@@ -152,7 +152,7 @@
 			<arg value="start-domain" />
 		</exec>
 	</target>
-	
+
 	<target name="stop" depends="check-already-started" unless="start_required">
 		<echo message="stoping glassfish" />
 		<exec executable="asadmin">
@@ -190,7 +190,7 @@
 	</target>
 
 	<target name="clean">
-		<deltree dir="${dist}" />
+		<delete dir="${dist}" />
 	</target>
 
 </project>
