@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     25/02/2009 16:08:41                                                        
+
+     DARE    
+     description
+                   
+     oscar                                                                
+     ====================================================================== -->
+<project name="DARE" default="war">
+	<description>
+            description
+    </description>
+
+	<property name="dist" location="target" />
+	<property file="build.properties">
+	</property>
+
+	<property name="webapp" location="src/main/webapp" />
+
+	<property name="classes_dir" location="${dist}/classes" />
+
+	<property name="test_classes_dir" location="${dist}/test-classes" />
+
+	<property name="WEB-INF" location="${webapp}/WEB-INF/" />
+	
+	<property name="src.tests" location="src/main/test" />
+	
+	<property name="reports.tests" location="${dist}/reports" />
+
+
+	<fileset dir="${string_editor_project_location}/lib" id="string_editor_dependencies">
+		<include name="*.jar" />
+	</fileset>
+
+	<fileset dir="${string_editor_project_location}/scriptengines" id="ruby_libs">
+		<include name="**/*.jar" />
+	</fileset>
+
+	<fileset dir="${string_editor_project_location}" id="string_editor_jar">
+		<include name="stringeditor.jar" />
+	</fileset>
+
+	<fileset dir="lib" id="libs">
+		<include name="**/*.jar" />
+	</fileset>
+
+	<path id="compile-classpath">
+		<fileset refid="string_editor_dependencies" />
+		<fileset refid="ruby_libs" />
+		<fileset refid="string_editor_jar" />
+		<fileset refid="libs" />
+	</path>
+
+	<path id="runtime-classpath">
+		<fileset refid="string_editor_dependencies" />
+		<fileset refid="ruby_libs" />
+		<fileset refid="string_editor_jar" />
+		<fileset refid="libs" />
+		<pathelement location="${classes_dir}"/>
+	</path>
+
+	<path id="test-classpath">
+		<fileset refid="string_editor_dependencies" />
+		<fileset refid="ruby_libs" />
+		<fileset refid="string_editor_jar" />
+		<fileset refid="libs" />
+		<pathelement location="${classes_dir}"/>
+		<pathelement location="${test_classes_dir}"/>
+	</path>
+
+	<target name="build_string_editor">
+		<ant antfile="build-jar.xml" dir="${string_editor_project_location}" target="build-jar" />
+	</target>
+
+	<target name="compile" depends="build_string_editor">
+		<mkdir dir="${classes_dir}" />
+		<javac srcdir="src/main/java" destdir="${classes_dir}" debug="true" source="1.6" target="1.6">
+			<classpath refid="compile-classpath">
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="compile-test" depends="compile">
+		<mkdir dir="${test_classes_dir}" />
+		<javac srcdir="${src.tests}" destdir="${test_classes_dir}" debug="true" source="1.6" target="1.6">
+			<classpath refid="runtime-classpath" />
+		</javac>
+	</target>
+
+	<target name="test" depends="compile-test">
+		<mkdir dir="${reports.tests}"/>
+		<junit printsummary="yes" haltonfailure="yes">
+			<classpath refid="test-classpath" />
+			<formatter type="plain" />			
+			<batchtest todir="${reports.tests}">
+				<fileset dir="${src.tests}">
+					<include name="**/*Test*.java" />
+					<exclude name="**/AllTests.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="copy-libs">
+		<copy todir="${dist}/lib">
+			<fileset refid="string_editor_dependencies" />
+			<fileset refid="ruby_libs" />
+			<fileset refid="string_editor_jar" />
+			<fileset refid="libs" />
+		</copy>
+	</target>
+
+	<target name="war" depends="compile, copy-libs,test" description="description">
+		<war destfile="${dist}/${ant.project.name}.war" webxml="${WEB-INF}/web.xml">
+			<classes dir="${classes_dir}" />
+			<lib dir="${dist}/lib" />
+			<webinf dir="${WEB-INF}" excludes="web.xml" />
+			<fileset dir="src/main/webapp" excludes="WEB-INF" />
+		</war>
+	</target>
+
+</project>
+
