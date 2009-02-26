@@ -152,6 +152,13 @@
 			<arg value="start-domain" />
 		</exec>
 	</target>
+	
+	<target name="stop" depends="check-already-started" unless="start_required">
+		<echo message="stoping glassfish" />
+		<exec executable="asadmin">
+			<arg value="stop-domain" />
+		</exec>
+	</target>
 
 	<target name="deploy" depends="expand, start">
 		<exec executable="asadmin">
