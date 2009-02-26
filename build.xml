@@ -23,9 +23,9 @@
 	<property name="test_classes_dir" location="${dist}/test-classes" />
 
 	<property name="WEB-INF" location="${webapp}/WEB-INF/" />
-	
+
 	<property name="src.tests" location="src/main/test" />
-	
+
 	<property name="reports.tests" location="${dist}/reports" />
 
 
@@ -45,6 +45,8 @@
 		<include name="**/*.jar" />
 	</fileset>
 
+	<fileset dir="lib/runtime" id="runtime-libs" includes="**/*.jar" />
+
 	<path id="compile-classpath">
 		<fileset refid="string_editor_dependencies" />
 		<fileset refid="ruby_libs" />
@@ -57,7 +59,7 @@
 		<fileset refid="ruby_libs" />
 		<fileset refid="string_editor_jar" />
 		<fileset refid="libs" />
-		<pathelement location="${classes_dir}"/>
+		<pathelement location="${classes_dir}" />
 	</path>
 
 	<path id="test-classpath">
@@ -65,8 +67,8 @@
 		<fileset refid="ruby_libs" />
 		<fileset refid="string_editor_jar" />
 		<fileset refid="libs" />
-		<pathelement location="${classes_dir}"/>
-		<pathelement location="${test_classes_dir}"/>
+		<pathelement location="${classes_dir}" />
+		<pathelement location="${test_classes_dir}" />
 	</path>
 
 	<target name="build_string_editor">
@@ -79,6 +81,12 @@
 			<classpath refid="compile-classpath">
 			</classpath>
 		</javac>
+		<copy todir="${classes_dir}">
+			<fileset dir="src/main/java" />
+		</copy>
+		<copy todir="${classes_dir}">
+			<fileset dir="src/main/resources" />
+		</copy>
 	</target>
 
 	<target name="compile-test" depends="compile">
@@ -89,10 +97,10 @@
 	</target>
 
 	<target name="test" depends="compile-test">
-		<mkdir dir="${reports.tests}"/>
+		<mkdir dir="${reports.tests}" />
 		<junit printsummary="yes" haltonfailure="yes">
 			<classpath refid="test-classpath" />
-			<formatter type="plain" />			
+			<formatter type="plain" />
 			<batchtest todir="${reports.tests}">
 				<fileset dir="${src.tests}">
 					<include name="**/*Test*.java" />
@@ -103,15 +111,69 @@
 	</target>
 
 	<target name="copy-libs">
-		<copy todir="${dist}/lib">
+		<copy todir="${dist}/lib" flatten="true">
 			<fileset refid="string_editor_dependencies" />
 			<fileset refid="ruby_libs" />
 			<fileset refid="string_editor_jar" />
-			<fileset refid="libs" />
+			<fileset refid="runtime-libs" />
 		</copy>
 	</target>
 
-	<target name="war" depends="compile, copy-libs,test" description="description">
+	<property name="expanded_dir" location="${dist}/${ant.project.name}_war" />
+
+	<target name="expand" depends="compile, copy-libs,test">
+		<mkdir dir="${expanded_dir}/WEB-INF/lib" />
+		<mkdir dir="${expanded_dir}/WEB-INF/classes" />
+		<copy todir="${expanded_dir}/WEB-INF/classes">
+			<fileset dir="${classes_dir}" />
+		</copy>
+		<copy todir="${expanded_dir}/WEB-INF/lib">
+			<fileset dir="${dist}/lib" includes="*.jar" />
+		</copy>
+		<copy todir="${expanded_dir}">
+			<fileset dir="${webapp}" />
+		</copy>
+	</target>
+
+	<target name="check-already-started">
+		<exec executable="asadmin" resultproperty="asadmin_result">
+			<arg value="uptime" />
+		</exec>
+		<condition property="start_required">
+			<not>
+				<equals arg1="${asadmin_result}" arg2="0" />
+			</not>
+		</condition>
+	</target>
+
+	<target name="start" depends="check-already-started" if="start_required">
+		<echo message="starting glassfish" />
+		<exec executable="asadmin">
+			<arg value="start-domain" />
+		</exec>
+	</target>
+
+	<target name="deploy" depends="expand, start">
+		<exec executable="asadmin">
+			<arg value="deploy" />
+			<arg value="--force=true" />
+			<arg value="--name=${ant.project.name}" />
+			<arg value="${expanded_dir}" />
+		</exec>
+	</target>
+
+	<target name="undeploy" depends="start">
+		<exec executable="asadmin">
+			<arg value="undeploy" />
+			<arg value="${ant.project.name}" />
+		</exec>
+	</target>
+
+	<target name="reload" depends="expand, start">
+		<touch file="${expanded_dir}/.reload" />
+	</target>
+
+	<target name="war" depends="compile, copy-libs,test" description="web application archive">
 		<war destfile="${dist}/${ant.project.name}.war" webxml="${WEB-INF}/web.xml">
 			<classes dir="${classes_dir}" />
 			<lib dir="${dist}/lib" />
