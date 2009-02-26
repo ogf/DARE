@@ -120,5 +120,9 @@
 		</war>
 	</target>
 
+	<target name="clean">
+		<deltree dir="${dist}" />
+	</target>
+
 </project>
 
