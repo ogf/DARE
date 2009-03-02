@@ -150,6 +150,7 @@
 		<echo message="starting glassfish" />
 		<exec executable="asadmin">
 			<arg value="start-domain" />
+			<arg value="--debug" />
 		</exec>
 	</target>
 
