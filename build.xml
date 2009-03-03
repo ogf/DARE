@@ -13,12 +13,15 @@
     </description>
 
 	<property name="dist" location="target" />
-	<property file="build.properties">
-	</property>
+	<property file="build.properties" />
 
 	<property name="webapp" location="src/main/webapp" />
 
 	<property name="classes_dir" location="${dist}/classes" />
+	
+	<property environment="env"/>
+	
+	<property name="glassfish_home" value="${env.GLASSFISH_HOME}" />
 
 	<property name="unit_test_classes_dir" location="${dist}/unit-test-classes" />
 	
@@ -32,9 +35,12 @@
 
 	<property name="reports.tests" location="${dist}/reports" />
 	
+	<property name="asadmin" location="${glassfish_home}/bin/asadmin" />
+	
 
-	<fileset dir="${string_editor_project_location}/lib" id="string_editor_dependencies">
-		<include name="*.jar" />
+	<fileset dir="${string_editor_project_location}" id="string_editor_dependencies">
+		<include name="lib/*.jar" />
+		<include name="plugins_bin/stringeditor/**/*.jar" />
 	</fileset>
 
 	<fileset dir="${string_editor_project_location}/scriptengines" id="ruby_libs">
@@ -161,7 +167,7 @@
 	</target>
 
 	<target name="check-already-started">
-		<exec executable="asadmin" resultproperty="asadmin_result">
+		<exec executable="${asadmin}" resultproperty="asadmin_result">
 			<arg value="uptime" />
 		</exec>
 		<condition property="start_required">
@@ -173,7 +179,7 @@
 
 	<target name="start" depends="check-already-started" if="start_required">
 		<echo message="starting glassfish" />
-		<exec executable="asadmin">
+		<exec executable="${asadmin}">
 			<arg value="start-domain" />
 			<arg value="--debug" />
 		</exec>
@@ -181,13 +187,13 @@
 
 	<target name="stop" depends="check-already-started" unless="start_required">
 		<echo message="stoping glassfish" />
-		<exec executable="asadmin">
+		<exec executable="${asadmin}">
 			<arg value="stop-domain" />
 		</exec>
 	</target>
 
 	<target name="deploy" depends="expand, start">
-		<exec executable="asadmin">
+		<exec executable="${asadmin}">
 			<arg value="deploy" />
 			<arg value="--force=true" />
 			<arg value="--name=${ant.project.name}" />
@@ -196,7 +202,7 @@
 	</target>
 
 	<target name="undeploy" depends="start">
-		<exec executable="asadmin">
+		<exec executable="${asadmin}">
 			<arg value="undeploy" />
 			<arg value="${ant.project.name}" />
 		</exec>
