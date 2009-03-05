@@ -1,0 +1,5 @@
+# Ignoring target directory
+target
+# Ignoring eclipse files
+.classpath
+.project
