@@ -31,7 +31,7 @@ public class MinilanguageResourceTest extends TestCase {
 				add("transformer",
 						"url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
 				add("input", "http://www.google.es");
-				add("input", "http://www.ei.uvigo.es");
+				add("input", "http://www.esei.uvigo.es");
 			}
 		});
 	}
@@ -76,13 +76,13 @@ public class MinilanguageResourceTest extends TestCase {
 	}
 
 	public void testReturnResults() throws Exception {
-		ExecutionResult result = doPostOnMinilanguageResource(ExecutionResult.class,
-				new MultivaluedMapImpl() {
+		ExecutionResult result = doPostOnMinilanguageResource(
+				ExecutionResult.class, new MultivaluedMapImpl() {
 					{
 						add("transformer",
 								"url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
 						add("input", "http://www.google.es");
-						add("input", "http://www.ei.uvigo.es");
+						add("input", "http://www.esei.uvigo.es");
 					}
 				});
 		assertNotNull(result);
