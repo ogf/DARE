@@ -1,18 +1,22 @@
 package es.uvigo.ei.sing.dare.resources;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
 import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-public class MinilanguageResourceTest extends TestCase {
+public class MinilanguageResourceTest {
 
 
 	private static final URI BASE_URI = UriBuilder.fromUri("http://localhost/")
@@ -25,7 +29,8 @@ public class MinilanguageResourceTest extends TestCase {
 		appResource = c.resource(BASE_URI);
 	}
 
-	public void testExistsPostMethod() throws Exception {
+    @Test
+    public void existsPostMethod() throws Exception {
 		doPostOnMinilanguageResource(new MultivaluedMapImpl() {
 			{
 				add("transformer",
@@ -36,7 +41,8 @@ public class MinilanguageResourceTest extends TestCase {
 		});
 	}
 
-	public void testWrongTransformer() throws Exception {
+    @Test
+    public void onWrongTransformerThrowsException() throws Exception {
 		try {
 			doPostOnMinilanguageResource(new MultivaluedMapImpl() {
 				{
@@ -46,7 +52,7 @@ public class MinilanguageResourceTest extends TestCase {
 				}
 			});
 		} catch (UniformInterfaceException e) {
-			assertEquals(400, e.getResponse().getStatus());
+            assertEquals(400, e.getResponse().getStatus());
 		}
 	}
 
@@ -61,6 +67,7 @@ public class MinilanguageResourceTest extends TestCase {
 				MediaType.APPLICATION_JSON_TYPE).post(type, postEntity);
 	}
 
+    @Test
 	public void testErrorExecuting() throws Exception {
 		try {
 			doPostOnMinilanguageResource(new MultivaluedMapImpl() {
@@ -75,6 +82,7 @@ public class MinilanguageResourceTest extends TestCase {
 		}
 	}
 
+    @Test
 	public void testReturnResults() throws Exception {
 		ExecutionResult result = doPostOnMinilanguageResource(
 				ExecutionResult.class, new MultivaluedMapImpl() {
