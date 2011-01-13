@@ -1,8 +1,9 @@
 package es.uvigo.ei.sing.dare.resources;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.net.URI;
 
@@ -52,7 +53,7 @@ public class MinilanguageResourceTest {
 				}
 			});
 		} catch (UniformInterfaceException e) {
-            assertEquals(400, e.getResponse().getStatus());
+            assertThat(e.getResponse().getStatus(), equalTo(400));
 		}
 	}
 
@@ -78,7 +79,7 @@ public class MinilanguageResourceTest {
 				}
 			});
 		} catch (UniformInterfaceException e) {
-			assertEquals(500, e.getResponse().getStatus());
+            assertThat(e.getResponse().getStatus(), equalTo(500));
 		}
 	}
 
@@ -96,7 +97,6 @@ public class MinilanguageResourceTest {
 		assertNotNull(result);
 		assertNotNull(result.getLines());
 		assertFalse(result.getLines().isEmpty());
-
 	}
 
 }
