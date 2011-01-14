@@ -23,7 +23,7 @@ import es.uvigo.ei.sing.stringeditor.Util;
 public class MinilanguageResource {
     private static final Logger LOGGER = Logger
             .getLogger(MinilanguageResource.class.getName());
-    public static final String PATH = "/minilanguage";
+    public static final String PATH = "/execute";
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
