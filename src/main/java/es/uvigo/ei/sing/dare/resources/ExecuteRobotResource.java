@@ -25,10 +25,9 @@ public class ExecuteRobotResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public ExecutionResult execute(
             @FormParam("transformer") String transformerParam,
-            @FormParam("input") List<String> input) {
+            @FormParam("input") List<String> inputs) {
         Transformer transformer = parseTransformer(transformerParam);
-        String[] result = Util.runRobot(transformer,
-                input.toArray(new String[0]));
+        String[] result = execute(transformer, inputs);
         return new ExecutionResult(result);
     }
 
@@ -36,13 +35,17 @@ public class ExecuteRobotResource {
         try {
             return Minilanguage.eval(transformerParam);
         } catch (Exception e) {
-            throw new WebApplicationException(
-                    createResporseForErrorParsingTransformer(e));
+            throw new WebApplicationException(errorParsingTranformerResponse());
         }
     }
 
-    private Response createResporseForErrorParsingTransformer(Exception e) {
+    private Response errorParsingTranformerResponse() {
         return Response.status(400).entity("transformer not valid").build();
+    }
+
+    private String[] execute(Transformer transformer, List<String> inputs) {
+        String[] asArray = inputs.toArray(new String[0]);
+        return Util.runRobot(transformer, asArray);
     }
 
 }
