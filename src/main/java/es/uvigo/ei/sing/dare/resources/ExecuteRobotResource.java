@@ -1,8 +1,6 @@
 package es.uvigo.ei.sing.dare.resources;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -19,8 +17,6 @@ import es.uvigo.ei.sing.stringeditor.Util;
 
 @Path(ExecuteRobotResource.PATH)
 public class ExecuteRobotResource {
-    private static final Logger LOGGER = Logger
-            .getLogger(ExecuteRobotResource.class.getName());
 
     public static final String PATH = "/execute";
 
@@ -30,12 +26,9 @@ public class ExecuteRobotResource {
     public ExecutionResult execute(
             @FormParam("transformer") String transformerParam,
             @FormParam("input") List<String> input) {
-        LOGGER.info("receiving transformer: " + transformerParam
-                + " with inputs: " + input);
         Transformer transformer = parseTransformer(transformerParam);
         String[] result = Util.runRobot(transformer,
                 input.toArray(new String[0]));
-        LOGGER.info("result is: " + Arrays.toString(result));
         return new ExecutionResult(result);
     }
 
