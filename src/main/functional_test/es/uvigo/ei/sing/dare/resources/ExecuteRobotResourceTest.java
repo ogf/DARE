@@ -20,7 +20,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-public class MinilanguageResourceTest {
+public class ExecuteRobotResourceTest {
 
 
     private static final URI BASE_URI = UriBuilder.fromUri("http://localhost/")
@@ -28,7 +28,7 @@ public class MinilanguageResourceTest {
 
     private WebResource appResource;
 
-    public MinilanguageResourceTest() {
+    public ExecuteRobotResourceTest() {
         Client c = Client.create();
         appResource = c.resource(BASE_URI);
     }
@@ -66,7 +66,7 @@ public class MinilanguageResourceTest {
 
     private <T> T doPostOnMinilanguageResource(Class<T> type,
             MultivaluedMapImpl postEntity) {
-        return appResource.path(MinilanguageResource.PATH).type(
+        return appResource.path(ExecuteRobotResource.PATH).type(
                 MediaType.APPLICATION_FORM_URLENCODED).accept(
                 MediaType.APPLICATION_JSON_TYPE).post(type, postEntity);
     }

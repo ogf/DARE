@@ -1,7 +1,6 @@
 package es.uvigo.ei.sing.dare.resources;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -19,10 +18,11 @@ import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
 import es.uvigo.ei.sing.stringeditor.Util;
 
-@Path(MinilanguageResource.PATH)
-public class MinilanguageResource {
+@Path(ExecuteRobotResource.PATH)
+public class ExecuteRobotResource {
     private static final Logger LOGGER = Logger
-            .getLogger(MinilanguageResource.class.getName());
+            .getLogger(ExecuteRobotResource.class.getName());
+
     public static final String PATH = "/execute";
 
     @POST
