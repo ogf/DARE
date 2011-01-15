@@ -4,12 +4,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
+import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
@@ -69,15 +72,17 @@ public class MinilanguageResourceTest {
     }
 
     @Test
+    @Ignore("review string editor execution handling")
     public void testErrorExecuting() throws Exception {
         try {
             doPostOnMinilanguageResource(new MultivaluedMapImpl() {
                 {
                     add("transformer",
                             "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
-                    add("input", "http://www.ogle.es");
+                    add("input", "http://www." + UUID.randomUUID() + ".es");
                 }
             });
+            fail("it must fail since it can't be executed because one of the inputs is wrong");
         } catch (UniformInterfaceException e) {
             assertThat(e.getResponse().getStatus(), equalTo(500));
         }
