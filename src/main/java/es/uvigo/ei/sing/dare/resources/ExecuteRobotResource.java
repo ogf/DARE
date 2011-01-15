@@ -10,10 +10,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
@@ -49,8 +47,6 @@ public class ExecuteRobotResource {
                     createResporseForErrorParsingTransformer(e));
         }
     }
-
-    @Context UriInfo uriInfo;
 
     private Response createResporseForErrorParsingTransformer(Exception e) {
         return Response.status(400).entity("transformer not valid").build();
