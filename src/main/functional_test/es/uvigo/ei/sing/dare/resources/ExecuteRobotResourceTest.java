@@ -1,10 +1,12 @@
 package es.uvigo.ei.sing.dare.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
@@ -13,6 +15,8 @@ import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -117,6 +121,31 @@ public class ExecuteRobotResourceTest {
                     }
                 });
         assertThat(result.getExecutionTime(), greaterThan(0l));
+    }
+
+    @Test
+    public void testStructureJSONObjectReturnedDirectly() throws Exception {
+        JSONObject result = doPostOnMinilanguageResource(JSONObject.class,
+                new MultivaluedMapImpl() {
+                    {
+                        add("transformer",
+                                "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
+                        add("input", "http://www.google.es");
+                        add("input", "http://www.esei.uvigo.es");
+                    }
+                });
+
+        final String linesProperty = "lines";
+        final String executionTimeProperty = "executionTime";
+
+        assertTrue(result.has(linesProperty));
+        assertThat(result.get(linesProperty), is(JSONArray.class));
+
+        JSONArray jsonArray = result.getJSONArray(linesProperty);
+        assertThat(jsonArray.length(), greaterThan(0));
+
+        assertTrue(result.has(executionTimeProperty));
+        assertThat(result.get(executionTimeProperty), is(Number.class));
     }
 
 }
