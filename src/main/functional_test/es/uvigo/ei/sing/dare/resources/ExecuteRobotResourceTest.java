@@ -25,6 +25,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+@SuppressWarnings("serial")
 public class ExecuteRobotResourceTest {
 
 
