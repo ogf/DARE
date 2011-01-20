@@ -26,9 +26,13 @@ public class ExecuteRobotResource {
     public ExecutionResult execute(
             @FormParam("transformer") String transformerParam,
             @FormParam("input") List<String> inputs) {
+        long startTime = System.currentTimeMillis();
+
         Transformer transformer = parseTransformer(transformerParam);
         String[] result = execute(transformer, inputs);
-        return new ExecutionResult(result);
+
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        return new ExecutionResult(elapsedTime, result);
     }
 
     private Transformer parseTransformer(String transformerParam) {

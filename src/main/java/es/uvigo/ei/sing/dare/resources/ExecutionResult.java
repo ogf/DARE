@@ -14,23 +14,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExecutionResult {
 
-    @XmlElement(name="line")
+    @XmlElement(name = "line")
     private final List<String> lines;
 
+    private final long executionTime;
+
     public ExecutionResult(){
-        this(new ArrayList<String>());
+        this(0, new ArrayList<String>());
     }
 
-    public ExecutionResult(String... lines){
-        this(Arrays.asList(lines));
+    public ExecutionResult(long milliseconds, String... lines) {
+        this(milliseconds, Arrays.asList(lines));
     }
 
-    public ExecutionResult(Collection<? extends String> lines) {
+    public ExecutionResult(long executionTime,
+            Collection<? extends String> lines) {
         this.lines = new ArrayList<String>(lines);
+        this.executionTime = executionTime;
     }
 
     public List<String> getLines() {
         return lines;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
     }
 
 }

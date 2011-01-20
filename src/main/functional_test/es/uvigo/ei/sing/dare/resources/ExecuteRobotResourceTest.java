@@ -1,6 +1,7 @@
 package es.uvigo.ei.sing.dare.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -102,6 +103,20 @@ public class ExecuteRobotResourceTest {
         assertNotNull(result);
         assertNotNull(result.getLines());
         assertFalse(result.getLines().isEmpty());
+    }
+
+    @Test
+    public void itReturnsTheTimeElapsed() throws Exception {
+        ExecutionResult result = doPostOnMinilanguageResource(
+                ExecutionResult.class, new MultivaluedMapImpl() {
+                    {
+                        add("transformer",
+                                "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
+                        add("input", "http://www.google.es");
+                        add("input", "http://www.esei.uvigo.es");
+                    }
+                });
+        assertThat(result.getExecutionTime(), greaterThan(0l));
     }
 
 }
