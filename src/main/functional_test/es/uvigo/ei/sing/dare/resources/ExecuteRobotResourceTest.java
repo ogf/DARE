@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
@@ -19,6 +21,9 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -26,17 +31,27 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 @SuppressWarnings("serial")
+@RunWith(Parameterized.class)
 public class ExecuteRobotResourceTest {
-
 
     private static final URI BASE_URI = UriBuilder.fromUri("http://localhost/")
             .port(8080).path("DARE").build();
 
+    @Parameters
+    public static Collection<Object[]> acceptedTypes() {
+        Object[] json = { MediaType.APPLICATION_JSON_TYPE };
+        Object[] xml = { MediaType.APPLICATION_XML_TYPE };
+        return Arrays.asList(json, xml);
+    }
+
     private WebResource appResource;
 
-    public ExecuteRobotResourceTest() {
+    private MediaType acceptedType;
+
+    public ExecuteRobotResourceTest(MediaType acceptedType) {
         Client c = Client.create();
-        appResource = c.resource(BASE_URI);
+        this.appResource = c.resource(BASE_URI);
+        this.acceptedType = acceptedType;
     }
 
     @Test
@@ -72,9 +87,9 @@ public class ExecuteRobotResourceTest {
 
     private <T> T doPostOnMinilanguageResource(Class<T> type,
             MultivaluedMapImpl postEntity) {
-        return appResource.path(ExecuteRobotResource.PATH).type(
-                MediaType.APPLICATION_FORM_URLENCODED).accept(
-                MediaType.APPLICATION_JSON_TYPE).post(type, postEntity);
+        return appResource.path(ExecuteRobotResource.PATH)
+                .type(MediaType.APPLICATION_FORM_URLENCODED)
+                .accept(acceptedType).post(type, postEntity);
     }
 
     @Test
@@ -126,6 +141,9 @@ public class ExecuteRobotResourceTest {
 
     @Test
     public void testStructureJSONObjectReturnedDirectly() throws Exception {
+        if (acceptedType != MediaType.APPLICATION_JSON_TYPE) {
+            return;
+        }
         JSONObject result = doPostOnMinilanguageResource(JSONObject.class,
                 new MultivaluedMapImpl() {
                     {
