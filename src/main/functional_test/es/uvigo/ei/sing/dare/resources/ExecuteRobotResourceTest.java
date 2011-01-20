@@ -2,6 +2,7 @@ package es.uvigo.ei.sing.dare.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,12 +19,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -139,32 +144,57 @@ public class ExecuteRobotResourceTest {
         assertThat(result.getExecutionTime(), greaterThan(0l));
     }
 
+    private static final String linesPropertyName = "lines";
+
+    private static final String executionTimePropertyName = "executionTime";
+
     @Test
-    public void testStructureJSONObjectReturnedDirectly() throws Exception {
-        if (acceptedType != MediaType.APPLICATION_JSON_TYPE) {
-            return;
+    public void testStructureDocumentReturnedDirectly() throws Exception {
+        MultivaluedMapImpl request = new MultivaluedMapImpl() {
+            {
+                add("transformer",
+                        "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
+                add("input", "http://www.google.es");
+                add("input", "http://www.esei.uvigo.es");
+            }
+        };
+        if (acceptedType == MediaType.APPLICATION_JSON_TYPE) {
+            JSONObject result = doPostOnMinilanguageResource(JSONObject.class,
+                    request);
+            checkStructureIsCorrect(result);
+        } else {
+            Document document = doPostOnMinilanguageResource(Document.class,
+                    request);
+            checkStructureIsCorrect(document);
         }
-        JSONObject result = doPostOnMinilanguageResource(JSONObject.class,
-                new MultivaluedMapImpl() {
-                    {
-                        add("transformer",
-                                "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
-                        add("input", "http://www.google.es");
-                        add("input", "http://www.esei.uvigo.es");
-                    }
-                });
+    }
 
-        final String linesProperty = "lines";
-        final String executionTimeProperty = "executionTime";
+    private void checkStructureIsCorrect(JSONObject result)
+            throws JSONException {
+        assertTrue(result.has(linesPropertyName));
+        assertThat(result.get(linesPropertyName), is(JSONArray.class));
 
-        assertTrue(result.has(linesProperty));
-        assertThat(result.get(linesProperty), is(JSONArray.class));
-
-        JSONArray jsonArray = result.getJSONArray(linesProperty);
+        JSONArray jsonArray = result.getJSONArray(linesPropertyName);
         assertThat(jsonArray.length(), greaterThan(0));
 
-        assertTrue(result.has(executionTimeProperty));
-        assertThat(result.get(executionTimeProperty), is(Number.class));
+        assertTrue(result.has(executionTimePropertyName));
+        assertThat(result.get(executionTimePropertyName), is(Number.class));
+    }
+
+    private void checkStructureIsCorrect(Document document) {
+        Element root = document.getDocumentElement();
+        assertThat("we don't want to use namespaces", root.getNamespaceURI(),
+                nullValue());
+        assertThat(root.getNodeName(), equalTo("result"));
+
+        NodeList executionTimeElements = root
+                .getElementsByTagName(executionTimePropertyName);
+        assertThat("there is one executionTime element in the response",
+                executionTimeElements.getLength(), equalTo(1));
+
+        NodeList linesElements = root.getElementsByTagName(linesPropertyName);
+        assertThat("there is one lines property name in the response",
+                linesElements.getLength(), equalTo(1));
     }
 
 }

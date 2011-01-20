@@ -15,7 +15,7 @@ public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
 
     public JAXBJSONConfigurator() throws JAXBException {
         JSONConfiguration configuration = JSONConfiguration.mapped()
-                .nonStrings("executionTime").build();
+                .nonStrings("executionTime").arrays("lines").build();
         context = new JSONJAXBContext(configuration,
                 new Class[] { ExecutionResult.class });
     }

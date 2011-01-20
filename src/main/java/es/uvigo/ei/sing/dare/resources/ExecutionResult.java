@@ -7,12 +7,14 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExecutionResult {
 
+    @XmlList
     private final List<String> lines;
 
     private final long executionTime;
