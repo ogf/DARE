@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 @SuppressWarnings("serial")
@@ -57,6 +58,7 @@ public class ExecuteRobotResourceTest {
         Client c = Client.create();
         this.appResource = c.resource(BASE_URI);
         this.acceptedType = acceptedType;
+        c.addFilter(new LoggingFilter());
     }
 
     @Test
