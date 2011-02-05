@@ -40,8 +40,8 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 @RunWith(Parameterized.class)
 public class ExecuteRobotResourceTest {
 
-    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost/")
-            .port(8080).path("DARE").build();
+    public static final URI APPLICATION_URI = UriBuilder
+            .fromUri("http://localhost/").port(8080).path("DARE").build();
 
     @Parameters
     public static Collection<Object[]> acceptedTypes() {
@@ -56,7 +56,7 @@ public class ExecuteRobotResourceTest {
 
     public ExecuteRobotResourceTest(MediaType acceptedType) {
         Client c = Client.create();
-        this.appResource = c.resource(BASE_URI);
+        this.appResource = c.resource(APPLICATION_URI);
         this.acceptedType = acceptedType;
         c.addFilter(new LoggingFilter());
     }
