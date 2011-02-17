@@ -1,0 +1,45 @@
+<robot version="1.0">
+    <transformer class="SimpleTransformer" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+        <description>SimpleTransformer</description>
+        <param key="description">SimpleTransformer</param>
+        <param key="inputFilter"></param>
+        <transformer class="Decorator" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>Decorator</description>
+            <param key="description">Decorator</param>
+            <param key="head"><![CDATA[http://bioinfo2.weizmann.ac.il/cgi-bin/geneannot/GA_search.pl?array=%%0%%&keyword_type=probe_set_list&keyword=]]></param>
+            <param key="inputFilter">0</param>
+            <param key="tail"><![CDATA[&target=integrated&.submit=Submit+Query]]></param>
+        </transformer>
+        <transformer class="URLRetriever" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>URLRetriever</description>
+            <param key="description">URLRetriever</param>
+            <param key="inputFilter"></param>
+        </transformer>
+        <transformer class="PatternMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>PatternMatcher</description>
+            <param key="description">PatternMatcher</param>
+            <param key="dotAll">false</param>
+            <param key="inputFilter"></param>
+            <param key="pattern"><![CDATA[carddisp.pl\?gene=(.*?)"]]></param>
+        </transformer>
+        <transformer class="Decorator" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>Decorator</description>
+            <param key="description">Decorator</param>
+            <param key="head">http://www.genecards.org/cgi-bin/carddisp.pl?gene=</param>
+            <param key="inputFilter"></param>
+            <param key="tail"></param>
+        </transformer>
+        <transformer class="URLRetriever" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>URLRetriever</description>
+            <param key="description">URLRetriever</param>
+            <param key="inputFilter"></param>
+        </transformer>
+        <transformer class="PatternMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+            <description>PatternMatcher</description>
+            <param key="description">PatternMatcher</param>
+            <param key="dotAll">false</param>
+            <param key="inputFilter"></param>
+            <param key="pattern"><![CDATA[http://www.ncbi.nlm.nih.gov/entrez/query.fcgi\?db=PubMed&cmd=search&Dopt=b&term=(.*?)"]]></param>
+        </transformer>
+    </transformer>
+</robot>
