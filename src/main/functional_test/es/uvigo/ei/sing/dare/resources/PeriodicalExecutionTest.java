@@ -12,16 +12,21 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 
+import es.uvigo.ei.sing.dare.backend.ExecutionsStoreStub;
+
 @RunWith(JUnit4.class)
 public class PeriodicalExecutionTest {
 
     private WebResource periodicalExecution;
+
+    private WebResource periodicalExecutionResult;
 
     public PeriodicalExecutionTest() {
         Client client = new Client();
         periodicalExecution = client.resource(
                 ExecuteRobotResourceTest.APPLICATION_URI).path(
                 PeriodicalExecutionResource.BASE_PATH);
+        periodicalExecutionResult = periodicalExecution.path("result");
     }
 
     @Test
@@ -30,6 +35,14 @@ public class PeriodicalExecutionTest {
                 .get(ClientResponse.class);
         assertThat(clientResponse.getStatus(),
                 equalTo(Status.NOT_FOUND.getStatusCode()));
+    }
+
+    @Test
+    public void ifPeriodicalResultExistsMustReturn200Code() {
+        ClientResponse response = periodicalExecutionResult.path(
+                ExecutionsStoreStub.EXISTENT_PERIODICAL_EXECUTION_CODE)
+                .get(ClientResponse.class);
+        assertThat(response.getStatus(), equalTo(Status.OK.getStatusCode()));
     }
 
 }
