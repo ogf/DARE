@@ -36,6 +36,8 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+
 @SuppressWarnings("serial")
 @RunWith(Parameterized.class)
 public class ExecuteRobotResourceTest {

@@ -11,6 +11,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
 import es.uvigo.ei.sing.stringeditor.Util;

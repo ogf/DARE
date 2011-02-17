@@ -8,6 +8,8 @@ import javax.xml.bind.JAXBException;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
 
+import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+
 @Provider
 public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
 

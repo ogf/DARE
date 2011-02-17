@@ -1,6 +1,6 @@
 package es.uvigo.ei.sing.dare.backend;
 
-import es.uvigo.ei.sing.dare.resources.PeriodicalExecution;
+import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 
 public interface IExecutionsStore {
 

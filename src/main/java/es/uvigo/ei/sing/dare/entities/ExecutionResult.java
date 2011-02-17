@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.resources;
+package es.uvigo.ei.sing.dare.entities;
 
 import java.util.ArrayList;
 import java.util.Arrays;

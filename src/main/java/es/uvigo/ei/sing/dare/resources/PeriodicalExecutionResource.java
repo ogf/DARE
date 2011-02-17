@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import es.uvigo.ei.sing.dare.backend.Configuration;
+import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 
 @Path(PeriodicalExecutionResource.BASE_PATH)
 public class PeriodicalExecutionResource {
