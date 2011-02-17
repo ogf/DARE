@@ -67,7 +67,7 @@ public class ExecuteRobotResourceTest {
     public void existsPostMethod() throws Exception {
         doPostOnMinilanguageResource(new MultivaluedMapImpl() {
             {
-                add("transformer",
+                add("robot",
                         "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
                 add("input", "http://www.google.es");
                 add("input", "http://www.esei.uvigo.es");
@@ -80,7 +80,7 @@ public class ExecuteRobotResourceTest {
         try {
             doPostOnMinilanguageResource(new MultivaluedMapImpl() {
                 {
-                    add("transformer",
+                    add("robot",
                             "ur xpath('//a/@href') | patternMatcher('(http://.*)') ");
                     add("input", "http://www.google.es");
                 }
@@ -107,7 +107,7 @@ public class ExecuteRobotResourceTest {
         try {
             doPostOnMinilanguageResource(new MultivaluedMapImpl() {
                 {
-                    add("transformer",
+                    add("robot",
                             "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
                     add("input", "http://www." + UUID.randomUUID() + ".es");
                 }
@@ -123,7 +123,7 @@ public class ExecuteRobotResourceTest {
         ExecutionResult result = doPostOnMinilanguageResource(
                 ExecutionResult.class, new MultivaluedMapImpl() {
                     {
-                        add("transformer",
+                        add("robot",
                                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
                         add("input", "http://www.google.es");
                         add("input", "http://www.esei.uvigo.es");
@@ -139,7 +139,7 @@ public class ExecuteRobotResourceTest {
         ExecutionResult result = doPostOnMinilanguageResource(
                 ExecutionResult.class, new MultivaluedMapImpl() {
                     {
-                        add("transformer",
+                        add("robot",
                                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
                         add("input", "http://www.google.es");
                         add("input", "http://www.esei.uvigo.es");
@@ -156,7 +156,7 @@ public class ExecuteRobotResourceTest {
     public void testStructureDocumentReturnedDirectly() throws Exception {
         MultivaluedMapImpl request = new MultivaluedMapImpl() {
             {
-                add("transformer",
+                add("robot",
                         "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
                 add("input", "http://www.google.es");
                 add("input", "http://www.esei.uvigo.es");

@@ -25,8 +25,7 @@ public class ExecuteRobotResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML })
-    public ExecutionResult execute(
-            @FormParam("transformer") String transformerParam,
+    public ExecutionResult execute(@FormParam("robot") String transformerParam,
             @FormParam("input") List<String> inputs) {
         long startTime = System.currentTimeMillis();
 
