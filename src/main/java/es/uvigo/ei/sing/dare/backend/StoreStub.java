@@ -7,7 +7,7 @@ import es.uvigo.ei.sing.dare.entities.ExecutionPeriod.Unit;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
 
-public class ExecutionsStoreStub implements IExecutionsStore {
+public class StoreStub implements IStore {
 
     public static final String EXISTENT_PERIODICAL_EXECUTION_CODE = "abc";
 

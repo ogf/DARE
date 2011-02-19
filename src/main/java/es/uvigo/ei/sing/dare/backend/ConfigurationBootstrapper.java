@@ -12,14 +12,14 @@ public class ConfigurationBootstrapper implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext context = sce.getServletContext();
 
-        IExecutionsStore executionsStore = findExecutionsStore(context);
+        IStore executionsStore = findExecutionsStore(context);
         Configuration.associate(context, new Configuration(executionsStore));
     }
 
-    private IExecutionsStore findExecutionsStore(ServletContext context) {
+    private IStore findExecutionsStore(ServletContext context) {
         String className = (String) context
                 .getInitParameter("executions-store-class-name");
-        return (IExecutionsStore) instantiate(className);
+        return (IStore) instantiate(className);
     }
 
     private Object instantiate(String className) {

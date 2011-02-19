@@ -31,16 +31,16 @@ public class Configuration {
                 .getName());
     }
 
-    private final IExecutionsStore executionsStore;
+    private final IStore executionsStore;
 
-    public Configuration(IExecutionsStore executionsStore) {
+    public Configuration(IStore executionsStore) {
         if (executionsStore == null) {
             throw new IllegalArgumentException("executionsStore can't be null");
         }
         this.executionsStore = executionsStore;
     }
 
-    public IExecutionsStore getExecutionsStore() {
+    public IStore getExecutionsStore() {
         return executionsStore;
     }
 

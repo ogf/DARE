@@ -7,7 +7,7 @@
 
      <context-param>
         <param-name>executions-store-class-name</param-name>
-        <param-value>es.uvigo.ei.sing.dare.backend.ExecutionsStoreStub</param-value>
+        <param-value>es.uvigo.ei.sing.dare.backend.StoreStub</param-value>
     </context-param>
 
     <servlet>

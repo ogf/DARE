@@ -12,7 +12,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 
-import es.uvigo.ei.sing.dare.backend.ExecutionsStoreStub;
+import es.uvigo.ei.sing.dare.backend.StoreStub;
 
 @RunWith(JUnit4.class)
 public class PeriodicalExecutionTest {
@@ -40,7 +40,7 @@ public class PeriodicalExecutionTest {
     @Test
     public void ifPeriodicalResultExistsMustReturn200Code() {
         ClientResponse response = periodicalExecutionResult.path(
-                ExecutionsStoreStub.EXISTENT_PERIODICAL_EXECUTION_CODE)
+                StoreStub.EXISTENT_PERIODICAL_EXECUTION_CODE)
                 .get(ClientResponse.class);
         assertThat(response.getStatus(), equalTo(Status.OK.getStatusCode()));
     }
