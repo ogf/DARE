@@ -1,8 +1,11 @@
 package es.uvigo.ei.sing.dare.entities;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 
@@ -91,6 +94,19 @@ public class Robot {
     public Robot description(String description) {
         return new Robot(this.code, this.transformerInMinilanguage,
                 this.transformerInXML, this.creationTime, description);
+    }
+
+    public PeriodicalExecution createPeriodical(ExecutionPeriod period,
+            String[] inputs) {
+        Validate.notNull(inputs);
+        return createPeriodical(period, Arrays.asList(inputs));
+    }
+
+    public PeriodicalExecution createPeriodical(ExecutionPeriod period,
+            List<String> inputs) {
+        Validate.notNull(period);
+        Validate.noNullElements(inputs);
+        return new PeriodicalExecution(this, period, inputs);
     }
 
 }
