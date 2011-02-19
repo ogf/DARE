@@ -6,8 +6,8 @@
          version="3.0">
 
      <context-param>
-        <param-name>executions-store-class-name</param-name>
-        <param-value>es.uvigo.ei.sing.dare.backend.StoreStub</param-value>
+        <param-name>configuration-class-name</param-name>
+        <param-value>es.uvigo.ei.sing.dare.backend.ConfigurationStub</param-value>
     </context-param>
 
     <servlet>

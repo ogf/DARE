@@ -2,7 +2,7 @@ package es.uvigo.ei.sing.dare.backend;
 
 import javax.servlet.ServletContext;
 
-public class Configuration {
+public abstract class Configuration {
 
     public static void associate(ServletContext context,
             Configuration configuration) {
@@ -33,7 +33,7 @@ public class Configuration {
 
     private final IStore executionsStore;
 
-    public Configuration(IStore executionsStore) {
+    protected Configuration(IStore executionsStore) {
         if (executionsStore == null) {
             throw new IllegalArgumentException("executionsStore can't be null");
         }
