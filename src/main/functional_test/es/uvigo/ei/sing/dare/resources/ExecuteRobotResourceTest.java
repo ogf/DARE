@@ -2,6 +2,7 @@ package es.uvigo.ei.sing.dare.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertFalse;
@@ -135,7 +136,7 @@ public class ExecuteRobotResourceTest {
     }
 
     @Test
-    public void itReturnsTheTimeElapsed() throws Exception {
+    public void itReturnsTheTimeElapsedAndTheDate() throws Exception {
         ExecutionResult result = doPostOnMinilanguageResource(
                 ExecutionResult.class, new MultivaluedMapImpl() {
                     {
@@ -146,11 +147,14 @@ public class ExecuteRobotResourceTest {
                     }
                 });
         assertThat(result.getExecutionTime(), greaterThan(0l));
+        assertThat(result.getDate(), notNullValue());
     }
 
     private static final String linesPropertyName = "lines";
 
     private static final String executionTimePropertyName = "executionTime";
+
+    private static final String datePropertyName = "date";
 
     @Test
     public void testStructureDocumentReturnedDirectly() throws Exception {
@@ -183,6 +187,9 @@ public class ExecuteRobotResourceTest {
 
         assertTrue(result.has(executionTimePropertyName));
         assertThat(result.get(executionTimePropertyName), is(Number.class));
+
+        assertTrue(result.has(datePropertyName));
+        assertThat(result.get(datePropertyName), is(Number.class));
     }
 
     private void checkStructureIsCorrect(Document document) {
@@ -199,6 +206,10 @@ public class ExecuteRobotResourceTest {
         NodeList linesElements = root.getElementsByTagName(linesPropertyName);
         assertThat("there is one lines property name in the response",
                 linesElements.getLength(), equalTo(1));
+
+        NodeList dateElements = root.getElementsByTagName(datePropertyName);
+        assertThat("there is one date element", dateElements.getLength(),
+                equalTo(1));
     }
 
 }

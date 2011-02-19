@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.joda.time.DateTime;
+
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExecutionResult {
@@ -18,6 +20,11 @@ public class ExecutionResult {
     private final List<String> lines;
 
     private final long executionTime;
+
+    /**
+     * The number of milliseconds since 1970-01-01T00:00:00Z
+     */
+    private final long date;
 
     public ExecutionResult(){
         this(0, new ArrayList<String>());
@@ -31,6 +38,7 @@ public class ExecutionResult {
             Collection<? extends String> lines) {
         this.lines = new ArrayList<String>(lines);
         this.executionTime = executionTime;
+        this.date = new DateTime().getMillis();
     }
 
     public List<String> getLines() {
@@ -39,6 +47,10 @@ public class ExecutionResult {
 
     public long getExecutionTime() {
         return executionTime;
+    }
+
+    public DateTime getDate() {
+        return new DateTime(date);
     }
 
 }
