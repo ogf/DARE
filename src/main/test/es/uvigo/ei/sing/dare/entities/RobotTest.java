@@ -35,7 +35,7 @@ public class RobotTest {
     }
 
     @Test
-    public void aRobotCanBeCreatedFromACodeAndAXmlStringWithARobot() {
+    public void aRobotCanBeCreatedFromAXmlStringWithARobot() {
         String robotXML = readAsString(RobotTest.class
                 .getResource("robot-example.xml"));
         Robot robot = Robot.createFromXML(robotXML);
@@ -44,7 +44,7 @@ public class RobotTest {
     }
 
     @Test
-    public void aRobotCanBeCreatedFromACodeAndAXmlDocumentWithARobot() {
+    public void aRobotCanBeCreatedFromAXmlDocumentWithARobot() {
         Document robotXML = XMLUtil.toDocument(RobotTest.class
                 .getResource("robot-example.xml"));
         Robot robot = Robot.createFromXML(robotXML);
