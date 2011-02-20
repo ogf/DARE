@@ -49,10 +49,20 @@ public class Robot {
     }
 
     private static Robot createFrom(Document robotXML, String robotXMLAsString) {
+        checkVAlidRobot(robotXML);
         String minilanguage = Minilanguage.xmlToLanguage(robotXML);
         return new Robot(minilanguage, robotXMLAsString, new DateTime(),
                 minilanguage);
 
+    }
+
+    private static void checkVAlidRobot(Document robotXML) {
+        try {
+            XMLInputOutput.loadTransformer(robotXML);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "the xml specified doesn't contain a valid robot");
+        }
     }
 
     private final String code;

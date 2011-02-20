@@ -52,6 +52,13 @@ public class RobotTest {
                 equalTo(XMLUtil.toString(robotXML)));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void ifTheXMLDocumentIsWrongAIllegalArgumentExceptionIsThrown() {
+        Document notValidRobot = XMLUtil.toDocument(RobotTest.class
+                .getResource("robot-invalid-example.xml"));
+        Robot.createFromXML(notValidRobot);
+    }
+
     @Test
     public void aRobotHasACreationTime() {
         DateTime beforeCreating = new DateTime();
