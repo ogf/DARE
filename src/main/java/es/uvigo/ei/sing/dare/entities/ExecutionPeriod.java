@@ -1,12 +1,13 @@
 package es.uvigo.ei.sing.dare.entities;
 
+import static es.uvigo.ei.sing.dare.util.StringUtil.quote;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-
 
 public class ExecutionPeriod {
 
@@ -58,10 +59,6 @@ public class ExecutionPeriod {
         }
 
         public abstract Period byAmount(int amount);
-    }
-
-    private static String quote(String stringToBeQuoted) {
-        return "'" + stringToBeQuoted + "'";
     }
 
     private static Pattern periodSpecificationPattern = Pattern
