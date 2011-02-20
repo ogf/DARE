@@ -28,6 +28,12 @@ public class RobotTest {
         assertThat(robot.getTransformerInMinilanguage(), equalTo(minilanguage));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void ifTheMinilanguageIsIncorretThrowIllegalArgumentException() {
+        String minilanguage = "notValidMinilanguage";
+        Robot.createFromMinilanguage(minilanguage);
+    }
+
     @Test
     public void aRobotCanBeCreatedFromACodeAndAXmlStringWithARobot() {
         String robotXML = readAsString(RobotTest.class

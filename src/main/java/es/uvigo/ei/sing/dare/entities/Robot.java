@@ -1,5 +1,8 @@
 package es.uvigo.ei.sing.dare.entities;
 
+
+import static es.uvigo.ei.sing.dare.util.StringUtil.quote;
+
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +20,13 @@ import es.uvigo.ei.sing.stringeditor.XMLInputOutput;
 public class Robot {
 
     public static Robot createFromMinilanguage(String transformerInminilanguage) {
-        Transformer transformer = Minilanguage.eval(transformerInminilanguage);
+        Transformer transformer;
+        try {
+            transformer = Minilanguage.eval(transformerInminilanguage);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(quote(transformerInminilanguage)
+                    + "is wrong");
+        }
         return new Robot(transformerInminilanguage,
                 XMLUtil.toString(fromMinilanguageToXML(transformer)),
                 new DateTime(), null);
