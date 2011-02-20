@@ -16,10 +16,10 @@ import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
 import es.uvigo.ei.sing.stringeditor.Util;
 
-@Path(ExecuteRobotResource.PATH)
-public class ExecuteRobotResource {
+@Path("robot")
+public class RobotResource {
 
-    public static final String PATH = "/execute";
+    public static final String EXECUTE_PATH = "robot/execute";
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

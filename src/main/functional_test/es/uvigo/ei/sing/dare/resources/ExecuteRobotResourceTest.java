@@ -97,7 +97,7 @@ public class ExecuteRobotResourceTest {
 
     private <T> T doPostOnMinilanguageResource(Class<T> type,
             MultivaluedMapImpl postEntity) {
-        return appResource.path(ExecuteRobotResource.PATH)
+        return appResource.path(RobotResource.EXECUTE_PATH)
                 .type(MediaType.APPLICATION_FORM_URLENCODED)
                 .accept(acceptedType).post(type, postEntity);
     }
