@@ -67,7 +67,7 @@
 		<fileset refid="string_editor_dependencies" />
 		<fileset refid="ruby_libs" />
 		<fileset refid="string_editor_jar" />
-		<fileset refid="libs" />
+		<fileset refid="runtime-libs" />
 		<pathelement location="${classes_dir}" />
 	</path>
 
@@ -102,14 +102,21 @@
 	<target name="compile-unit-test" depends="compile">
 		<mkdir dir="${unit_test_classes_dir}" />
 		<javac srcdir="${src.unit_tests}" destdir="${unit_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
-			<classpath refid="runtime-classpath" />
+			<classpath>
+			    <path refid="compile-classpath" />
+			    <pathelement location="${classes_dir}" />
+			</classpath>
 		</javac>
 	</target>
 	
-	<target name="compile-functional-test" depends="compile">
+	<target name="compile-functional-test" depends="compile, compile-unit-test">
 		<mkdir dir="${functional_test_classes_dir}" />
 		<javac srcdir="${src.functional_tests}" destdir="${functional_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
-			<classpath refid="runtime-classpath" />
+			<classpath>
+			    <pathelement location="${unit_test_classes_dir}" />
+			    <path refid="compile-classpath" />
+			    <pathelement location="${classes_dir}" />
+			</classpath>
 		</javac>
 	</target>
 
