@@ -17,6 +17,7 @@ import es.uvigo.ei.sing.dare.resources.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
 import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
+import es.uvigo.ei.sing.stringeditor.Util;
 import es.uvigo.ei.sing.stringeditor.XMLInputOutput;
 
 public class Robot {
@@ -136,6 +137,12 @@ public class Robot {
 
     public RobotJSONView asJSONView() {
         return new RobotJSONView(code, creationTime, transformerInMinilanguage);
+    }
+
+    public String[] execute(List<String> inputs) {
+        String[] asArray = inputs.toArray(new String[0]);
+        return Util.runRobot(XMLInputOutput.loadTransformer(XMLUtil
+                .toDocument(transformerInXML)), asArray);
     }
 
 }

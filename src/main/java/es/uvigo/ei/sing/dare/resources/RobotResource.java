@@ -25,9 +25,6 @@ import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.backend.IStore;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.Robot;
-import es.uvigo.ei.sing.stringeditor.Minilanguage;
-import es.uvigo.ei.sing.stringeditor.Transformer;
-import es.uvigo.ei.sing.stringeditor.Util;
 
 @Path("robot")
 public class RobotResource {
@@ -51,26 +48,32 @@ public class RobotResource {
     @Path("create")
     public Response create(
             @FormParam("minilanguage") String miniLanguage) {
-        Robot robot;
+        Robot robot = parseRobot(miniLanguage);
+        return create(robot);
+    }
+
+    private Robot parseRobot(String miniLanguage) {
         try {
-            robot = Robot.createFromMinilanguage(miniLanguage);
+            return Robot.createFromMinilanguage(miniLanguage);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(e, Status.BAD_REQUEST);
         }
-        return create(robot);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @Path("create")
     public Response createFromXML(Document robotXML) {
-        Robot robot;
+        Robot robot = parseRobot(robotXML);
+        return create(robot);
+    }
+
+    private Robot parseRobot(Document robotXML) {
         try {
-            robot = Robot.createFromXML(robotXML);
+            return Robot.createFromXML(robotXML);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(e, Status.BAD_REQUEST);
         }
-        return create(robot);
     }
 
     private Response create(Robot robot) {
@@ -110,32 +113,13 @@ public class RobotResource {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML })
     @Path("execute")
-    public ExecutionResult execute(@FormParam("robot") String transformerParam,
+    public ExecutionResult execute(@FormParam("robot") String robotParam,
             @FormParam("input") List<String> inputs) {
         long startTime = System.currentTimeMillis();
-
-        Transformer transformer = parseTransformer(transformerParam);
-        String[] result = execute(transformer, inputs);
-
+        Robot robot = parseRobot(robotParam);
+        String[] result = robot.execute(inputs);
         long elapsedTime = System.currentTimeMillis() - startTime;
         return new ExecutionResult(elapsedTime, result);
-    }
-
-    private Transformer parseTransformer(String transformerParam) {
-        try {
-            return Minilanguage.eval(transformerParam);
-        } catch (Exception e) {
-            throw new WebApplicationException(errorParsingTranformerResponse());
-        }
-    }
-
-    private Response errorParsingTranformerResponse() {
-        return Response.status(400).entity("transformer not valid").build();
-    }
-
-    private String[] execute(Transformer transformer, List<String> inputs) {
-        String[] asArray = inputs.toArray(new String[0]);
-        return Util.runRobot(transformer, asArray);
     }
 
 }
