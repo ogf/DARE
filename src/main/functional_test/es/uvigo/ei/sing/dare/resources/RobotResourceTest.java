@@ -1,7 +1,9 @@
 package es.uvigo.ei.sing.dare.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
@@ -24,6 +26,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.entities.RobotTest;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
@@ -100,6 +103,25 @@ public class RobotResourceTest {
         JSONObject jsonResponse = getRobot(MediaType.APPLICATION_JSON_TYPE,
                 JSONObject.class, uri);
         jsonResponse.getLong("creationDateMillis");
+    }
+
+    @Test
+    public void aCreatedRobotCanBeExecuted() {
+        URI uri = postRobotCreation("url");
+        RobotJSONView robot = getRobot(MediaType.APPLICATION_JSON_TYPE,
+                RobotJSONView.class, uri);
+        String robotCode = robot.getCode();
+
+        MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+        map.add("input", "www.google.es");
+        map.add("input", "www.twitter.com");
+        ExecutionResult result = robotResource.path(robotCode).path("execute")
+                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                .post(ExecutionResult.class, map);
+
+        assertNotNull(result);
+        assertThat(result.getExecutionTime(), greaterThan(0l));
+        assertThat(result.getLines().isEmpty(), is(false));
     }
 
     private URI postRobotCreation(String robotInMinilanguage) {

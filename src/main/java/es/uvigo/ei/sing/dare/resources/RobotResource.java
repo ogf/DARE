@@ -108,18 +108,55 @@ public class RobotResource {
         return robot;
     }
 
+    public interface IExecutionResultBuilder {
+
+        ExecutionResult build();
+    }
+
+    public static ExecutionResult trackTime(IExecutionResultBuilder builder) {
+        long start = System.currentTimeMillis();
+        ExecutionResult built = builder.build();
+        long elapsed = System.currentTimeMillis() - start;
+        return built.withExecutionTime(elapsed);
+    }
+
+    @POST
+    @Path("{code}/execute")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML })
+    public ExecutionResult executeOnAlreadyExistentRobot(
+            @PathParam("code") String robotCode,
+            @FormParam("input") final List<String> inputs) {
+
+        final Robot robot = find(robotCode);
+        return trackTime(new IExecutionResultBuilder() {
+
+            @Override
+            public ExecutionResult build() {
+                String[] result = robot.execute(inputs);
+                return new ExecutionResult(result);
+            }
+        });
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML })
     @Path("execute")
-    public ExecutionResult execute(@FormParam("robot") String robotParam,
-            @FormParam("input") List<String> inputs) {
-        long startTime = System.currentTimeMillis();
-        Robot robot = parseRobot(robotParam);
-        String[] result = robot.execute(inputs);
-        long elapsedTime = System.currentTimeMillis() - startTime;
-        return new ExecutionResult(elapsedTime, result);
+    public ExecutionResult execute(@FormParam("robot") final String robotParam,
+            @FormParam("input") final List<String> inputs) {
+
+        return trackTime(new IExecutionResultBuilder() {
+
+            @Override
+            public ExecutionResult build() {
+                Robot robot = parseRobot(robotParam);
+                String[] result = robot.execute(inputs);
+                return new ExecutionResult(result);
+            }
+        });
     }
 
 }

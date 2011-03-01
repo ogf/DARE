@@ -3,6 +3,7 @@ package es.uvigo.ei.sing.dare.entities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,8 +31,16 @@ public class ExecutionResult {
         this(0, new ArrayList<String>());
     }
 
+    public ExecutionResult(String... lines) {
+        this(-1, lines);
+    }
+
     public ExecutionResult(long milliseconds, String... lines) {
         this(milliseconds, Arrays.asList(lines));
+    }
+
+    public ExecutionResult(Collection<? extends String> lines) {
+        this(-1, lines);
     }
 
     public ExecutionResult(long executionTime,
@@ -41,8 +50,12 @@ public class ExecutionResult {
         this.date = new DateTime().getMillis();
     }
 
+    public ExecutionResult withExecutionTime(long executionTime) {
+        return new ExecutionResult(executionTime, this.lines);
+    }
+
     public List<String> getLines() {
-        return lines;
+        return Collections.unmodifiableList(lines);
     }
 
     public long getExecutionTime() {
