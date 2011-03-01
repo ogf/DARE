@@ -78,10 +78,14 @@ public class RobotResource {
 
     private Response create(Robot robot) {
         getStore().save(robot);
-        URI robotURI = UriBuilder.fromUri(uriInfo.getBaseUri()).path("robot")
+        URI robotURI = buildURIFor(robot);
+        return Response.created(robotURI).build();
+    }
+
+    private URI buildURIFor(Robot robot) {
+        return UriBuilder.fromUri(uriInfo.getBaseUri()).path("robot")
                 .path("view/{code}")
                 .build(robot.getCode());
-        return Response.created(robotURI).build();
     }
 
     @GET
@@ -130,12 +134,13 @@ public class RobotResource {
             @FormParam("input") final List<String> inputs) {
 
         final Robot robot = find(robotCode);
+        final URI uriForRobot = buildURIFor(robot);
         return trackTime(new IExecutionResultBuilder() {
 
             @Override
             public ExecutionResult build() {
                 String[] result = robot.execute(inputs);
-                return new ExecutionResult(result);
+                return new ExecutionResult(uriForRobot, result);
             }
         });
     }
@@ -148,13 +153,16 @@ public class RobotResource {
     public ExecutionResult execute(@FormParam("robot") final String robotParam,
             @FormParam("input") final List<String> inputs) {
 
+        final Robot robot = parseRobot(robotParam);
+        getStore().save(robot);
+        final URI uriForRobot = buildURIFor(robot);
+
         return trackTime(new IExecutionResultBuilder() {
 
             @Override
             public ExecutionResult build() {
-                Robot robot = parseRobot(robotParam);
                 String[] result = robot.execute(inputs);
-                return new ExecutionResult(result);
+                return new ExecutionResult(uriForRobot, result);
             }
         });
     }

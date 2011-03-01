@@ -57,11 +57,13 @@ public class RobotResourceExecutionTest {
 
     private MediaType acceptedType;
 
+    private Client client;
+
     public RobotResourceExecutionTest(MediaType acceptedType) {
-        Client c = Client.create();
-        this.appResource = c.resource(APPLICATION_URI);
+        client = Client.create();
+        this.appResource = client.resource(APPLICATION_URI);
         this.acceptedType = acceptedType;
-        c.addFilter(new LoggingFilter());
+        client.addFilter(new LoggingFilter());
     }
 
     @Test
@@ -148,6 +150,25 @@ public class RobotResourceExecutionTest {
                 });
         assertThat(result.getExecutionTime(), greaterThan(0l));
         assertThat(result.getDate(), notNullValue());
+
+    }
+
+    @Test
+    public void theRobotAssociatedIsStoredAndAURLToItIsStored() {
+        final String robotInMinilanguage = "url | xpath('//a/@href') | patternMatcher('(http://.*)') ";
+        ExecutionResult result = postRobotExecution(ExecutionResult.class,
+                new MultivaluedMapImpl() {
+                    {
+                        add("robot", robotInMinilanguage);
+                        add("input", "http://www.google.es");
+                        add("input", "http://www.esei.uvigo.es");
+                    }
+                });
+        RobotJSONView robotJSONView = client.resource(result.getCreatedFrom())
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(RobotJSONView.class);
+        assertThat(robotJSONView.getRobotInMinilanguage(),
+                equalTo(robotInMinilanguage));
     }
 
     private static final String linesPropertyName = "lines";
