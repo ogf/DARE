@@ -24,7 +24,7 @@ public class PeriodicalExecutionTest {
     public PeriodicalExecutionTest() {
         Client client = new Client();
         periodicalExecution = client.resource(
-                ExecuteRobotResourceTest.APPLICATION_URI).path(
+                RobotResourceExecutionTest.APPLICATION_URI).path(
                 PeriodicalExecutionResource.BASE_PATH);
         periodicalExecutionResult = periodicalExecution.path("result");
     }

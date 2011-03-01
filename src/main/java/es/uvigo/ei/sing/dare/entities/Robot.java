@@ -12,6 +12,8 @@ import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 
+import es.uvigo.ei.sing.dare.resources.RobotJSONView;
+import es.uvigo.ei.sing.dare.resources.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
 import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;
@@ -49,14 +51,14 @@ public class Robot {
     }
 
     private static Robot createFrom(Document robotXML, String robotXMLAsString) {
-        checkVAlidRobot(robotXML);
+        checkValidRobot(robotXML);
         String minilanguage = Minilanguage.xmlToLanguage(robotXML);
         return new Robot(minilanguage, robotXMLAsString, new DateTime(),
                 minilanguage);
 
     }
 
-    private static void checkVAlidRobot(Document robotXML) {
+    private static void checkValidRobot(Document robotXML) {
         try {
             XMLInputOutput.loadTransformer(robotXML);
         } catch (Exception e) {
@@ -126,6 +128,14 @@ public class Robot {
         Validate.notNull(period);
         Validate.noNullElements(inputs);
         return new PeriodicalExecution(this, period, inputs);
+    }
+
+    public RobotXMLView asXMLView() {
+        return new RobotXMLView(code, creationTime, XMLUtil.toDocument(transformerInXML));
+    }
+
+    public RobotJSONView asJSONView() {
+        return new RobotJSONView(code, creationTime, transformerInMinilanguage);
     }
 
 }

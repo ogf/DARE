@@ -2,6 +2,8 @@ package es.uvigo.ei.sing.dare.backend;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.lang.Validate;
+
 public abstract class Configuration {
 
     public static void associate(ServletContext context,
@@ -31,17 +33,15 @@ public abstract class Configuration {
                 .getName());
     }
 
-    private final IStore executionsStore;
+    private final IStore store;
 
-    protected Configuration(IStore executionsStore) {
-        if (executionsStore == null) {
-            throw new IllegalArgumentException("executionsStore can't be null");
-        }
-        this.executionsStore = executionsStore;
+    protected Configuration(IStore store) {
+        Validate.notNull(store);
+        this.store = store;
     }
 
-    public IStore getExecutionsStore() {
-        return executionsStore;
+    public IStore getStore() {
+        return store;
     }
 
 }

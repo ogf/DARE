@@ -18,6 +18,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 public class XMLUtil {
@@ -41,6 +42,17 @@ public class XMLUtil {
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
             return builder
                     .parse(new InputSource(new StringReader(xmlAsString)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Document fromRootDocumentElement(Element robot) {
+        try {
+            DocumentBuilder builder = builderFactory.newDocumentBuilder();
+            Document result = builder.newDocument();
+            result.appendChild(result.adoptNode(robot));
+            return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

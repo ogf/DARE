@@ -41,7 +41,7 @@ import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 
 @SuppressWarnings("serial")
 @RunWith(Parameterized.class)
-public class ExecuteRobotResourceTest {
+public class RobotResourceExecutionTest {
 
     public static final URI APPLICATION_URI = UriBuilder
             .fromUri("http://localhost/").port(8080).path("DARE").build();
@@ -57,7 +57,7 @@ public class ExecuteRobotResourceTest {
 
     private MediaType acceptedType;
 
-    public ExecuteRobotResourceTest(MediaType acceptedType) {
+    public RobotResourceExecutionTest(MediaType acceptedType) {
         Client c = Client.create();
         this.appResource = c.resource(APPLICATION_URI);
         this.acceptedType = acceptedType;
@@ -66,7 +66,7 @@ public class ExecuteRobotResourceTest {
 
     @Test
     public void existsPostMethod() throws Exception {
-        doPostOnMinilanguageResource(new MultivaluedMapImpl() {
+        postRobotExecution(new MultivaluedMapImpl() {
             {
                 add("robot",
                         "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
@@ -79,7 +79,7 @@ public class ExecuteRobotResourceTest {
     @Test
     public void onWrongTransformerThrowsException() throws Exception {
         try {
-            doPostOnMinilanguageResource(new MultivaluedMapImpl() {
+            postRobotExecution(new MultivaluedMapImpl() {
                 {
                     add("robot",
                             "ur xpath('//a/@href') | patternMatcher('(http://.*)') ");
@@ -91,13 +91,13 @@ public class ExecuteRobotResourceTest {
         }
     }
 
-    private void doPostOnMinilanguageResource(MultivaluedMapImpl postEntity) {
-        doPostOnMinilanguageResource(ExecutionResult.class, postEntity);
+    private void postRobotExecution(MultivaluedMapImpl postEntity) {
+        postRobotExecution(ExecutionResult.class, postEntity);
     }
 
-    private <T> T doPostOnMinilanguageResource(Class<T> type,
+    private <T> T postRobotExecution(Class<T> type,
             MultivaluedMapImpl postEntity) {
-        return appResource.path(RobotResource.EXECUTE_PATH)
+        return appResource.path("robot/execute")
                 .type(MediaType.APPLICATION_FORM_URLENCODED)
                 .accept(acceptedType).post(type, postEntity);
     }
@@ -106,7 +106,7 @@ public class ExecuteRobotResourceTest {
     @Ignore("review string editor execution handling")
     public void testErrorExecuting() throws Exception {
         try {
-            doPostOnMinilanguageResource(new MultivaluedMapImpl() {
+            postRobotExecution(new MultivaluedMapImpl() {
                 {
                     add("robot",
                             "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
@@ -121,7 +121,7 @@ public class ExecuteRobotResourceTest {
 
     @Test
     public void testReturnResults() throws Exception {
-        ExecutionResult result = doPostOnMinilanguageResource(
+        ExecutionResult result = postRobotExecution(
                 ExecutionResult.class, new MultivaluedMapImpl() {
                     {
                         add("robot",
@@ -137,7 +137,7 @@ public class ExecuteRobotResourceTest {
 
     @Test
     public void itReturnsTheTimeElapsedAndTheDate() throws Exception {
-        ExecutionResult result = doPostOnMinilanguageResource(
+        ExecutionResult result = postRobotExecution(
                 ExecutionResult.class, new MultivaluedMapImpl() {
                     {
                         add("robot",
@@ -167,11 +167,11 @@ public class ExecuteRobotResourceTest {
             }
         };
         if (acceptedType == MediaType.APPLICATION_JSON_TYPE) {
-            JSONObject result = doPostOnMinilanguageResource(JSONObject.class,
+            JSONObject result = postRobotExecution(JSONObject.class,
                     request);
             checkStructureIsCorrect(result);
         } else {
-            Document document = doPostOnMinilanguageResource(Document.class,
+            Document document = postRobotExecution(Document.class,
                     request);
             checkStructureIsCorrect(document);
         }

@@ -20,6 +20,16 @@ import es.uvigo.ei.sing.dare.util.XMLUtil;
 
 public class RobotTest {
 
+    public static Document buildValidRobot() {
+        return XMLUtil.toDocument(RobotTest.class
+                .getResource("robot-example.xml"));
+    }
+
+    public static Document buildInvalidRobot() {
+        return XMLUtil.toDocument(RobotTest.class
+                .getResource("robot-invalid-example.xml"));
+    }
+
     @Test
     public void aRobotCanBeCreatedFromACodeAndAMinilanguageString() {
         String minilanguage = "url";
@@ -45,8 +55,7 @@ public class RobotTest {
 
     @Test
     public void aRobotCanBeCreatedFromAXmlDocumentWithARobot() {
-        Document robotXML = XMLUtil.toDocument(RobotTest.class
-                .getResource("robot-example.xml"));
+        Document robotXML = buildValidRobot();
         Robot robot = Robot.createFromXML(robotXML);
         assertThat(robot.getTransformerInXML(),
                 equalTo(XMLUtil.toString(robotXML)));
@@ -54,8 +63,7 @@ public class RobotTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void ifTheXMLDocumentIsWrongAIllegalArgumentExceptionIsThrown() {
-        Document notValidRobot = XMLUtil.toDocument(RobotTest.class
-                .getResource("robot-invalid-example.xml"));
+        Document notValidRobot = buildInvalidRobot();
         Robot.createFromXML(notValidRobot);
     }
 

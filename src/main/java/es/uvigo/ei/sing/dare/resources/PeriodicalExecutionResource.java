@@ -29,7 +29,7 @@ public class PeriodicalExecutionResource {
     public Response retrievePeriodicalExecution(
             @PathParam("periodical-execution-code") String periodicalExecutionCode) {
         PeriodicalExecution periodicalExecution = getConfiguration()
-                .getExecutionsStore().findPeriodicalExecution(
+                .getStore().findPeriodicalExecution(
                         periodicalExecutionCode);
         if (periodicalExecution == null) {
             return Response.status(Status.NOT_FOUND).build();
