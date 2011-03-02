@@ -38,11 +38,14 @@ public class RobotResourceTest {
 
     private Client client;
 
+    private URIPoller poller;
+
     public RobotResourceTest() {
         client = new Client();
         client.addFilter(new LoggingFilter());
         robotResource = client.resource(
                 RobotResourceExecutionTest.APPLICATION_URI).path("robot");
+        poller = new URIPoller(client, MediaType.APPLICATION_JSON_TYPE);
     }
 
     @Test
@@ -113,11 +116,13 @@ public class RobotResourceTest {
         String robotCode = robot.getCode();
 
         MultivaluedMap<String, String> map = new MultivaluedMapImpl();
-        map.add("input", "www.google.es");
-        map.add("input", "www.twitter.com");
-        ExecutionResult result = robotResource.path(robotCode).path("execute")
+        map.add("input", "http://www.google.com");
+        map.add("input", "http://www.twitter.com");
+        ClientResponse response = robotResource.path(robotCode).path("execute")
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .post(ExecutionResult.class, map);
+                .post(ClientResponse.class, map);
+        ExecutionResult result = poller.retrieve(ExecutionResult.class,
+                response.getLocation());
 
         assertNotNull(result);
         assertThat(result.getExecutionTime(), greaterThan(0l));

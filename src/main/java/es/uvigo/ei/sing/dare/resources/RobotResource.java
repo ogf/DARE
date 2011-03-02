@@ -22,8 +22,8 @@ import javax.ws.rs.core.UriInfo;
 import org.w3c.dom.Document;
 
 import es.uvigo.ei.sing.dare.backend.Configuration;
+import es.uvigo.ei.sing.dare.backend.IRobotExecutor;
 import es.uvigo.ei.sing.dare.backend.IStore;
-import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.Robot;
 
 @Path("robot")
@@ -41,6 +41,10 @@ public class RobotResource {
 
     private IStore getStore() {
         return getConfiguration().getStore();
+    }
+
+    private IRobotExecutor getRobotExecutor() {
+        return getConfiguration().getRobotExecutor();
     }
 
     @POST
@@ -83,7 +87,8 @@ public class RobotResource {
     }
 
     private URI buildURIFor(Robot robot) {
-        return UriBuilder.fromUri(uriInfo.getBaseUri()).path("robot")
+        URI baseUri = uriInfo.getBaseUri();
+        return UriBuilder.fromUri(baseUri).path("robot")
                 .path("view/{code}")
                 .build(robot.getCode());
     }
@@ -112,59 +117,35 @@ public class RobotResource {
         return robot;
     }
 
-    public interface IExecutionResultBuilder {
-
-        ExecutionResult build();
-    }
-
-    public static ExecutionResult trackTime(IExecutionResultBuilder builder) {
-        long start = System.currentTimeMillis();
-        ExecutionResult built = builder.build();
-        long elapsed = System.currentTimeMillis() - start;
-        return built.withExecutionTime(elapsed);
-    }
-
     @POST
     @Path("{code}/execute")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-            MediaType.TEXT_XML })
-    public ExecutionResult executeOnAlreadyExistentRobot(
+    public Response executeOnAlreadyExistentRobot(
             @PathParam("code") String robotCode,
             @FormParam("input") final List<String> inputs) {
 
         final Robot robot = find(robotCode);
-        final URI uriForRobot = buildURIFor(robot);
-        return trackTime(new IExecutionResultBuilder() {
-
-            @Override
-            public ExecutionResult build() {
-                String[] result = robot.execute(inputs);
-                return new ExecutionResult(uriForRobot, result);
-            }
-        });
+        return submitExecutionAndRedirectToResult(robot, inputs);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-            MediaType.TEXT_XML })
     @Path("execute")
-    public ExecutionResult execute(@FormParam("robot") final String robotParam,
+    public Response execute(@FormParam("robot") final String robotParam,
             @FormParam("input") final List<String> inputs) {
 
         final Robot robot = parseRobot(robotParam);
         getStore().save(robot);
-        final URI uriForRobot = buildURIFor(robot);
+        return submitExecutionAndRedirectToResult(robot, inputs);
+    }
 
-        return trackTime(new IExecutionResultBuilder() {
-
-            @Override
-            public ExecutionResult build() {
-                String[] result = robot.execute(inputs);
-                return new ExecutionResult(uriForRobot, result);
-            }
-        });
+    private Response submitExecutionAndRedirectToResult(final Robot robot,
+            final List<String> inputs) {
+        String resultCode = getRobotExecutor().submitExecution(
+                buildURIFor(robot), robot, inputs);
+        return Response.created(
+                ExecutionResultResource.buildURIFor(uriInfo, resultCode))
+                .build();
     }
 
 }

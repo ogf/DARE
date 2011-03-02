@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
@@ -59,11 +60,14 @@ public class RobotResourceExecutionTest {
 
     private Client client;
 
+    private URIPoller poller;
+
     public RobotResourceExecutionTest(MediaType acceptedType) {
         client = Client.create();
         this.appResource = client.resource(APPLICATION_URI);
         this.acceptedType = acceptedType;
         client.addFilter(new LoggingFilter());
+        poller = new URIPoller(client, acceptedType);
     }
 
     @Test
@@ -93,15 +97,20 @@ public class RobotResourceExecutionTest {
         }
     }
 
-    private void postRobotExecution(MultivaluedMapImpl postEntity) {
-        postRobotExecution(ExecutionResult.class, postEntity);
+    private ExecutionResult postRobotExecution(MultivaluedMapImpl postEntity) {
+        return postRobotExecution(ExecutionResult.class, postEntity);
     }
 
     private <T> T postRobotExecution(Class<T> type,
             MultivaluedMapImpl postEntity) {
-        return appResource.path("robot/execute")
+        ClientResponse response = appResource.path("robot/execute")
                 .type(MediaType.APPLICATION_FORM_URLENCODED)
-                .accept(acceptedType).post(type, postEntity);
+                .post(ClientResponse.class, postEntity);
+        if (response.getClientResponseStatus().getStatusCode() >= 400) {
+            throw new UniformInterfaceException(response);
+        }
+        URI location = response.getLocation();
+        return poller.retrieve(type, location);
     }
 
     @Test
@@ -123,8 +132,8 @@ public class RobotResourceExecutionTest {
 
     @Test
     public void testReturnResults() throws Exception {
-        ExecutionResult result = postRobotExecution(
-                ExecutionResult.class, new MultivaluedMapImpl() {
+        ExecutionResult result = postRobotExecution(ExecutionResult.class,
+                new MultivaluedMapImpl() {
                     {
                         add("robot",
                                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");

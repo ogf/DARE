@@ -2,8 +2,6 @@ package es.uvigo.ei.sing.dare.backend;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.lang.Validate;
-
 public abstract class Configuration {
 
     public static void associate(ServletContext context,
@@ -33,15 +31,8 @@ public abstract class Configuration {
                 .getName());
     }
 
-    private final IStore store;
+    public abstract IStore getStore();
 
-    protected Configuration(IStore store) {
-        Validate.notNull(store);
-        this.store = store;
-    }
-
-    public IStore getStore() {
-        return store;
-    }
+    public abstract IRobotExecutor getRobotExecutor();
 
 }
