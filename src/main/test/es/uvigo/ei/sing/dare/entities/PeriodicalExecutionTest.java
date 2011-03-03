@@ -21,7 +21,8 @@ public class PeriodicalExecutionTest {
     private ExecutionPeriod examplePeriod = ExecutionPeriod.create(20,
             Unit.HOURS);
 
-    private String[] exampleInputs = { "www.google.com", "www.twitter.com" };
+    private String[] exampleInputs = { "http://www.google.com",
+            "http://www.twitter.com" };
 
     private PeriodicalExecution periodicalExecution = robot.createPeriodical(
             examplePeriod, exampleInputs);
@@ -43,8 +44,8 @@ public class PeriodicalExecutionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void allTheInputsMustBeNotNull() {
-        robot.createPeriodical(examplePeriod, new String[] { "www.google.com",
-                null });
+        robot.createPeriodical(examplePeriod, new String[] {
+                "http://www.google.com", null });
     }
 
     @Test
@@ -72,15 +73,15 @@ public class PeriodicalExecutionTest {
     @Test
     public void theProvidedListOfInputsIsCopiedToAvoidUndesirableSideEffects() {
         List<String> inputs = new ArrayList<String>();
-        inputs.add("www.google.com");
+        inputs.add("http://www.google.com");
         periodicalExecution = robot.createPeriodical(examplePeriod, inputs);
-        inputs.add("www.yahoo.com");
+        inputs.add("http://www.yahoo.com");
         assertThat(periodicalExecution.getInputs(), not(equalTo(inputs)));
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void theInputsOfAPeriodicalExecutionCannotBeModified() {
-        periodicalExecution.getInputs().add("www.yahoo.com");
+        periodicalExecution.getInputs().add("http://www.yahoo.com");
     }
 
     @Test

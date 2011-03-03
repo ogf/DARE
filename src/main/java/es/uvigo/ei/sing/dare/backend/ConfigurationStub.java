@@ -66,7 +66,7 @@ public class ConfigurationStub extends Configuration {
                 return new PeriodicalExecution(
                         Robot.createFromMinilanguage("url"),
                         ExecutionPeriod.create(1, Unit.DAYS),
-                        Arrays.asList("www.google.com"));
+                        Arrays.asList("http://www.google.com"));
             }
             return null;
         }
