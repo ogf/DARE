@@ -30,16 +30,7 @@ public class ConfigurationStub extends Configuration {
 
         private Map<String, Robot> robotsByCode = new HashMap<String, Robot>();
 
-        @Override
-        public PeriodicalExecution findPeriodicalExecution(String code) {
-            if (code.equals(EXISTENT_PERIODICAL_EXECUTION_CODE)) {
-                return new PeriodicalExecution(
-                        Robot.createFromMinilanguage("url"),
-                        ExecutionPeriod.create(1, Unit.DAYS),
-                        Arrays.asList("www.google.com"));
-            }
-            return null;
-        }
+        private Map<String, PeriodicalExecution> periodicalsByCode = new HashMap<String, PeriodicalExecution>();
 
         @Override
         public void save(Robot robot) {
@@ -66,6 +57,27 @@ public class ConfigurationStub extends Configuration {
             }
             return Maybe.none();
         }
+
+        @Override
+        public PeriodicalExecution findPeriodicalExecution(String code) {
+            if (periodicalsByCode.containsKey(code)) {
+                return periodicalsByCode.get(code);
+            }
+            if (code.equals(EXISTENT_PERIODICAL_EXECUTION_CODE)) {
+                return new PeriodicalExecution(
+                        Robot.createFromMinilanguage("url"),
+                        ExecutionPeriod.create(1, Unit.DAYS),
+                        Arrays.asList("www.google.com"));
+            }
+            return null;
+        }
+
+        @Override
+        public void save(PeriodicalExecution periodicalExecution) {
+            periodicalsByCode.put(periodicalExecution.getCode(),
+                    periodicalExecution);
+        }
+
     };
 
     private IRobotExecutor robotExecutor = new IRobotExecutor() {

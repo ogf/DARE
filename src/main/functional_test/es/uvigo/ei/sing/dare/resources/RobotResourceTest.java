@@ -129,6 +129,43 @@ public class RobotResourceTest {
         assertThat(result.getLines().isEmpty(), is(false));
     }
 
+    @Test
+    public void fromARobotAPeriodicalExecutionCanBeCreated() {
+        URI uri = postRobotCreation("url");
+        WebResource periodicalCreationResource = client.resource(uri).path(
+                "periodical");
+        ClientResponse response = periodicalCreationResource.post(
+                ClientResponse.class,
+                new MultivaluedMapImpl() {
+                    {
+                        add("period", "12h");
+                        add("input", "http://www.google.com");
+                    }
+                });
+
+        ClientResponse periodicalExecutionCreated = client.resource(
+                response.getLocation()).get(ClientResponse.class);
+
+        assertThat(periodicalExecutionCreated.getStatus(),
+                equalTo(Status.OK.getStatusCode()));
+    }
+
+    @Test
+    public void aWrongPeriodImpliesABadRequestResponse() {
+        URI uri = postRobotCreation("url");
+        WebResource periodicalCreationResource = client.resource(uri).path(
+                "periodical");
+        ClientResponse response = periodicalCreationResource.post(
+                ClientResponse.class, new MultivaluedMapImpl() {
+                    {
+                        add("period", "foo");
+                        add("input", "http://www.google.com");
+                    }
+                });
+        assertThat(response.getStatus(),
+                equalTo(Status.BAD_REQUEST.getStatusCode()));
+    }
+
     private URI postRobotCreation(String robotInMinilanguage) {
         return postRobotCreationReturningResponse(robotInMinilanguage)
                 .getLocation();

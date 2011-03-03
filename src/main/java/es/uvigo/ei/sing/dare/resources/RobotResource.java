@@ -24,6 +24,8 @@ import org.w3c.dom.Document;
 import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.backend.IRobotExecutor;
 import es.uvigo.ei.sing.dare.backend.IStore;
+import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
+import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
 
 @Path("robot")
@@ -145,6 +147,24 @@ public class RobotResource {
         return Response.created(
                 ExecutionResultResource.buildURIFor(uriInfo, resultCode))
                 .build();
+    }
+
+    @POST
+    @Path("{code}/periodical")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response createPeriodical(
+            @PathParam("code") String robotCode,
+            @FormParam("period") String periodString,
+            @FormParam("input") final List<String> inputs) {
+
+        Robot robot = find(robotCode);
+        ExecutionPeriod period = PeriodicalExecutionResource.parsePeriod(periodString);
+        PeriodicalExecution periodicalExecution = new PeriodicalExecution(
+                robot, period, inputs);
+        getStore().save(periodicalExecution);
+        return Response.created(
+                PeriodicalExecutionResource.buildURIFor(uriInfo,
+                        periodicalExecution)).build();
     }
 
 }
