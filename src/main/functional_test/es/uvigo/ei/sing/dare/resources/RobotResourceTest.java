@@ -29,6 +29,8 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.entities.RobotTest;
+import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
+import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
 
 @RunWith(JUnit4.class)

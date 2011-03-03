@@ -39,6 +39,7 @@ import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @SuppressWarnings("serial")
 @RunWith(Parameterized.class)

@@ -27,6 +27,8 @@ import es.uvigo.ei.sing.dare.backend.IStore;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
+import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
+import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 
 @Path("robot")
 public class RobotResource {

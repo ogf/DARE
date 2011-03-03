@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.resources;
+package es.uvigo.ei.sing.dare.resources.views;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

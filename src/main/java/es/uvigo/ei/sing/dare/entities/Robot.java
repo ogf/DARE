@@ -12,8 +12,8 @@ import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 
-import es.uvigo.ei.sing.dare.resources.RobotJSONView;
-import es.uvigo.ei.sing.dare.resources.RobotXMLView;
+import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
+import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
 import es.uvigo.ei.sing.stringeditor.Minilanguage;
 import es.uvigo.ei.sing.stringeditor.Transformer;

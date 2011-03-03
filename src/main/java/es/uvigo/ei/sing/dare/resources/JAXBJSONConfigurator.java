@@ -12,6 +12,7 @@ import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
 
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @Provider
 public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
