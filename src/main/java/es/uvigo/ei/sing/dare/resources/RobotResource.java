@@ -88,13 +88,12 @@ public class RobotResource {
 
     private URI buildURIFor(Robot robot) {
         URI baseUri = uriInfo.getBaseUri();
-        return UriBuilder.fromUri(baseUri).path("robot")
-                .path("view/{code}")
+        return UriBuilder.fromUri(baseUri).path("robot/{code}")
                 .build(robot.getCode());
     }
 
     @GET
-    @Path("view/{code}")
+    @Path("{code}")
     @Produces(MediaType.APPLICATION_JSON)
     public RobotJSONView viewAsJSON(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
@@ -102,7 +101,7 @@ public class RobotResource {
     }
 
     @GET
-    @Path("view/{code}")
+    @Path("{code}")
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public RobotXMLView viewAsXML(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
