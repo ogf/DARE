@@ -58,7 +58,7 @@ public class PeriodicalExecution {
         return executionPeriod;
     }
 
-    public ExecutionResult getLastExecutionResult() {
+    public PeriodicalExecution getLastExecutionResult() {
         return null;
     }
 

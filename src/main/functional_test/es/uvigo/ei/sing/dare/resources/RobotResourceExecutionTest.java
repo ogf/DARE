@@ -38,7 +38,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @SuppressWarnings("serial")
@@ -98,8 +98,8 @@ public class RobotResourceExecutionTest {
         }
     }
 
-    private ExecutionResult postRobotExecution(MultivaluedMapImpl postEntity) {
-        return postRobotExecution(ExecutionResult.class, postEntity);
+    private ExecutionResultView postRobotExecution(MultivaluedMapImpl postEntity) {
+        return postRobotExecution(ExecutionResultView.class, postEntity);
     }
 
     private <T> T postRobotExecution(Class<T> type,
@@ -133,7 +133,7 @@ public class RobotResourceExecutionTest {
 
     @Test
     public void testReturnResults() throws Exception {
-        ExecutionResult result = postRobotExecution(ExecutionResult.class,
+        ExecutionResultView result = postRobotExecution(ExecutionResultView.class,
                 new MultivaluedMapImpl() {
                     {
                         add("robot",
@@ -149,8 +149,8 @@ public class RobotResourceExecutionTest {
 
     @Test
     public void itReturnsTheTimeElapsedAndTheDate() throws Exception {
-        ExecutionResult result = postRobotExecution(
-                ExecutionResult.class, new MultivaluedMapImpl() {
+        ExecutionResultView result = postRobotExecution(
+                ExecutionResultView.class, new MultivaluedMapImpl() {
                     {
                         add("robot",
                                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
@@ -166,7 +166,7 @@ public class RobotResourceExecutionTest {
     @Test
     public void theRobotAssociatedIsStoredAndAURLToItIsStored() {
         final String robotInMinilanguage = "url | xpath('//a/@href') | patternMatcher('(http://.*)') ";
-        ExecutionResult result = postRobotExecution(ExecutionResult.class,
+        ExecutionResultView result = postRobotExecution(ExecutionResultView.class,
                 new MultivaluedMapImpl() {
                     {
                         add("robot", robotInMinilanguage);

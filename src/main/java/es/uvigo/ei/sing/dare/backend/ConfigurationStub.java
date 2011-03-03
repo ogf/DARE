@@ -1,6 +1,5 @@
 package es.uvigo.ei.sing.dare.backend;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -83,17 +82,18 @@ public class ConfigurationStub extends Configuration {
     private IRobotExecutor robotExecutor = new IRobotExecutor() {
 
         @Override
-        public String submitExecution(final URI createdFrom, final Robot robot,
+        public String submitExecution(final Robot robot,
                 final List<String> inputs) {
             String code = UUID.randomUUID().toString();
-            Future<ExecutionResult> future = executor
-                    .submit(resultCreation(createdFrom, robot, inputs));
+            Future<ExecutionResult> future = executor.submit(resultCreation(
+                    code, robot, inputs));
             executions.put(code, future);
             return code;
         }
 
-        private Callable<ExecutionResult> resultCreation(final URI createdFrom,
-                final Robot robot, final List<String> inputs) {
+        private Callable<ExecutionResult> resultCreation(final String code,
+                final Robot robot,
+                final List<String> inputs) {
             return new Callable<ExecutionResult>() {
 
                 @Override
@@ -103,7 +103,7 @@ public class ConfigurationStub extends Configuration {
                         @Override
                         public ExecutionResult build() {
                             final String[] result = robot.execute(inputs);
-                            return new ExecutionResult(createdFrom, result);
+                            return ExecutionResult.create(code, robot, result);
                         }
                     };
                     return TimeTracker.trackTime(resultBuilder);

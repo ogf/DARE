@@ -33,6 +33,16 @@ import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 @Path("robot")
 public class RobotResource {
 
+    public static URI buildURIFor(UriInfo uriInfo, Robot robot) {
+        return buildURIFor(uriInfo, robot.getCode());
+    }
+
+    public static URI buildURIFor(UriInfo uriInfo, String robotCode) {
+        URI baseUri = uriInfo.getBaseUri();
+        return UriBuilder.fromUri(baseUri).path("robot/{code}")
+                .build(robotCode);
+    }
+
     @Context
     private UriInfo uriInfo;
 
@@ -91,9 +101,7 @@ public class RobotResource {
     }
 
     private URI buildURIFor(Robot robot) {
-        URI baseUri = uriInfo.getBaseUri();
-        return UriBuilder.fromUri(baseUri).path("robot/{code}")
-                .build(robot.getCode());
+        return buildURIFor(uriInfo, robot);
     }
 
     @GET
@@ -144,8 +152,7 @@ public class RobotResource {
 
     private Response submitExecutionAndRedirectToResult(final Robot robot,
             final List<String> inputs) {
-        String resultCode = getRobotExecutor().submitExecution(
-                buildURIFor(robot), robot, inputs);
+        String resultCode = getRobotExecutor().submitExecution(robot, inputs);
         return Response.created(
                 ExecutionResultResource.buildURIFor(uriInfo, resultCode))
                 .build();

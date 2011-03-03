@@ -11,7 +11,7 @@ import javax.xml.bind.JAXBException;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
 
-import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @Provider
@@ -20,7 +20,7 @@ public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
     @SuppressWarnings("serial")
     private Map<Class<?>, JAXBContext> contextsByClass = new HashMap<Class<?>, JAXBContext>() {
         {
-            add(ExecutionResult.class,
+            add(ExecutionResultView.class,
                     JSONConfiguration.mapped().nonStrings("executionTime")
                             .nonStrings("date").arrays("lines").build());
             add(RobotJSONView.class,

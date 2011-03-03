@@ -19,6 +19,7 @@ import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.backend.IStore;
 import es.uvigo.ei.sing.dare.backend.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 
 @Path("result")
 public class ExecutionResultResource {
@@ -30,6 +31,9 @@ public class ExecutionResultResource {
 
     @Context
     private ServletContext context;
+
+    @Context
+    private UriInfo uriInfo;
 
     private Configuration getConfiguration() {
         return Configuration.from(context);
@@ -44,7 +48,7 @@ public class ExecutionResultResource {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML })
     @Path("{executionResultCode}")
-    public ExecutionResult retrieve(
+    public ExecutionResultView retrieve(
             @PathParam("executionResultCode") String executionResultCode) {
 
         Maybe<ExecutionResult> possibleResult = getStore().retrieveExecution(
@@ -55,7 +59,11 @@ public class ExecutionResultResource {
         if (possibleResult.isNone()) {// not completed
             throw new WebApplicationException(Status.NO_CONTENT);
         }
-        return possibleResult.getValue();
+        ExecutionResult result = possibleResult.getValue();
+        URI createdFrom = RobotResource.buildURIFor(uriInfo,
+                result.getRobotCode());
+        return new ExecutionResultView(createdFrom, result.getCreationTime(),
+                result.getExecutionTimeMilliseconds(), result.getResultLines());
     }
 
 }
