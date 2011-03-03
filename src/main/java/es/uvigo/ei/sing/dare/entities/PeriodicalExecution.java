@@ -20,6 +20,8 @@ public class PeriodicalExecution {
 
     private final List<String> inputs;
 
+    private ExecutionResult lastExecution;
+
     public PeriodicalExecution(Robot robot, ExecutionPeriod executionPeriod,
             List<String> inputs) {
         this(new DateTime(), robot, executionPeriod, inputs);
@@ -58,8 +60,12 @@ public class PeriodicalExecution {
         return executionPeriod;
     }
 
-    public PeriodicalExecution getLastExecutionResult() {
-        return null;
+    public ExecutionResult getLastExecutionResult() {
+        return lastExecution;
+    }
+
+    public void receiveLastResult(ExecutionResult last) {
+        this.lastExecution = last;
     }
 
 }

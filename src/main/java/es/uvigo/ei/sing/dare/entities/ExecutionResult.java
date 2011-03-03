@@ -11,12 +11,24 @@ public class ExecutionResult {
 
     public static ExecutionResult create(String code, Robot robot,
             String[] resultLines) {
-        return new ExecutionResult(code, robot.getCode(), 0, resultLines);
+        return new ExecutionResult(code, Type.ROBOT, robot.getCode(), 0, resultLines);
+    }
+
+    public static ExecutionResult create(String code,
+            PeriodicalExecution parent, String[] resultLines) {
+        return new ExecutionResult(code, Type.PERIODICAL, parent.getCode(), 0,
+                resultLines);
+    }
+
+    public enum Type {
+        ROBOT, PERIODICAL;
     }
 
     private final String code;
 
-    private final String robotCode;
+    private final Type type;
+
+    private final String createdFromCode;
 
     private final DateTime creationTime;
 
@@ -24,16 +36,18 @@ public class ExecutionResult {
 
     private final List<String> resultLines;
 
-    private ExecutionResult(String code, String robotCode,
+    private ExecutionResult(String code,Type type, String createdFromCode,
             long executionTimeMilliseconds,
             String[] resultLines) {
         Validate.notNull(code);
-        Validate.notNull(robotCode);
-        Validate.notNull(resultLines);
+        Validate.notNull(type);
+        Validate.notNull(createdFromCode);
         Validate.isTrue(executionTimeMilliseconds >= 0);
+        Validate.notNull(resultLines);
 
         this.code = code;
-        this.robotCode = robotCode;
+        this.createdFromCode = createdFromCode;
+        this.type = type;
         this.creationTime = new DateTime();
         this.executionTimeMilliseconds = executionTimeMilliseconds;
         this.resultLines = Collections.unmodifiableList(Arrays
@@ -44,8 +58,12 @@ public class ExecutionResult {
         return code;
     }
 
-    public String getRobotCode() {
-        return robotCode;
+    public Type getType() {
+        return type;
+    }
+
+    public String getCreatedFromCode() {
+        return createdFromCode;
     }
 
     public DateTime getCreationTime() {
@@ -61,8 +79,8 @@ public class ExecutionResult {
     }
 
     public ExecutionResult withExecutionTime(long executionTime) {
-        return new ExecutionResult(this.code, this.robotCode, executionTime,
-                this.resultLines.toArray(new String[0]));
+        return new ExecutionResult(this.code, this.type, this.createdFromCode,
+                executionTime, this.resultLines.toArray(new String[0]));
     }
 
 }

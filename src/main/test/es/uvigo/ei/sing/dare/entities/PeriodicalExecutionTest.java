@@ -3,6 +3,7 @@ package es.uvigo.ei.sing.dare.entities;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
@@ -95,6 +96,25 @@ public class PeriodicalExecutionTest {
     @Test
     public void initiallyTheLastExecutionResultIsNull() {
         assertThat(periodicalExecution.getLastExecutionResult(), nullValue());
+    }
+
+    @Test
+    public void theLastExecutionCanBeUpdated() {
+        long time = System.currentTimeMillis();
+        Robot robot = periodicalExecution.getRobot();
+        List<String> inputs = periodicalExecution.getInputs();
+        String[] lines = robot.execute(inputs);
+        ExecutionResult result = ExecutionResult.create("test",
+                periodicalExecution, lines).withExecutionTime(
+                System.currentTimeMillis() - time);
+        periodicalExecution.receiveLastResult(result);
+
+        ExecutionResult executionResult = periodicalExecution
+                .getLastExecutionResult();
+        assertNotNull(executionResult);
+        assertThat(executionResult.getExecutionTimeMilliseconds(),
+                greaterThan(0l));
+        assertThat(executionResult.getResultLines().size(), greaterThan(0));
     }
 
 }

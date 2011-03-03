@@ -61,7 +61,7 @@ public class ExecutionResultResource {
         }
         ExecutionResult result = possibleResult.getValue();
         URI createdFrom = RobotResource.buildURIFor(uriInfo,
-                result.getRobotCode());
+                result.getCreatedFromCode());
         return new ExecutionResultView(createdFrom, result.getCreationTime(),
                 result.getExecutionTimeMilliseconds(), result.getResultLines());
     }
