@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -107,6 +109,21 @@ public class ExecutionPeriod {
 
     public DateTime calculateNextExecution(DateTime lastExecutionTime) {
         return lastExecutionTime.plus(getPeriod());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ExecutionPeriod) {
+            ExecutionPeriod other = (ExecutionPeriod) obj;
+            return new EqualsBuilder().append(this.amount, other.amount)
+                    .append(this.unit, other.unit).isEquals();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(amount).append(unit).toHashCode();
     }
 
 }

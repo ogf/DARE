@@ -1,6 +1,7 @@
 package es.uvigo.ei.sing.dare.entities;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -87,6 +88,16 @@ public class ExecutionPeriodTest {
         DateTime nextExecution = period
                 .calculateNextExecution(lastExecutionTime);
         assertThat(nextExecution.getMinuteOfHour(), equalTo(20));
+    }
+
+    @Test
+    public void twoExecutionPeriodsAreEqualIfHaveTheSameUnitAndAmount() {
+        assertThat(ExecutionPeriod.create(11, Unit.HOURS),
+                not(equalTo(ExecutionPeriod.parse("10 hours"))));
+        assertThat(ExecutionPeriod.create(10, Unit.HOURS),
+                equalTo(ExecutionPeriod.parse("10 hours")));
+        assertThat(ExecutionPeriod.create(10, Unit.HOURS),
+                not(equalTo(ExecutionPeriod.create(60 * 60 * 10, Unit.MINUTES))));
     }
 
 }
