@@ -29,10 +29,18 @@ public class PeriodicalExecution {
 
     private PeriodicalExecution(DateTime creationTime, Robot robot,
             ExecutionPeriod executionPeriod, List<String> inputs) {
+        this(UUID.randomUUID().toString(), creationTime, robot,
+                executionPeriod, inputs);
+    }
+
+    private PeriodicalExecution(String code, DateTime creationTime,
+            Robot robot,
+            ExecutionPeriod executionPeriod, List<String> inputs) {
+        Validate.notNull(code);
         Validate.notNull(creationTime);
         Validate.notNull(robot);
         Validate.notNull(inputs);
-        this.code = UUID.randomUUID().toString();
+        this.code = code;
         this.creationTime = creationTime;
         this.robot = robot;
         this.inputs = Collections
@@ -66,6 +74,11 @@ public class PeriodicalExecution {
 
     public void receiveLastResult(ExecutionResult last) {
         this.lastExecution = last;
+    }
+
+    public PeriodicalExecution withHarcodedCode(String hardcodedCode) {
+        return new PeriodicalExecution(hardcodedCode, creationTime, robot,
+                executionPeriod, inputs);
     }
 
 }

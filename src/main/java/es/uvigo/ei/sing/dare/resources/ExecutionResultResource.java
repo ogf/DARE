@@ -19,10 +19,16 @@ import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.backend.IStore;
 import es.uvigo.ei.sing.dare.backend.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
+import es.uvigo.ei.sing.dare.entities.ExecutionResult.Type;
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 
 @Path("result")
 public class ExecutionResultResource {
+
+    public static URI buildURIFor(UriInfo uriInfo,
+            ExecutionResult executionResult) {
+        return buildURIFor(uriInfo, executionResult.getCode());
+    }
 
     public static URI buildURIFor(UriInfo uriInfo, String resultCode) {
         return UriBuilder.fromUri(uriInfo.getBaseUri())
@@ -60,10 +66,20 @@ public class ExecutionResultResource {
             throw new WebApplicationException(Status.NO_CONTENT);
         }
         ExecutionResult result = possibleResult.getValue();
-        URI createdFrom = RobotResource.buildURIFor(uriInfo,
-                result.getCreatedFromCode());
+        URI createdFrom = getCreatedFrom(result);
         return new ExecutionResultView(createdFrom, result.getCreationTime(),
                 result.getExecutionTimeMilliseconds(), result.getResultLines());
+    }
+
+    private URI getCreatedFrom(ExecutionResult result) {
+        if (result.getType() == Type.ROBOT) {
+            return RobotResource.buildURIFor(uriInfo,
+                    result.getCreatedFromCode());
+        } else {
+            return PeriodicalExecutionResource.buildURIFor(uriInfo,
+                    result.getCreatedFromCode());
+        }
+
     }
 
 }

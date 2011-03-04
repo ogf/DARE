@@ -10,12 +10,12 @@ import org.joda.time.DateTime;
 public class ExecutionResult {
 
     public static ExecutionResult create(String code, Robot robot,
-            String[] resultLines) {
+            String... resultLines) {
         return new ExecutionResult(code, Type.ROBOT, robot.getCode(), 0, resultLines);
     }
 
     public static ExecutionResult create(String code,
-            PeriodicalExecution parent, String[] resultLines) {
+            PeriodicalExecution parent, String... resultLines) {
         return new ExecutionResult(code, Type.PERIODICAL, parent.getCode(), 0,
                 resultLines);
     }

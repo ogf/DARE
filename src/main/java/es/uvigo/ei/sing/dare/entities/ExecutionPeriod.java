@@ -45,6 +45,10 @@ public class ExecutionPeriod {
                     + " is not a valid unit");
         }
 
+        public String asString() {
+            return name().toLowerCase();
+        }
+
         private final String[] possibleRepresentations;
 
         private Unit(String... possibleRepresentations) {
@@ -61,6 +65,7 @@ public class ExecutionPeriod {
         }
 
         public abstract Period byAmount(int amount);
+
     }
 
     private static Pattern periodSpecificationPattern = Pattern

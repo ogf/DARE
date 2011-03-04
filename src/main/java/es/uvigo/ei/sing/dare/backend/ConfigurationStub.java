@@ -19,7 +19,28 @@ import es.uvigo.ei.sing.dare.entities.Robot;
 
 public class ConfigurationStub extends Configuration {
 
-    public static final String EXISTENT_PERIODICAL_EXECUTION_CODE = "abc";
+    private static final Robot robotExample = Robot
+            .createFromMinilanguage("url");
+
+    private static final ExecutionPeriod oneDay = ExecutionPeriod.create(1,
+            Unit.DAYS);
+
+    public static final PeriodicalExecution EXISTENT_PERIODICAL_EXECUTION = new PeriodicalExecution(
+            robotExample, oneDay, Arrays.asList("http://www.google.com"))
+            .withHarcodedCode("test");
+
+    public static final PeriodicalExecution PERIODICAL_EXECUTION_WITH_RESULT = new PeriodicalExecution(
+            robotExample, oneDay, Arrays.asList("http://www.google.com"))
+            .withHarcodedCode("test-with-periodical");
+    static {
+        PERIODICAL_EXECUTION_WITH_RESULT.receiveLastResult(ExecutionResult
+                .create("test-result", PERIODICAL_EXECUTION_WITH_RESULT,
+                        "result-line-1",
+                        "result-line-2"));
+    }
+
+    private static final PeriodicalExecution[] existent = {
+            EXISTENT_PERIODICAL_EXECUTION, PERIODICAL_EXECUTION_WITH_RESULT };
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -30,6 +51,21 @@ public class ConfigurationStub extends Configuration {
         private Map<String, Robot> robotsByCode = new HashMap<String, Robot>();
 
         private Map<String, PeriodicalExecution> periodicalsByCode = new HashMap<String, PeriodicalExecution>();
+
+        private Map<String, ExecutionResult> previousResultsByCode = new HashMap<String, ExecutionResult>();
+
+        {
+            for (PeriodicalExecution each : existent) {
+                periodicalsByCode.put(each.getCode(), each);
+                robotsByCode.put(each.getRobot().getCode(), each.getRobot());
+                ExecutionResult lastExecutionResult = each
+                        .getLastExecutionResult();
+                if (lastExecutionResult != null) {
+                    previousResultsByCode.put(lastExecutionResult.getCode(),
+                            lastExecutionResult);
+                }
+            }
+        }
 
         @Override
         public void save(Robot robot) {
@@ -43,6 +79,10 @@ public class ConfigurationStub extends Configuration {
 
         @Override
         public Maybe<ExecutionResult> retrieveExecution(String executionCode) {
+            if (previousResultsByCode.containsKey(executionCode)) {
+                return Maybe.value(previousResultsByCode.get(executionCode));
+            }
+
             Future<ExecutionResult> future = executions.get(executionCode);
             if (future == null) {
                 return null;
@@ -61,12 +101,6 @@ public class ConfigurationStub extends Configuration {
         public PeriodicalExecution findPeriodicalExecution(String code) {
             if (periodicalsByCode.containsKey(code)) {
                 return periodicalsByCode.get(code);
-            }
-            if (code.equals(EXISTENT_PERIODICAL_EXECUTION_CODE)) {
-                return new PeriodicalExecution(
-                        Robot.createFromMinilanguage("url"),
-                        ExecutionPeriod.create(1, Unit.DAYS),
-                        Arrays.asList("http://www.google.com"));
             }
             return null;
         }
