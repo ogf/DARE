@@ -128,7 +128,7 @@ public class RobotResourceTest {
 
         assertNotNull(result);
         assertThat(result.getExecutionTime(), greaterThan(0l));
-        assertThat(result.getLines().isEmpty(), is(false));
+        assertThat(result.getResultLines().isEmpty(), is(false));
     }
 
     @Test

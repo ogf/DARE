@@ -97,7 +97,7 @@ public class PeriodicalExecutionResourceTest {
         URIPoller poller = new URIPoller(client);
         ExecutionResultView executionResult = poller.retrieve(
                 ExecutionResultView.class, last);
-        assertThat(executionResult.getLines(), equalTo(existent
+        assertThat(executionResult.getResultLines(), equalTo(existent
                 .getLastExecutionResult().getResultLines()));
     }
 

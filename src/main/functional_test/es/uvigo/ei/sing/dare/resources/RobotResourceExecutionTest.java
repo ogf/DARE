@@ -143,8 +143,8 @@ public class RobotResourceExecutionTest {
                     }
                 });
         assertNotNull(result);
-        assertNotNull(result.getLines());
-        assertFalse(result.getLines().isEmpty());
+        assertNotNull(result.getResultLines());
+        assertFalse(result.getResultLines().isEmpty());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class RobotResourceExecutionTest {
                 equalTo(robotInMinilanguage));
     }
 
-    private static final String linesPropertyName = "lines";
+    private static final String linesPropertyName = "resultLines";
 
     private static final String executionTimePropertyName = "executionTime";
 

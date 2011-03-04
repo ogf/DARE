@@ -21,7 +21,7 @@ public class ExecutionResultView {
     private final URI createdFrom;
 
     @XmlList
-    private final List<String> lines;
+    private final List<String> resultLines;
 
     private final long executionTime;
 
@@ -50,10 +50,9 @@ public class ExecutionResultView {
     }
 
     public ExecutionResultView(URI createdFrom, DateTime creationTime,
-            long executionTime,
-            Collection<? extends String> lines) {
+            long executionTime, Collection<? extends String> resutLines) {
         this.createdFrom = createdFrom;
-        this.lines = new ArrayList<String>(lines);
+        this.resultLines = new ArrayList<String>(resutLines);
         this.executionTime = executionTime;
         this.date = creationTime.getMillis();
     }
@@ -62,8 +61,8 @@ public class ExecutionResultView {
         return createdFrom;
     }
 
-    public List<String> getLines() {
-        return Collections.unmodifiableList(lines);
+    public List<String> getResultLines() {
+        return Collections.unmodifiableList(resultLines);
     }
 
     public long getExecutionTime() {
