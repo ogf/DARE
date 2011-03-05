@@ -6,11 +6,15 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import org.codehaus.jettison.json.JSONObject;
 
 import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
@@ -55,6 +59,7 @@ public class PeriodicalExecutionResource {
 
     @GET
     @Path("/result/{periodical-execution-code}")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public PeriodicalExecutionView retrievePeriodicalExecution(
             @PathParam("periodical-execution-code") String periodicalExecutionCode) {
         PeriodicalExecution periodicalExecution = getConfiguration()
@@ -82,6 +87,14 @@ public class PeriodicalExecutionResource {
         }
         return ExecutionResultResource.buildURIFor(uriInfo,
                 lastExecutionResult);
+    }
+
+    @GET
+    @Path("/result/{periodical-execution-code}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject retrievePeriodicalExecutionAsJSON(
+            @PathParam("periodical-execution-code") String periodicalExecutionCode) {
+        return retrievePeriodicalExecution(periodicalExecutionCode).asJSON();
     }
 
 }

@@ -12,7 +12,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
 
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
-import es.uvigo.ei.sing.dare.resources.views.PeriodicalExecutionView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @Provider
@@ -27,9 +26,6 @@ public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
             add(RobotJSONView.class,
                     JSONConfiguration.mapped().nonStrings("creationDateMillis")
                             .build());
-            add(PeriodicalExecutionView.class, JSONConfiguration.mapped()
-                    .nonStrings("creationDateMillis")
-                    .nonStrings("periodAmount").arrays("inputs").build());
         }
 
         private void add(Class<?> klass, JSONConfiguration configuration) {

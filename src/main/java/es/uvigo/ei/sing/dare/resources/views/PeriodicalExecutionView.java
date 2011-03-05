@@ -6,8 +6,12 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
 
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
@@ -35,7 +39,8 @@ public class PeriodicalExecutionView {
 
     private final int periodAmount;
 
-    @XmlElement(name = "inputs")
+    @XmlElementWrapper
+    @XmlElement(name = "input")
     private final List<String> inputs;
 
     private final URI lastExecutionResult;
@@ -55,6 +60,24 @@ public class PeriodicalExecutionView {
         this.periodAmount = amount;
         this.inputs = inputs;
         this.lastExecutionResult = lastExecutionResult;
+    }
+
+    public JSONObject asJSON() {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("code", code);
+            result.put("creationDateMillis", creationDateMillis);
+            result.put("robot", robot.toString());
+            result.put("periodUnit", periodUnit);
+            result.put("periodAmount", periodAmount);
+            result.put("inputs", new JSONArray(inputs));
+            result.put("lastExecutionResult",
+                    lastExecutionResult == null ? JSONObject.NULL
+                            : lastExecutionResult.toString());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     public String getCode() {

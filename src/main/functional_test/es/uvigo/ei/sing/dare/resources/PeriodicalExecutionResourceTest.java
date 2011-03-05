@@ -58,8 +58,8 @@ public class PeriodicalExecutionResourceTest {
 
     @Test
     public void ifPeriodicalResultExistsMustReturn200Code() {
-        ClientResponse response = periodicalExecutionResult.path(
-                ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION.getCode())
+        ClientResponse response = periodicalExecutionResult
+                .path(ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION.getCode())
                 .get(ClientResponse.class);
         assertThat(response.getStatus(), equalTo(Status.OK.getStatusCode()));
     }
@@ -126,6 +126,8 @@ public class PeriodicalExecutionResourceTest {
         assertThat(result.get("creationDateMillis"), is(Number.class));
         assertThat(result.get("periodAmount"), is(Number.class));
         assertThat(result.get("inputs"), is(JSONArray.class));
+        JSONArray inputs = result.getJSONArray("inputs");
+        assertThat(inputs.get(0), is(String.class));
     }
 
     private PeriodicalExecutionView retrievePeriodicalFromServer(
@@ -137,6 +139,7 @@ public class PeriodicalExecutionResourceTest {
     private PeriodicalExecutionView retrievePeriodicalFromServer(
             final String code) {
         return periodicalExecutionResult.path(code)
+                .accept(MediaType.APPLICATION_XML)
                 .get(PeriodicalExecutionView.class);
     }
 
