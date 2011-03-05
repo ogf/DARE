@@ -111,7 +111,13 @@ public class RobotResourceExecutionTest {
             throw new UniformInterfaceException(response);
         }
         URI location = response.getLocation();
-        return poller.retrieve(type, location);
+        if (acceptedType == MediaType.APPLICATION_JSON_TYPE
+                && type.equals(ExecutionResultView.class)) {
+            return type.cast(ExecutionResultView.fromJSON(poller.retrieve(
+                    JSONObject.class, location)));
+        } else {
+            return poller.retrieve(type, location);
+        }
     }
 
     @Test

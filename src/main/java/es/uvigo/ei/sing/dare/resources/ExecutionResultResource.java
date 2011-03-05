@@ -15,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.codehaus.jettison.json.JSONObject;
+
 import es.uvigo.ei.sing.dare.backend.Configuration;
 import es.uvigo.ei.sing.dare.backend.IStore;
 import es.uvigo.ei.sing.dare.backend.Maybe;
@@ -51,8 +53,7 @@ public class ExecutionResultResource {
 
     @GET
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-            MediaType.TEXT_XML })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @Path("{executionResultCode}")
     public ExecutionResultView retrieve(
             @PathParam("executionResultCode") String executionResultCode) {
@@ -79,7 +80,14 @@ public class ExecutionResultResource {
             return PeriodicalExecutionResource.buildURIFor(uriInfo,
                     result.getCreatedFromCode());
         }
-
     }
 
+    @GET
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{executionResultCode}")
+    public JSONObject retrieveAsJSON(
+            @PathParam("executionResultCode") String executionResultCode) {
+        return retrieve(executionResultCode).asJSON();
+    }
 }

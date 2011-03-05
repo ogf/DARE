@@ -123,8 +123,8 @@ public class RobotResourceTest {
         ClientResponse response = robotResource.path(robotCode).path("execute")
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .post(ClientResponse.class, map);
-        ExecutionResultView result = poller.retrieve(ExecutionResultView.class,
-                response.getLocation());
+        ExecutionResultView result = ExecutionResultView.fromJSON(poller
+                .retrieve(JSONObject.class, response.getLocation()));
 
         assertNotNull(result);
         assertThat(result.getExecutionTime(), greaterThan(0l));
