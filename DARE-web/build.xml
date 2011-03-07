@@ -12,31 +12,19 @@
             description
     </description>
 
-	<property name="dist" location="target" />
 	<property file="build.properties" />
 
 	<property name="webapp" location="src/main/webapp" />
 
-	<property name="classes_dir" location="${dist}/classes" />
-
-	<property environment="env"/>
+    <property environment="env"/>
 
 	<property name="glassfish_home" value="${env.GLASSFISH_HOME}" />
 
-	<property name="unit_test_classes_dir" location="${dist}/unit-test-classes" />
-
-	<property name="functional_test_classes_dir" location="${dist}/functional-test-classes" />
-
 	<property name="WEB-INF" location="${webapp}/WEB-INF/" />
-
-	<property name="src.unit_tests" location="src/main/test" />
-
-	<property name="src.functional_tests" location="src/main/functional_test" />
-
-	<property name="reports.tests" location="${dist}/reports" />
 
 	<property name="asadmin" location="${glassfish_home}/bin/asadmin" />
 
+    <import file="../build-common.xml"/>
 
 	<fileset dir="${string_editor_project_location}" id="string_editor_dependencies">
 		<include name="lib/*.jar" />
@@ -85,68 +73,7 @@
 		<ant antfile="build-jar.xml" dir="${string_editor_project_location}" target="build-jar" />
 	</target>
 
-	<target name="compile" depends="build_string_editor">
-		<mkdir dir="${classes_dir}" />
-		<javac srcdir="src/main/java" destdir="${classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
-			<classpath refid="compile-classpath">
-			</classpath>
-		</javac>
-		<copy todir="${classes_dir}">
-			<fileset dir="src/main/java" />
-		</copy>
-		<copy todir="${classes_dir}">
-			<fileset dir="src/main/resources" />
-		</copy>
-	</target>
-
-	<target name="compile-unit-test" depends="compile">
-		<mkdir dir="${unit_test_classes_dir}" />
-		<javac srcdir="${src.unit_tests}" destdir="${unit_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
-			<classpath>
-			    <path refid="compile-classpath" />
-			    <pathelement location="${classes_dir}" />
-			</classpath>
-		</javac>
-	</target>
-
-	<target name="compile-functional-test" depends="compile, compile-unit-test">
-		<mkdir dir="${functional_test_classes_dir}" />
-		<javac srcdir="${src.functional_tests}" destdir="${functional_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
-			<classpath>
-			    <pathelement location="${unit_test_classes_dir}" />
-			    <path refid="compile-classpath" />
-			    <pathelement location="${classes_dir}" />
-			</classpath>
-		</javac>
-	</target>
-
-	<target name="unit-test" depends="compile-unit-test">
-		<mkdir dir="${reports.tests}" />
-		<junit printsummary="yes" haltonfailure="yes">
-			<classpath refid="test-classpath" />
-			<formatter type="plain" />
-			<batchtest todir="${reports.tests}">
-				<fileset dir="${src.unit_tests}">
-					<include name="**/*Test*.java" />
-					<exclude name="**/AllTests.java" />
-				</fileset>
-			</batchtest>
-		</junit>
-	</target>
-
-	<target name="functional-test" depends="compile-functional-test, deploy">
-		<mkdir dir="${reports.tests}" />
-		<junit printsummary="yes" haltonfailure="yes">
-			<classpath refid="test-classpath" />
-			<formatter type="plain" />
-			<batchtest todir="${reports.tests}">
-				<fileset dir="${src.functional_tests}">
-					<include name="**/*Test*.java" />
-					<exclude name="**/AllTests.java" />
-				</fileset>
-			</batchtest>
-		</junit>
-	</target>
+    <target name="compile" depends="build_string_editor, common.compile" />
 
 	<target name="copy-libs">
 		<copy todir="${dist}/lib" flatten="true">
@@ -226,12 +153,6 @@
 			<webinf dir="${WEB-INF}" excludes="web.xml" />
 			<fileset dir="src/main/webapp" excludes="WEB-INF" />
 		</war>
-	</target>
-
-
-
-	<target name="clean">
-		<delete dir="${dist}" />
 	</target>
 
 </project>
