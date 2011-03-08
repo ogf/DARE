@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="minilanguage">
+
+    <import file="../build-common.xml" />
+
+    <!-- This is the base version. Ivy will append a build number. -->
+    <property name="project-version" value="0.1.0"/>
+
+    <fileset dir="lib" id="libs">
+        <include name="**/*.jar" />
+    </fileset>
+
+    <path id="compile-classpath">
+        <fileset refid="libs" />
+    </path>
+
+    <path id="runtime-classpath" refid="compile-classpath" />
+
+    <property name="spec-file-location" location="src/main/resources/es/uvigo/ei/sing/stringeditor/" />
+
+    <target name="unit-test" depends="common.unit-test">
+        <java jar="lib/jruby-complete-1.5.6.jar" failonerror="true" fork="true" dir="${spec-file-location}">
+            <classpath refid="runtime-classpath"></classpath>
+            <arg value="-S" />
+            <arg value="spec"/>
+            <arg value="transformer_spec.rb"/>
+        </java>
+    </target>
+
+    <target name="deploy" depends="jar">
+    </target>
+</project>
