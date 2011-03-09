@@ -21,6 +21,8 @@
     <chain returnFirst="true" name="public">
       <ibiblio name="public-default-maven" m2compatible="true"
                root="http://uk.maven.org/maven2/" />
+      <ibiblio name="java.net" m2compatible="true"
+               root="http://download.java.net/maven/2"/>
       <ibiblio root="http://repository.codehaus.org/"
                name="codehaus repository" m2compatible="true"/>
       <ibiblio root="http://dist.wso2.org/maven2/" name="wso2" m2compatible="true" />

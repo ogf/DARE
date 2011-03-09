@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- ======================================================================
-     25/02/2009 16:08:41
 
-     DARE
-     description
-
-     oscar
-     ====================================================================== -->
-<project name="DARE" default="war">
-	<description>
-            description
-    </description>
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="DARE" default="war">
 
 	<property file="build.properties" />
 
@@ -26,67 +16,37 @@
 
     <import file="../build-common.xml"/>
 
-	<fileset dir="${string_editor_project_location}" id="string_editor_dependencies">
-		<include name="lib/*.jar" />
-		<include name="plugins_bin/stringeditor/**/*.jar" />
-	</fileset>
-
-	<fileset dir="${string_editor_project_location}/scriptengines" id="ruby_libs">
-		<include name="**/*.jar" />
-	</fileset>
-
-	<fileset dir="${string_editor_project_location}" id="string_editor_jar">
-		<include name="stringeditor.jar" />
-	</fileset>
-
 	<fileset dir="lib" id="libs">
 		<include name="**/*.jar" />
 	</fileset>
 
 	<fileset dir="lib/runtime" id="runtime-libs" includes="**/*.jar" />
 
+    <fileset dir="lib/provided" id="provided-libs" includes="**/*.jar" />
+
+    <fileset dir="lib/test" id="test-libs" includes="**/*.jar" />
+
 	<path id="compile-classpath">
-		<fileset refid="ruby_libs" />
-		<fileset refid="string_editor_jar" />
-		<fileset refid="libs" />
+		<fileset refid="runtime-libs" />
+		<fileset refid="provided-libs" />
 	</path>
 
 	<path id="runtime-classpath">
-		<fileset refid="string_editor_dependencies" />
-		<fileset refid="ruby_libs" />
-		<fileset refid="string_editor_jar" />
-		<fileset refid="runtime-libs" />
+	    <fileset refid="runtime-libs" />
 		<pathelement location="${classes_dir}" />
 	</path>
 
 	<path id="test-classpath">
-		<fileset refid="string_editor_dependencies" />
-		<fileset refid="ruby_libs" />
-		<fileset refid="string_editor_jar" />
-		<fileset refid="libs" />
+	    <path refid="compile-classpath" />
+	    <fileset refid="test-libs" />
 		<pathelement location="${classes_dir}" />
 		<pathelement location="${unit_test_classes_dir}" />
 		<pathelement location="${functional_test_classes_dir}" />
 	</path>
 
-	<target name="build_string_editor">
-		<ant antfile="build-jar.xml" dir="${string_editor_project_location}" target="build-jar" />
-	</target>
-
-    <target name="compile" depends="build_string_editor, common.compile" />
-
-	<target name="copy-libs">
-		<copy todir="${dist}/lib" flatten="true">
-			<fileset refid="string_editor_dependencies" />
-			<fileset refid="ruby_libs" />
-			<fileset refid="string_editor_jar" />
-			<fileset refid="runtime-libs" />
-		</copy>
-	</target>
-
 	<property name="expanded_dir" location="${dist}/${ant.project.name}_war" />
 
-	<target name="expand" depends="compile, copy-libs,unit-test">
+	<target name="expand" depends="compile, unit-test">
 		<mkdir dir="${expanded_dir}/WEB-INF/lib" />
 		<mkdir dir="${expanded_dir}/WEB-INF/classes" />
 		<copy todir="${expanded_dir}/WEB-INF/classes">
@@ -126,7 +86,13 @@
 		</exec>
 	</target>
 
-	<target name="deploy" depends="expand, start">
+    <target name="copy-libs">
+       <copy todir="${dist}/lib" flatten="true">
+            <fileset refid="runtime-libs" />
+       </copy>
+   </target>
+
+	<target name="deploy" depends="expand, copy-libs, start">
 		<exec executable="${asadmin}">
 			<arg value="deploy" />
 			<arg value="--force=true" />
@@ -146,7 +112,7 @@
 		<touch file="${expanded_dir}/.reload" />
 	</target>
 
-	<target name="war" depends="compile, copy-libs,unit-test" description="web application archive">
+	<target name="war" depends="compile, unit-test, copy-libs" description="web application archive">
 		<war destfile="${dist}/${ant.project.name}.war" webxml="${WEB-INF}/web.xml">
 			<classes dir="${classes_dir}" />
 			<lib dir="${dist}/lib" />

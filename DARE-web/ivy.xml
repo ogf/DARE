@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ivy-module version="2.0">
+    <info organisation="es.uvigo.ei.sing" module="DARE-web"/>
+    <configurations defaultconfmapping="runtime->default;">
+        <conf name="runtime" />
+        <conf name="provided" />
+        <conf name="test" visibility="private" />
+        <conf name="sources" visibility="private" />
+    </configurations>
+    <dependencies>
+        <dependency org="es.uvigo.ei.sing" name="minilanguage" rev="latest.integration" conf="runtime"/>
+        <dependency org="joda-time" name="joda-time" rev="1.6.2" conf="runtime; sources" />
+        <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="runtime; sources" />
+
+        <dependency org="org.apache.tomcat" name="servlet-api" rev="6.0.29" conf="provided->default; sources"/>
+        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1" conf="provided->default; sources"/>
+
+        <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="test->default; sources"/>
+        <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="test->default; sources"/>
+        <dependency org="org.hamcrest" name="hamcrest-all" rev="1.1" conf="test->default; sources"/>
+        <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources"/>
+    </dependencies>
+</ivy-module>
