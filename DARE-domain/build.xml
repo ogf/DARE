@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="DARE-domain" default="publish">
+
+  <import file="../build-common.xml" />
+
+  <!-- This is the base version. Ivy will append a build number. -->
+  <property name="project-version" value="0.1.0"/>
+
+  <target name="jar" depends="common.jar">
+    <jar destfile="${dist}/artifacts/${ivy.module}-test-${ivy.new.revision}.jar">
+      <fileset dir="${classes_dir}" includes="**" />
+      <fileset dir="${unit_test_classes_dir}" includes="**" />
+    </jar>
+  </target>
+
+</project>

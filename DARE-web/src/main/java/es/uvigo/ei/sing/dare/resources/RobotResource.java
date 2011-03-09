@@ -29,6 +29,7 @@ import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
+import es.uvigo.ei.sing.dare.util.XMLUtil;
 
 @Path("robot")
 public class RobotResource {
@@ -109,7 +110,8 @@ public class RobotResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RobotJSONView viewAsJSON(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
-        return robot.asJSONView();
+        return new RobotJSONView(robot.getCode(), robot.getCreationTime(),
+                robot.getTransformerInMinilanguage());
     }
 
     @GET
@@ -117,7 +119,8 @@ public class RobotResource {
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public RobotXMLView viewAsXML(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
-        return robot.asXMLView();
+        return new RobotXMLView(robot.getCode(), robot.getCreationTime(),
+                XMLUtil.toDocument(robot.getTransformerInXML()));
     }
 
     private Robot find(String robotCode) {
