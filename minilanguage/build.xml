@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="minilanguage">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="minilanguage" default="publish">
 
     <import file="../build-common.xml" />
 
@@ -18,6 +18,4 @@
         </java>
     </target>
 
-    <target name="deploy" depends="jar">
-    </target>
 </project>

@@ -178,6 +178,8 @@
       </jar>
     </target>
 
+    <target name="deploy" depends="jar" />
+
     <target name="publish" depends="jar">
       <ivy:publish resolver="local" pubrevision="${ivy.new.revision}">
         <artifacts pattern="${dist}/artifacts/[artifact]-[revision].[ext]" />
