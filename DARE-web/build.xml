@@ -20,33 +20,15 @@
 		<include name="**/*.jar" />
 	</fileset>
 
-	<fileset dir="lib/runtime" id="runtime-libs" includes="**/*.jar" />
-
-    <fileset dir="lib/provided" id="provided-libs" includes="**/*.jar" />
-
-    <fileset dir="lib/test" id="test-libs" includes="**/*.jar" />
-
-	<path id="compile-classpath">
-		<fileset refid="runtime-libs" />
-		<fileset refid="provided-libs" />
-	</path>
-
-	<path id="runtime-classpath">
-	    <fileset refid="runtime-libs" />
-		<pathelement location="${classes_dir}" />
-	</path>
-
-	<path id="test-classpath">
-	    <path refid="compile-classpath" />
-	    <fileset refid="test-libs" />
-		<pathelement location="${classes_dir}" />
-		<pathelement location="${unit_test_classes_dir}" />
-		<pathelement location="${functional_test_classes_dir}" />
-	</path>
+    <target name="copy-libs">
+        <copy todir="${dist}/lib" flatten="true">
+            <fileset refid="runtime-libs" />
+         </copy>
+    </target>
 
 	<property name="expanded_dir" location="${dist}/${ant.project.name}_war" />
 
-	<target name="expand" depends="compile, unit-test">
+	<target name="expand" depends="compile, unit-test, copy-libs">
 		<mkdir dir="${expanded_dir}/WEB-INF/lib" />
 		<mkdir dir="${expanded_dir}/WEB-INF/classes" />
 		<copy todir="${expanded_dir}/WEB-INF/classes">
@@ -85,12 +67,6 @@
 			<arg value="stop-domain" />
 		</exec>
 	</target>
-
-    <target name="copy-libs">
-       <copy todir="${dist}/lib" flatten="true">
-            <fileset refid="runtime-libs" />
-       </copy>
-   </target>
 
 	<target name="deploy" depends="expand, copy-libs, start">
 		<exec executable="${asadmin}">

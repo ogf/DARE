@@ -56,6 +56,35 @@
 
     <property name="reports.tests" location="${dist}/reports" />
 
+    <fileset dir="lib" id="libs">
+      <include name="**/*.jar" />
+    </fileset>
+
+    <fileset dir="lib" id="runtime-libs" includes="runtime/**/*.jar" />
+
+    <fileset dir="lib" id="compile-libs" includes="compile/**/*.jar" />
+
+    <fileset dir="lib" id="provided-libs" includes="provided/**/*.jar" />
+
+    <fileset dir="lib" id="test-libs" includes="test/**/*.jar" />
+
+    <path id="compile-classpath">
+      <fileset refid="compile-libs" />
+      <fileset refid="provided-libs" />
+    </path>
+
+    <path id="runtime-classpath">
+      <fileset refid="runtime-libs" />
+      <pathelement location="${classes_dir}" />
+    </path>
+
+    <path id="test-classpath">
+      <fileset refid="test-libs" />
+      <pathelement location="${classes_dir}" />
+      <pathelement location="${unit_test_classes_dir}" />
+      <pathelement location="${functional_test_classes_dir}" />
+    </path>
+
     <target name="dependencies" depends="init-ivy">
         <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" sync="true"/>
     </target>
@@ -85,6 +114,7 @@
         <javac srcdir="${src.unit_tests}" destdir="${unit_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
             <classpath>
                 <path refid="compile-classpath" />
+                <fileset refid="test-libs" />
                 <pathelement location="${classes_dir}" />
             </classpath>
         </javac>
@@ -108,7 +138,6 @@
         <condition property="functional-tests-exist">
             <available file="${src.functional_tests}" />
         </condition>
-        <echo message="exist functional tests? ${functional-tests-exist}" />
     </target>
 
     <target name="compile-functional-test"
@@ -150,8 +179,6 @@
     </target>
 
     <target name="publish" depends="jar">
-      <echo message="Previous revision: ${ivy.revision}" />
-      <echo message="New revision: ${ivy.new.revision}" />
       <ivy:publish resolver="local" pubrevision="${ivy.new.revision}">
         <artifacts pattern="${dist}/artifacts/[artifact]-[revision].[ext]" />
       </ivy:publish>
