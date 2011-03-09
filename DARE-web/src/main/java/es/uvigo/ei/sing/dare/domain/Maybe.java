@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.backend;
+package es.uvigo.ei.sing.dare.domain;
 
 public abstract class Maybe<T> {
 

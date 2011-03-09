@@ -7,7 +7,7 @@
 
      <context-param>
         <param-name>configuration-class-name</param-name>
-        <param-value>es.uvigo.ei.sing.dare.backend.ConfigurationStub</param-value>
+        <param-value>es.uvigo.ei.sing.dare.configuration.ConfigurationStub</param-value>
     </context-param>
 
     <servlet>

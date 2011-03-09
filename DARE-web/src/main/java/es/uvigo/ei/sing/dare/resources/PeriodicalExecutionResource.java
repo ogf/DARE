@@ -16,7 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.jettison.json.JSONObject;
 
-import es.uvigo.ei.sing.dare.backend.Configuration;
+import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;

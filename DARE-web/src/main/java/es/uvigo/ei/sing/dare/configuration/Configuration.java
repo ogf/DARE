@@ -1,6 +1,9 @@
-package es.uvigo.ei.sing.dare.backend;
+package es.uvigo.ei.sing.dare.configuration;
 
 import javax.servlet.ServletContext;
+
+import es.uvigo.ei.sing.dare.domain.IRobotExecutor;
+import es.uvigo.ei.sing.dare.domain.IStore;
 
 public abstract class Configuration {
 

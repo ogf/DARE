@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.backend;
+package es.uvigo.ei.sing.dare.configuration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;

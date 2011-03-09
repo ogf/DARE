@@ -24,7 +24,7 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 
-import es.uvigo.ei.sing.dare.backend.ConfigurationStub;
+import es.uvigo.ei.sing.dare.configuration.ConfigurationStub;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.PeriodicalExecutionView;

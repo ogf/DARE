@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.backend;
+package es.uvigo.ei.sing.dare.domain;
 
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 

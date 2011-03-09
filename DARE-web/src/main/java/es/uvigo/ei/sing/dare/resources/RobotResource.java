@@ -21,9 +21,9 @@ import javax.ws.rs.core.UriInfo;
 
 import org.w3c.dom.Document;
 
-import es.uvigo.ei.sing.dare.backend.Configuration;
-import es.uvigo.ei.sing.dare.backend.IRobotExecutor;
-import es.uvigo.ei.sing.dare.backend.IStore;
+import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.domain.IRobotExecutor;
+import es.uvigo.ei.sing.dare.domain.IStore;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
