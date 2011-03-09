@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="DARE-util" default="publish">
+
+    <import file="../build-common.xml" />
+
+    <!-- This is the base version. Ivy will append a build number. -->
+    <property name="project-version" value="0.1.0"/>
+
+</project>

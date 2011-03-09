@@ -86,7 +86,8 @@
     </path>
 
     <target name="dependencies" depends="init-ivy">
-        <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" sync="true"/>
+      <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" sync="true"/>
+      <mkdir dir="lib" />
     </target>
 
     <target name="compile" depends="dependencies">
@@ -96,10 +97,8 @@
             </classpath>
         </javac>
         <copy todir="${classes_dir}">
-            <fileset dir="src/main/java" />
-        </copy>
-        <copy todir="${classes_dir}">
-            <fileset dir="src/main/resources" />
+            <fileset dir="src/" includes="main/resources/**" />
+            <globmapper from="main/resources/*" to="*"/>
         </copy>
     </target>
 
