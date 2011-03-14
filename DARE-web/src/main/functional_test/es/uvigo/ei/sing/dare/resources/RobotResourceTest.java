@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
+import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -129,6 +130,19 @@ public class RobotResourceTest {
         assertNotNull(result);
         assertThat(result.getExecutionTime(), greaterThan(0l));
         assertThat(result.getResultLines().isEmpty(), is(false));
+    }
+
+    @Test
+    public void executingANotCreatedRobotReturnsNotFound() {
+        String robotCode = UUID.randomUUID().toString();
+        MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+        map.add("input", "http://www.google.com");
+        map.add("input", "http://www.twitter.com");
+        ClientResponse response = robotResource.path(robotCode).path("execute")
+                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                .post(ClientResponse.class, map);
+        assertThat(response.getStatus(),
+                equalTo(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test

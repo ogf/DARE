@@ -10,8 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import es.uvigo.ei.sing.dare.domain.IRobotExecutor;
-import es.uvigo.ei.sing.dare.domain.IStore;
+import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.domain.TimeTracker;
 import es.uvigo.ei.sing.dare.domain.TimeTracker.IExecutionResultBuilder;
@@ -48,15 +47,16 @@ public class ConfigurationStub extends Configuration {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
-    private Map<String, Future<ExecutionResult>> executions = new HashMap<String, Future<ExecutionResult>>();
 
-    private final IStore store = new IStore() {
+    private final IBackend store = new IBackend() {
 
         private Map<String, Robot> robotsByCode = new HashMap<String, Robot>();
 
         private Map<String, PeriodicalExecution> periodicalsByCode = new HashMap<String, PeriodicalExecution>();
 
         private Map<String, ExecutionResult> previousResultsByCode = new HashMap<String, ExecutionResult>();
+
+        private Map<String, Future<ExecutionResult>> executions = new HashMap<String, Future<ExecutionResult>>();
 
         {
             for (PeriodicalExecution each : existent) {
@@ -79,6 +79,51 @@ public class ConfigurationStub extends Configuration {
         @Override
         public Robot find(String code) {
             return robotsByCode.get(code);
+        }
+
+        @Override
+        public String submitExecution(final Robot robot,
+                final List<String> inputs) {
+            save(robot);
+            return enqueRobotExection(robot, inputs);
+        }
+
+        private String enqueRobotExection(final Robot robot,
+                final List<String> inputs) {
+            String resultCode = UUID.randomUUID().toString();
+            Future<ExecutionResult> future = executor.submit(resultCreation(
+                    resultCode, robot, inputs));
+            executions.put(resultCode, future);
+            return resultCode;
+        }
+
+        @Override
+        public String submitExecutionForExistentRobot(String existentRobotCode,
+                List<String> inputs) {
+            Robot robot = find(existentRobotCode);
+            if (robot == null) {
+                return null;
+            }
+            return enqueRobotExection(robot, inputs);
+        }
+
+        private Callable<ExecutionResult> resultCreation(final String code,
+                final Robot robot, final List<String> inputs) {
+            return new Callable<ExecutionResult>() {
+
+                @Override
+                public ExecutionResult call() throws Exception {
+                    IExecutionResultBuilder resultBuilder = new IExecutionResultBuilder() {
+
+                        @Override
+                        public ExecutionResult build() {
+                            final String[] result = robot.execute(inputs);
+                            return ExecutionResult.create(code, robot, result);
+                        }
+                    };
+                    return TimeTracker.trackTime(resultBuilder);
+                }
+            };
         }
 
         @Override
@@ -117,45 +162,8 @@ public class ConfigurationStub extends Configuration {
 
     };
 
-    private IRobotExecutor robotExecutor = new IRobotExecutor() {
-
-        @Override
-        public String submitExecution(final Robot robot,
-                final List<String> inputs) {
-            String code = UUID.randomUUID().toString();
-            Future<ExecutionResult> future = executor.submit(resultCreation(
-                    code, robot, inputs));
-            executions.put(code, future);
-            return code;
-        }
-
-        private Callable<ExecutionResult> resultCreation(final String code,
-                final Robot robot,
-                final List<String> inputs) {
-            return new Callable<ExecutionResult>() {
-
-                @Override
-                public ExecutionResult call() throws Exception {
-                    IExecutionResultBuilder resultBuilder = new IExecutionResultBuilder() {
-
-                        @Override
-                        public ExecutionResult build() {
-                            final String[] result = robot.execute(inputs);
-                            return ExecutionResult.create(code, robot, result);
-                        }
-                    };
-                    return TimeTracker.trackTime(resultBuilder);
-                }
-            };
-        }
-    };
-
-    public IStore getStore() {
+    public IBackend getBackend() {
         return store;
     }
 
-    @Override
-    public IRobotExecutor getRobotExecutor() {
-        return robotExecutor;
-    }
 }

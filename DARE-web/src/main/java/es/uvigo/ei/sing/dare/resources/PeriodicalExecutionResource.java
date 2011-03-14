@@ -63,7 +63,7 @@ public class PeriodicalExecutionResource {
     public PeriodicalExecutionView retrievePeriodicalExecution(
             @PathParam("periodical-execution-code") String periodicalExecutionCode) {
         PeriodicalExecution periodicalExecution = getConfiguration()
-                .getStore().findPeriodicalExecution(
+                .getBackend().findPeriodicalExecution(
                         periodicalExecutionCode);
         if (periodicalExecution == null) {
             throw new WebApplicationException(Status.NOT_FOUND);

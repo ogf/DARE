@@ -22,8 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.w3c.dom.Document;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
-import es.uvigo.ei.sing.dare.domain.IRobotExecutor;
-import es.uvigo.ei.sing.dare.domain.IStore;
+import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;
@@ -54,12 +53,8 @@ public class RobotResource {
         return Configuration.from(context);
     }
 
-    private IStore getStore() {
-        return getConfiguration().getStore();
-    }
-
-    private IRobotExecutor getRobotExecutor() {
-        return getConfiguration().getRobotExecutor();
+    private IBackend getBackend() {
+        return getConfiguration().getBackend();
     }
 
     @POST
@@ -96,7 +91,7 @@ public class RobotResource {
     }
 
     private Response create(Robot robot) {
-        getStore().save(robot);
+        getBackend().save(robot);
         URI robotURI = buildURIFor(robot);
         return Response.created(robotURI).build();
     }
@@ -124,7 +119,7 @@ public class RobotResource {
     }
 
     private Robot find(String robotCode) {
-        Robot robot = getStore().find(robotCode);
+        Robot robot = getBackend().find(robotCode);
         if (robot == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
@@ -137,9 +132,11 @@ public class RobotResource {
     public Response executeOnAlreadyExistentRobot(
             @PathParam("code") String robotCode,
             @FormParam("input") final List<String> inputs) {
-
-        final Robot robot = find(robotCode);
-        return submitExecutionAndRedirectToResult(robot, inputs);
+        String resultCode = getBackend().submitExecutionForExistentRobot(robotCode, inputs);
+        if (resultCode == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+        return redirectToResult(resultCode);
     }
 
     @POST
@@ -149,16 +146,13 @@ public class RobotResource {
             @FormParam("input") final List<String> inputs) {
 
         final Robot robot = parseRobot(robotParam);
-        getStore().save(robot);
-        return submitExecutionAndRedirectToResult(robot, inputs);
+        String resultCode = getBackend().submitExecution(robot, inputs);
+        return redirectToResult(resultCode);
     }
 
-    private Response submitExecutionAndRedirectToResult(final Robot robot,
-            final List<String> inputs) {
-        String resultCode = getRobotExecutor().submitExecution(robot, inputs);
-        return Response.created(
-                ExecutionResultResource.buildURIFor(uriInfo, resultCode))
-                .build();
+    private Response redirectToResult(String resultCode) {
+        URI uriFor = ExecutionResultResource.buildURIFor(uriInfo, resultCode);
+        return Response.created(uriFor).build();
     }
 
     @POST
@@ -173,7 +167,7 @@ public class RobotResource {
         ExecutionPeriod period = PeriodicalExecutionResource.parsePeriod(periodString);
         PeriodicalExecution periodicalExecution = new PeriodicalExecution(
                 robot, period, inputs);
-        getStore().save(periodicalExecution);
+        getBackend().save(periodicalExecution);
         return Response.created(
                 PeriodicalExecutionResource.buildURIFor(uriInfo,
                         periodicalExecution)).build();

@@ -2,8 +2,7 @@ package es.uvigo.ei.sing.dare.configuration;
 
 import javax.servlet.ServletContext;
 
-import es.uvigo.ei.sing.dare.domain.IRobotExecutor;
-import es.uvigo.ei.sing.dare.domain.IStore;
+import es.uvigo.ei.sing.dare.domain.IBackend;
 
 public abstract class Configuration {
 
@@ -34,8 +33,6 @@ public abstract class Configuration {
                 .getName());
     }
 
-    public abstract IStore getStore();
-
-    public abstract IRobotExecutor getRobotExecutor();
+    public abstract IBackend getBackend();
 
 }

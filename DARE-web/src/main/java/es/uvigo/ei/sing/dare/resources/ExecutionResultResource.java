@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.codehaus.jettison.json.JSONObject;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
-import es.uvigo.ei.sing.dare.domain.IStore;
+import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult.Type;
@@ -47,8 +47,8 @@ public class ExecutionResultResource {
         return Configuration.from(context);
     }
 
-    private IStore getStore() {
-        return getConfiguration().getStore();
+    private IBackend getStore() {
+        return getConfiguration().getBackend();
     }
 
     @GET
