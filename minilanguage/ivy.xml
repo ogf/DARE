@@ -11,6 +11,10 @@
         <conf name="sources" visibility="private" />
         <conf name="test" visibility="private" extends="runtime"/>
     </configurations>
+    <publications>
+      <artifact  name="minilanguage" type="pom" conf="default" />
+      <artifact  name="minilanguage" type="jar" conf="default" />
+    </publications>
     <dependencies>
         <dependency org="es.uvigo.ei.sing" name="stringeditor" rev="1.0" conf="compile->default"/>
 

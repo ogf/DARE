@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+  <resolvers>
+    <filesystem name="local-m2-publish" m2compatible="true" changingPattern=".*SNAPSHOT">
+      <artifact pattern="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+    </filesystem>
+  </resolvers>
+</ivysettings>

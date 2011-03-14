@@ -23,4 +23,5 @@
 	<include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
 	<include url="${ivy.default.settings.dir}/ivysettings-main-chain.xml"/>
 	<include file="ivysettings-default-chain.xml"/>
+        <include file="ivysettings-m2-publication.xml" />
 </ivysettings>

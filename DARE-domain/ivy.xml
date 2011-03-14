@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ivy-module version="2.0">
-  <info organisation="es.uvigo.ei.sing" module="DARE-domain"/>
+  <info organisation="es.uvigo.ei.sing" module="DARE-domain" />
     <configurations>
       <conf name="default" extends="runtime, master"/>
       <conf name="master"/>
@@ -13,13 +13,14 @@
     </configurations>
 
     <publications>
+      <artifact  name="DARE-domain" type="pom" conf="default"></artifact>
       <artifact  name="DARE-domain" type="jar" conf="default"></artifact>
       <artifact  name="DARE-domain-test" type="jar" conf="test"></artifact>
     </publications>
 
     <dependencies>
-      <dependency org="es.uvigo.ei.sing" name="minilanguage" rev="latest.integration" conf="compile"/>
-      <dependency org="es.uvigo.ei.sing" name="DARE-util" rev="latest.integration" conf="compile->default(*)"/>
+      <dependency org="es.uvigo.ei.sing" name="minilanguage" rev="0.1" conf="compile->default(*)"/>
+      <dependency org="es.uvigo.ei.sing" name="DARE-util" rev="0.1" conf="compile->default(*)"/>
       <dependency org="joda-time" name="joda-time" rev="1.6.2" conf="compile->default; sources" />
       <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="compile->default; sources" />
 

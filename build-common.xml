@@ -86,7 +86,8 @@
     </path>
 
     <target name="dependencies" depends="init-ivy">
-      <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" sync="true"/>
+      <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" resolveMode="dynamic"
+                    overwriteMode="different" sync="true"/>
       <mkdir dir="lib" />
     </target>
 
@@ -168,21 +169,33 @@
     </target>
 
     <target name="jar" depends="unit-test">
-      <ivy:buildnumber organisation="${ivy.organisation}"
-                       module="${ivy.module}"
-                       revision="${project-version}" />
-
-      <jar destfile="${dist}/artifacts/${ivy.module}-${ivy.new.revision}.jar">
+      <jar destfile="${dist}/jars/${ivy.module}.jar">
         <fileset dir="${classes_dir}" includes="**" />
       </jar>
     </target>
 
     <target name="deploy" depends="jar" />
 
-    <target name="publish" depends="jar">
-      <ivy:publish resolver="local" pubrevision="${ivy.new.revision}">
-        <artifacts pattern="${dist}/artifacts/[artifact]-[revision].[ext]" />
+    <target name="publish" depends="jar, gen-pom">
+      <ivy:resolve resolveMode="dynamic" />
+      <ivy:publish resolver="local" overwrite="true" update="true"
+                   pubrevision="${project-version}">
+        <artifacts pattern="${dist}/[type]s/[artifact].[ext]" />
       </ivy:publish>
+      <ivy:publish resolver="local-m2-publish" pubrevision="${project-version}"
+                   forcedeliver="true" overwrite="true" publishivy="false">
+        <artifacts pattern="${dist}/[type]s/[artifact].[ext]" />
+      </ivy:publish>
+    </target>
+
+    <target name="gen-pom" depends="jar">
+      <property name="ivy.pom.version" value="${project-version}" />
+      <ivy:makepom ivyfile="ivy.xml"
+                   pomfile="${dist}/poms/${ivy.module}.pom">
+        <mapping conf="default" scope="compile"/>
+        <mapping conf="compile" scope="compile"/>
+        <mapping conf="test" scope="test"/>
+      </ivy:makepom>
     </target>
 
     <target name="clean">
