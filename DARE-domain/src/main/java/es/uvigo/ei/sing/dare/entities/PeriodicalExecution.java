@@ -33,8 +33,7 @@ public class PeriodicalExecution {
                 executionPeriod, inputs);
     }
 
-    private PeriodicalExecution(String code, DateTime creationTime,
-            Robot robot,
+    public PeriodicalExecution(String code, DateTime creationTime, Robot robot,
             ExecutionPeriod executionPeriod, List<String> inputs) {
         Validate.notNull(code);
         Validate.notNull(creationTime);

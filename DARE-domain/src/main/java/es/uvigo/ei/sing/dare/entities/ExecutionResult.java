@@ -36,19 +36,25 @@ public class ExecutionResult {
 
     private final List<String> resultLines;
 
-    private ExecutionResult(String code,Type type, String createdFromCode,
-            long executionTimeMilliseconds,
+    private ExecutionResult(String code, Type type, String createdFromCode,
+            long executionTimeMilliseconds, String[] resultLines) {
+        this(code, new DateTime(), type, createdFromCode,
+                executionTimeMilliseconds, resultLines);
+    }
+
+    public ExecutionResult(String code, DateTime creationTime, Type type,
+            String createdFromCode, long executionTimeMilliseconds,
             String[] resultLines) {
         Validate.notNull(code);
+        Validate.notNull(creationTime);
         Validate.notNull(type);
         Validate.notNull(createdFromCode);
         Validate.isTrue(executionTimeMilliseconds >= 0);
         Validate.notNull(resultLines);
-
         this.code = code;
+        this.creationTime = creationTime;
         this.createdFromCode = createdFromCode;
         this.type = type;
-        this.creationTime = new DateTime();
         this.executionTimeMilliseconds = executionTimeMilliseconds;
         this.resultLines = Collections.unmodifiableList(Arrays
                 .asList(resultLines));

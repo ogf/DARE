@@ -82,8 +82,12 @@ public class Robot {
                 transformerInXML, creationTime, description);
     }
 
-    private Robot(String code, String transformerInMinilanguage,
+    public Robot(String code, String transformerInMinilanguage,
             String transformerInXML, DateTime creationTime, String description) {
+        Validate.notNull(code);
+        Validate.notNull(transformerInMinilanguage);
+        Validate.notNull(transformerInXML);
+        Validate.notNull(creationTime);
         this.code = code;
         this.transformerInMinilanguage = transformerInMinilanguage;
         this.transformerInXML = transformerInXML;
