@@ -22,7 +22,7 @@ import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult.Type;
-import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
+import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 
 @Path("result")
 public class ExecutionResultResource {
@@ -55,7 +55,7 @@ public class ExecutionResultResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @Path("{executionResultCode}")
-    public ExecutionResultView retrieve(
+    public RobotExecutionResultView retrieve(
             @PathParam("executionResultCode") String executionResultCode) {
 
         Maybe<ExecutionResult> possibleResult = getStore().retrieveExecution(
@@ -68,7 +68,7 @@ public class ExecutionResultResource {
         }
         ExecutionResult result = possibleResult.getValue();
         URI createdFrom = getCreatedFrom(result);
-        return new ExecutionResultView(createdFrom, result.getCreationTime(),
+        return new RobotExecutionResultView(createdFrom, result.getCreationTime(),
                 result.getExecutionTimeMilliseconds(), result.getResultLines());
     }
 

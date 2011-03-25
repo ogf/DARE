@@ -38,7 +38,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
+import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
 @SuppressWarnings("serial")
@@ -98,8 +98,8 @@ public class RobotResourceExecutionTest {
         }
     }
 
-    private ExecutionResultView postRobotExecution(MultivaluedMapImpl postEntity) {
-        return postRobotExecution(ExecutionResultView.class, postEntity);
+    private RobotExecutionResultView postRobotExecution(MultivaluedMapImpl postEntity) {
+        return postRobotExecution(RobotExecutionResultView.class, postEntity);
     }
 
     private <T> T postRobotExecution(Class<T> type,
@@ -112,8 +112,8 @@ public class RobotResourceExecutionTest {
         }
         URI location = response.getLocation();
         if (acceptedType == MediaType.APPLICATION_JSON_TYPE
-                && type.equals(ExecutionResultView.class)) {
-            return type.cast(ExecutionResultView.fromJSON(poller.retrieve(
+                && type.equals(RobotExecutionResultView.class)) {
+            return type.cast(RobotExecutionResultView.fromJSON(poller.retrieve(
                     JSONObject.class, location)));
         } else {
             return poller.retrieve(type, location);
@@ -139,7 +139,7 @@ public class RobotResourceExecutionTest {
 
     @Test
     public void testReturnResults() throws Exception {
-        ExecutionResultView result = postRobotExecution(ExecutionResultView.class,
+        RobotExecutionResultView result = postRobotExecution(RobotExecutionResultView.class,
                 new MultivaluedMapImpl() {
                     {
                         add("robot",
@@ -155,8 +155,8 @@ public class RobotResourceExecutionTest {
 
     @Test
     public void itReturnsTheTimeElapsedAndTheDate() throws Exception {
-        ExecutionResultView result = postRobotExecution(
-                ExecutionResultView.class, new MultivaluedMapImpl() {
+        RobotExecutionResultView result = postRobotExecution(
+                RobotExecutionResultView.class, new MultivaluedMapImpl() {
                     {
                         add("robot",
                                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
@@ -172,7 +172,7 @@ public class RobotResourceExecutionTest {
     @Test
     public void theRobotAssociatedIsStoredAndAURLToItIsStored() {
         final String robotInMinilanguage = "url | xpath('//a/@href') | patternMatcher('(http://.*)') ";
-        ExecutionResultView result = postRobotExecution(ExecutionResultView.class,
+        RobotExecutionResultView result = postRobotExecution(RobotExecutionResultView.class,
                 new MultivaluedMapImpl() {
                     {
                         add("robot", robotInMinilanguage);

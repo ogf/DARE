@@ -23,7 +23,7 @@ public class PeriodicalExecutionView {
 
     public static PeriodicalExecutionView create(String code,
             DateTime creationTime, URI robot, ExecutionPeriod executionPeriod,
-            List<String> inputs, URI lastExecution) {
+            List<String> inputs, ExecutionResultView lastExecution) {
         return new PeriodicalExecutionView(code, creationTime.getMillis(),
                 robot, executionPeriod.getUnitType().asString(),
                 executionPeriod.getAmount(), inputs, lastExecution);
@@ -43,7 +43,7 @@ public class PeriodicalExecutionView {
     @XmlElement(name = "input")
     private final List<String> inputs;
 
-    private final URI lastExecutionResult;
+    private final ExecutionResultView lastExecutionResult;
 
     // Empty constructor for JAXB. DO NOT USE!
     public PeriodicalExecutionView() {
@@ -52,7 +52,7 @@ public class PeriodicalExecutionView {
 
     private PeriodicalExecutionView(String code, long creationTimeMilliseconds,
             URI robot, String unit, int amount, List<String> inputs,
-            URI lastExecutionResult) {
+            ExecutionResultView lastExecutionResult) {
         this.code = code;
         this.creationDateMillis = creationTimeMilliseconds;
         this.robot = robot;
@@ -73,7 +73,7 @@ public class PeriodicalExecutionView {
             result.put("inputs", new JSONArray(inputs));
             result.put("lastExecutionResult",
                     lastExecutionResult == null ? JSONObject.NULL
-                            : lastExecutionResult.toString());
+                            : lastExecutionResult.asJSON());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -100,7 +100,7 @@ public class PeriodicalExecutionView {
         return inputs;
     }
 
-    public URI getLastExecutionResult() {
+    public ExecutionResultView getLastExecutionResult() {
         return lastExecutionResult;
     }
 

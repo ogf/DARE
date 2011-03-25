@@ -20,6 +20,7 @@ import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
+import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.PeriodicalExecutionView;
 
 @Path(PeriodicalExecutionResource.BASE_PATH)
@@ -62,15 +63,16 @@ public class PeriodicalExecutionResource {
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public PeriodicalExecutionView retrievePeriodicalExecution(
             @PathParam("periodical-execution-code") String periodicalExecutionCode) {
+
         PeriodicalExecution periodicalExecution = getConfiguration()
-                .getBackend().findPeriodicalExecution(
-                        periodicalExecutionCode);
+                .getBackend().findPeriodicalExecution(periodicalExecutionCode);
+
         if (periodicalExecution == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         } else {
             URI robotURI = RobotResource.buildURIFor(uriInfo,
                     periodicalExecution.getRobotCode());
-            URI lastResult = getLastResult(periodicalExecution);
+            ExecutionResultView lastResult = getLastResult(periodicalExecution);
             return PeriodicalExecutionView.create(
                     periodicalExecution.getCode(),
                     periodicalExecution.getCreationTime(), robotURI,
@@ -79,14 +81,17 @@ public class PeriodicalExecutionResource {
         }
     }
 
-    private URI getLastResult(PeriodicalExecution periodicalExecution) {
+    private ExecutionResultView getLastResult(
+            PeriodicalExecution periodicalExecution) {
         ExecutionResult lastExecutionResult = periodicalExecution
                 .getLastExecutionResult();
         if (lastExecutionResult == null) {
             return null;
         }
-        return ExecutionResultResource.buildURIFor(uriInfo,
-                lastExecutionResult);
+        return new ExecutionResultView(
+                lastExecutionResult.getCreationTime(),
+                lastExecutionResult.getExecutionTimeMilliseconds(),
+                lastExecutionResult.getResultLines());
     }
 
     @GET

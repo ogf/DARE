@@ -29,7 +29,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.entities.RobotTest;
-import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
+import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
@@ -124,7 +124,7 @@ public class RobotResourceTest {
         ClientResponse response = robotResource.path(robotCode).path("execute")
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .post(ClientResponse.class, map);
-        ExecutionResultView result = ExecutionResultView.fromJSON(poller
+        RobotExecutionResultView result = RobotExecutionResultView.fromJSON(poller
                 .retrieve(JSONObject.class, response.getLocation()));
 
         assertNotNull(result);

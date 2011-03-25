@@ -89,43 +89,33 @@ public class PeriodicalExecutionResourceTest {
     }
 
     @Test
-    public void theLastExecutionResultResultCanBeRetrievedIfItExists() {
+    public void theLastExecutionResultIsReturnedInTheResponse() {
         final PeriodicalExecution existent = ConfigurationStub.PERIODICAL_EXECUTION_WITH_RESULT;
         PeriodicalExecutionView periodicalExecution = retrievePeriodicalFromServer(existent);
 
-        URI last = periodicalExecution.getLastExecutionResult();
-        URIPoller poller = new URIPoller(client);
-        ExecutionResultView executionResult = poller.retrieve(
-                ExecutionResultView.class, last);
-        assertThat(executionResult.getResultLines(), equalTo(existent
+        ExecutionResultView last = periodicalExecution
+                .getLastExecutionResult();
+
+        assertThat(last.getResultLines(), equalTo(existent
                 .getLastExecutionResult().getResultLines()));
     }
 
     @Test
-    public void fromTheExecutionResultOfAPeriodicalTheCreatedFromPeriodicalCanBeRetrieved() {
-        PeriodicalExecutionView periodicalExecution = retrievePeriodicalFromServer(ConfigurationStub.PERIODICAL_EXECUTION_WITH_RESULT);
-
-        URI last = periodicalExecution.getLastExecutionResult();
-        URIPoller poller = new URIPoller(client);
-        ExecutionResultView executionResult = poller.retrieve(
-                ExecutionResultView.class, last);
-        URI createdFrom = executionResult.getCreatedFrom();
-        PeriodicalExecutionView fromTheResult = client.resource(createdFrom)
-                .get(PeriodicalExecutionView.class);
-
-        assertThat(fromTheResult.getCode(),
-                equalTo(periodicalExecution.getCode()));
-    }
-
-    @Test
     public void theJSONMappingIsIdiomatic() throws JSONException {
-        final PeriodicalExecution existent = ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION;
+        final PeriodicalExecution existent = ConfigurationStub.PERIODICAL_EXECUTION_WITH_RESULT;
         JSONObject result = periodicalExecutionResult.path(existent.getCode())
                 .accept(MediaType.APPLICATION_JSON_TYPE).get(JSONObject.class);
 
         assertThat(result.get("creationDateMillis"), is(Number.class));
         assertThat(result.get("periodAmount"), is(Number.class));
         assertThat(result.get("inputs"), is(JSONArray.class));
+        assertThat(result.get("lastExecutionResult"), is(JSONObject.class));
+
+        JSONObject last = result.getJSONObject("lastExecutionResult");
+        assertThat(last.get("resultLines"), is(JSONArray.class));
+        assertThat(last.get("executionTime"), is(Number.class));
+        assertThat(last.get("date"), is(Number.class));
+
         JSONArray inputs = result.getJSONArray("inputs");
         assertThat(inputs.get(0), is(String.class));
     }
