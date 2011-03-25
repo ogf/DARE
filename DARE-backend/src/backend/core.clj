@@ -29,11 +29,6 @@
 (def standard-transformations
   (comp code-to-mongo-id class-to-string date-time-to-millis))
 
-(defn robot-to-id [map]
-  (update-in-if-exists map [:robot] #(if (instance? Robot %)
-                                       (.getCode %)
-                                       %)))
-
 (defn unit-as-string [map]
   (update-in-if-exists map [:unitType] #(.asString %)))
 
@@ -50,7 +45,6 @@
 
   PeriodicalExecution
   (to-mongo [periodical-execution] (-> (bean periodical-execution)
-                                       robot-to-id
                                        execution-period-to-map
                                        standard-transformations))
   clojure.lang.PersistentArrayMap
@@ -82,8 +76,8 @@
   (Robot. code transformerInMinilanguage transformerInXML creationTime description))
 
 (defn create-periodical
-  [code creationTime robot executionPeriod inputs]
-  (PeriodicalExecution. code creationTime robot executionPeriod inputs))
+  [code creationTime robotCode executionPeriod inputs]
+  (PeriodicalExecution. code creationTime robotCode executionPeriod inputs))
 
 (defn create-execution-result
   [code type createdFromCode creationTime executionTimeMilliseconds resultLines]
@@ -121,7 +115,7 @@
   (->> map-from-mongo
        ((juxt :_id
               (date-time-at :creationTime)
-              (from-robot-code :robot)
+              :robotCode
               (from-execution-period :executionPeriod)
               :inputs))
        (apply create-periodical)))
@@ -191,7 +185,7 @@
    save [this ^PeriodicalExecution periodicalExecution]
    (on this
        (assert (find-unique :robots
-                            (.. periodicalExecution (getRobot) (getCode))))
+                            (.getRobotCode periodicalExecution)))
        (save! :periodical-executions periodicalExecution)))
 
   (^PeriodicalExecution

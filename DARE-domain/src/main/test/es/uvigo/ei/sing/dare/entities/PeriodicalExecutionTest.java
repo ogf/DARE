@@ -61,8 +61,7 @@ public class PeriodicalExecutionTest {
 
     @Test
     public void aPeriodicalExecutionContainsTheRobotThatCreatedIt() {
-        assertThat(periodicalExecution.getRobot().getCode(),
-                equalTo(robot.getCode()));
+        assertThat(periodicalExecution.getRobotCode(), equalTo(robot.getCode()));
     }
 
     @Test
@@ -101,7 +100,6 @@ public class PeriodicalExecutionTest {
     @Test
     public void theLastExecutionCanBeUpdated() {
         long time = System.currentTimeMillis();
-        Robot robot = periodicalExecution.getRobot();
         List<String> inputs = periodicalExecution.getInputs();
         String[] lines = robot.execute(inputs);
         ExecutionResult result = ExecutionResult.create("test",

@@ -59,9 +59,9 @@ public class ConfigurationStub extends Configuration {
         private Map<String, Future<ExecutionResult>> executions = new HashMap<String, Future<ExecutionResult>>();
 
         {
+            robotsByCode.put(robotExample.getCode(), robotExample);
             for (PeriodicalExecution each : existent) {
                 periodicalsByCode.put(each.getCode(), each);
-                robotsByCode.put(each.getRobot().getCode(), each.getRobot());
                 ExecutionResult lastExecutionResult = each
                         .getLastExecutionResult();
                 if (lastExecutionResult != null) {

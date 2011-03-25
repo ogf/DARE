@@ -14,7 +14,7 @@ public class PeriodicalExecution {
 
     private final DateTime creationTime;
 
-    private final Robot robot;
+    private final String robotCode;
 
     private final ExecutionPeriod executionPeriod;
 
@@ -22,26 +22,28 @@ public class PeriodicalExecution {
 
     private ExecutionResult lastExecution;
 
-    public PeriodicalExecution(Robot robot, ExecutionPeriod executionPeriod,
+    public PeriodicalExecution(Robot robot,
+            ExecutionPeriod executionPeriod,
             List<String> inputs) {
-        this(new DateTime(), robot, executionPeriod, inputs);
+        this(new DateTime(), robot.getCode(), executionPeriod, inputs);
     }
 
-    private PeriodicalExecution(DateTime creationTime, Robot robot,
+    private PeriodicalExecution(DateTime creationTime, String robotCode,
             ExecutionPeriod executionPeriod, List<String> inputs) {
-        this(UUID.randomUUID().toString(), creationTime, robot,
+        this(UUID.randomUUID().toString(), creationTime, robotCode,
                 executionPeriod, inputs);
     }
 
-    public PeriodicalExecution(String code, DateTime creationTime, Robot robot,
+    public PeriodicalExecution(String code, DateTime creationTime,
+            String robotCode,
             ExecutionPeriod executionPeriod, List<String> inputs) {
         Validate.notNull(code);
         Validate.notNull(creationTime);
-        Validate.notNull(robot);
+        Validate.notNull(robotCode);
         Validate.notNull(inputs);
         this.code = code;
         this.creationTime = creationTime;
-        this.robot = robot;
+        this.robotCode = robotCode;
         this.inputs = Collections
                 .unmodifiableList(new ArrayList<String>(inputs));
         this.executionPeriod = executionPeriod;
@@ -55,8 +57,8 @@ public class PeriodicalExecution {
         return creationTime;
     }
 
-    public Robot getRobot() {
-        return robot;
+    public String getRobotCode() {
+        return robotCode;
     }
 
     public List<String> getInputs() {
@@ -76,7 +78,7 @@ public class PeriodicalExecution {
     }
 
     public PeriodicalExecution withHarcodedCode(String hardcodedCode) {
-        return new PeriodicalExecution(hardcodedCode, creationTime, robot,
+        return new PeriodicalExecution(hardcodedCode, creationTime, robotCode,
                 executionPeriod, inputs);
     }
 

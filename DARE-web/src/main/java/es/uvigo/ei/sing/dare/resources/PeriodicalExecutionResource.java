@@ -69,7 +69,7 @@ public class PeriodicalExecutionResource {
             throw new WebApplicationException(Status.NOT_FOUND);
         } else {
             URI robotURI = RobotResource.buildURIFor(uriInfo,
-                    periodicalExecution.getRobot());
+                    periodicalExecution.getRobotCode());
             URI lastResult = getLastResult(periodicalExecution);
             return PeriodicalExecutionView.create(
                     periodicalExecution.getCode(),

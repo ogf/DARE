@@ -90,7 +90,7 @@
                                                 period ["http://www.twitter.com"])
         _ (.save *backend* periodical-execution)
         retrieved (.findPeriodicalExecution *backend* (.getCode periodical-execution))]
-    (equal-values-on [.getCreationTime .getInputs #(.. % (getRobot) (getCode))]
+    (equal-values-on [.getCreationTime .getInputs #(.getRobotCode %)]
                      retrieved periodical-execution)))
 
 (deftest Backend-is-an-implementation-of-IBackend
