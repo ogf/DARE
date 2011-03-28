@@ -80,16 +80,39 @@
 (deftest finding-a-non-existent-periodical-execution-returns-nil
   (is (nil? (.findPeriodicalExecution *backend* (new-unique-code)))))
 
+(defn save-last-execution-on [periodical-execution last-execution]
+  (on *backend*
+      (mongo/update! :periodical-executions {:_id (.getCode periodical-execution)}
+                     {:$set {:lastExecution last-execution}})))
+
 (deftest a-periodical-execution-can-be-saved-and-retrieved
   (let [robot (Robot/createFromMinilanguage "url")
         _ (.save *backend* robot)
         period (ExecutionPeriod. 1 ExecutionPeriod$Unit/DAYS)
         periodical-execution (.createPeriodical robot
                                                 period ["http://www.twitter.com"])
-        _ (.save *backend* periodical-execution)
-        retrieved (.findPeriodicalExecution *backend* (.getCode periodical-execution))]
-    (equal-values-on [.getCreationTime .getInputs #(.getRobotCode %)]
-                     retrieved periodical-execution)))
+        retrieve-periodical (fn [] (.findPeriodicalExecution *backend*
+                                                            (.getCode periodical-execution)))]
+    (testing "without last execution"
+      (.save *backend* periodical-execution)
+      (equal-values-on [.getCreationTime .getInputs .getRobotCode .getLastExecutionResult]
+                       periodical-execution (retrieve-periodical)))
+    (testing "with last execution added"
+      (let [new-execution-result-map {:_id (new-unique-code)
+                                      :creationTime (System/currentTimeMillis)
+                                      :executionTimeMilliseconds 1000
+                                      :resultLines ["example1" "example2"]}
+            _ (save-last-execution-on periodical-execution new-execution-result-map)
+            updated-periodical (retrieve-periodical)
+            last-execution (.getLastExecutionResult updated-periodical)]
+        (is ((complement nil?) last-execution))
+        (equal-values-on [.getCreationTime .getInputs .getRobotCode]
+                         periodical-execution updated-periodical)
+        (are [key-for-map value-on-last-execution] (= (key-for-map new-execution-result-map)
+                                                      value-on-last-execution)
+
+             :executionTimeMilliseconds (.getExecutionTimeMilliseconds last-execution)
+             :resultLines (.getResultLines last-execution))))))
 
 (deftest Backend-is-an-implementation-of-IBackend
   (is (instance? IBackend (create-backend :db :test))))

@@ -75,8 +75,8 @@
   (Robot. code transformerInMinilanguage transformerInXML creationTime description))
 
 (defn create-periodical
-  [code creationTime robotCode executionPeriod inputs]
-  (PeriodicalExecution. code creationTime robotCode executionPeriod inputs))
+  [code creationTime robotCode executionPeriod inputs lastExecution]
+  (PeriodicalExecution. code creationTime robotCode executionPeriod inputs lastExecution))
 
 (defn create-execution-result
   [code optionalRobotCode creationTime executionTimeMilliseconds resultLines]
@@ -109,23 +109,25 @@
                 (:amount %)
                 (ExecutionPeriod$Unit/parseUnit (:unitType %)))))
 
+(defn to-execution-result [map-from-mongo]
+  (when map-from-mongo
+    (->> map-from-mongo
+         ((juxt :_id
+                :optionalRobotCode
+                (date-time-at :creationTime)
+                (at-key :executionTimeMilliseconds #(.longValue %))
+                :resultLines))
+         (apply create-execution-result))))
+
 (defn to-periodical [map-from-mongo]
   (->> map-from-mongo
        ((juxt :_id
               (date-time-at :creationTime)
               :robotCode
               (from-execution-period :executionPeriod)
-              :inputs))
+              :inputs
+              (at-key :lastExecution to-execution-result)))
        (apply create-periodical)))
-
-(defn to-execution-result [map-from-mongo]
-  (->> map-from-mongo
-       ((juxt :_id
-              :optionalRobotCode
-              (date-time-at :creationTime)
-              (at-key :executionTimeMilliseconds #(.longValue %))
-              :resultLines))
-       (apply create-execution-result)))
 
 (defn new-unique-code []
   (.toString (UUID/randomUUID)))

@@ -35,11 +35,18 @@ public class PeriodicalExecution {
     }
 
     public PeriodicalExecution(String code, DateTime creationTime,
-            String robotCode,
-            ExecutionPeriod executionPeriod, List<String> inputs) {
+            String robotCode, ExecutionPeriod executionPeriod,
+            List<String> inputs) {
+        this(code, creationTime, robotCode, executionPeriod, inputs, null);
+    }
+
+    public PeriodicalExecution(String code, DateTime creationTime,
+            String robotCode, ExecutionPeriod executionPeriod,
+            List<String> inputs, ExecutionResult lastExecution) {
         Validate.notNull(code);
         Validate.notNull(creationTime);
         Validate.notNull(robotCode);
+        Validate.notNull(executionPeriod);
         Validate.notNull(inputs);
         this.code = code;
         this.creationTime = creationTime;
@@ -47,6 +54,7 @@ public class PeriodicalExecution {
         this.inputs = Collections
                 .unmodifiableList(new ArrayList<String>(inputs));
         this.executionPeriod = executionPeriod;
+        this.lastExecution = lastExecution;
     }
 
     public String getCode() {
