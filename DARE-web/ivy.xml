@@ -12,9 +12,9 @@
         <conf name="test" visibility="private" extends="runtime"/>
     </configurations>
     <dependencies>
-        <dependency org="es.uvigo.ei.sing" name="minilanguage" rev="latest.integration" conf="compile"/>
-        <dependency org="es.uvigo.ei.sing" name="DARE-util" rev="latest.integration" conf="compile->default(*)"/>
-        <dependency org="es.uvigo.ei.sing" name="DARE-domain" rev="latest.integration" conf="compile->default(*); test"/>
+        <dependency org="es.uvigo.ei.sing" name="minilanguage" changing="true" rev="latest.integration" conf="compile"/>
+        <dependency org="es.uvigo.ei.sing" name="DARE-util" changing="true" rev="latest.integration" conf="compile->default(*)"/>
+        <dependency org="es.uvigo.ei.sing" name="DARE-domain" changing="true" rev="latest.integration" conf="compile->default(*); test"/>
 
         <dependency org="joda-time" name="joda-time" rev="1.6.2" conf="compile->default; sources" />
         <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="compile->default; sources" />
