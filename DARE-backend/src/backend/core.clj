@@ -3,8 +3,7 @@
             [somnium.congomongo.config :as mongo-config])
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
            [es.uvigo.ei.sing.dare.entities
-            Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit
-            ExecutionResult ExecutionResult$Type]
+            Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
            [java.util List UUID]
            [org.joda.time DateTime]
            [com.mongodb DBApiLayer]))
@@ -80,11 +79,10 @@
   (PeriodicalExecution. code creationTime robotCode executionPeriod inputs))
 
 (defn create-execution-result
-  [code type createdFromCode creationTime executionTimeMilliseconds resultLines]
+  [code optionalRobotCode creationTime executionTimeMilliseconds resultLines]
   (ExecutionResult. code
                     creationTime
-                    type
-                    createdFromCode
+                    optionalRobotCode
                     executionTimeMilliseconds
                     (into-array String resultLines)))
 
@@ -123,8 +121,7 @@
 (defn to-execution-result [map-from-mongo]
   (->> map-from-mongo
        ((juxt :_id
-              (at-key :type #(ExecutionResult$Type/valueOf %))
-              :createdFromCode
+              :optionalRobotCode
               (date-time-at :creationTime)
               (at-key :executionTimeMilliseconds #(.longValue %))
               :resultLines))
@@ -137,9 +134,8 @@
   (let [code (new-unique-code)]
     (save! :executions {:_id code
                         :inputs inputs
-                        :type "ROBOT"
                         :creationTime (System/currentTimeMillis)
-                        :createdFromCode (.getCode robot)})
+                        :optionalRobotCode (.getCode robot)})
     code))
 
 (defn submit-execution! [^Robot robot ^List inputs]

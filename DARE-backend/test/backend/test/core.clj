@@ -3,8 +3,7 @@
   (:use [backend.core] :reload)
   (:use [clojure.test])
   (:import [es.uvigo.ei.sing.dare.entities
-            Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit
-            ExecutionResult ExecutionResult$Type]
+            Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
            [es.uvigo.ei.sing.dare.domain IBackend Maybe]
            backend.core.Backend))
 
@@ -75,8 +74,7 @@
     (let [execution-result (.getValue maybe)]
       (are [x y] (= x y)
            (.getCode execution-result) code
-           (.getType execution-result) ExecutionResult$Type/ROBOT
-           (.getCreatedFromCode execution-result) (.getCode robot)
+           (.getOptionalRobotCode execution-result) (.getCode robot)
            (.getResultLines execution-result) result-lines))))
 
 (deftest finding-a-non-existent-periodical-execution-returns-nil

@@ -21,7 +21,6 @@ import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
-import es.uvigo.ei.sing.dare.entities.ExecutionResult.Type;
 import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 
 @Path("result")
@@ -73,13 +72,8 @@ public class ExecutionResultResource {
     }
 
     private URI getCreatedFrom(ExecutionResult result) {
-        if (result.getType() == Type.ROBOT) {
-            return RobotResource.buildURIFor(uriInfo,
-                    result.getCreatedFromCode());
-        } else {
-            return PeriodicalExecutionResource.buildURIFor(uriInfo,
-                    result.getCreatedFromCode());
-        }
+        return RobotResource
+                .buildURIFor(uriInfo, result.getOptionalRobotCode());
     }
 
     @GET
