@@ -192,8 +192,14 @@
        (when-let [map (find-unique :periodical-executions code)]
          (to-periodical map)))))
 
+(defn- only-defined [map]
+  (->> (filter second map)
+       (apply concat)
+       (apply hash-map)))
+
 (defn create-backend  [& {:keys [host port db]}]
-  (let [mongo-connection (mongo/make-connection db :host host :port port)
+  (let [mongo-connection (mongo/make-connection db
+                                                (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
     (Backend. mongo-connection)))
 
