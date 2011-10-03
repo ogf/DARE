@@ -203,7 +203,7 @@
         _ (mongo/set-write-concern mongo-connection :strict)]
     (Backend. mongo-connection)))
 
-(defrecord BackendBuilder [^String host ^String port ^String db]
+(defrecord BackendBuilder [^String host ^int port ^String db]
   IBackendBuilder
   (^IBackend build [this]
              (create-backend :host host :port port :db db)))
