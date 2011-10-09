@@ -1,7 +1,8 @@
 (ns backend.core
   (:require [somnium.congomongo :as mongo]
             [somnium.congomongo.config :as mongo-config]
-            [workers.client :as workers])
+            [workers.client :as workers]
+            [clojure.contrib.logging :as log])
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
@@ -208,7 +209,11 @@
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
-    (Backend. mongo-connection (create-workers-handler mongo-connection))))
+    (let [backend
+          (Backend. mongo-connection (create-workers-handler mongo-connection))]
+      (log/info (str "Backend started. Connected to " host
+                     " on " port + " with database " db))
+      backend)))
 
 (defrecord BackendBuilder [^String host ^int port ^String db]
   IBackendBuilder

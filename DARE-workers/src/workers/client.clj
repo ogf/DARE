@@ -61,17 +61,20 @@
   (let [specified-workers (atom (as-workers workers-specs))
         alive (atom [])
         checker (future (check-healthy specified-workers alive))]
+    (log/info (str "created workers handler for: " workers-specs))
     {:specified-workers specified-workers
      :alive alive
      :checker checker}))
 
 (defn add-new-workers! [workers-handler & [host port :as new-workers-specs]]
   (let [{:keys [specified-workers]} workers-handler]
+    (log/info (str "adding new workers " new-workers-specs))
     (swap! specified-workers set/union (as-workers new-workers-specs))))
 
 (defn shutdown! [workers-handler]
   (future-cancel (:checker workers-handler))
-  (close-connections! @(:alive workers-handler)))
+  (close-connections! @(:alive workers-handler))
+  (log/info "workers handler has been shutdown"))
 
 (def attempt-send (wrap send-and-wait
                         :on-error (constantly nil)))
