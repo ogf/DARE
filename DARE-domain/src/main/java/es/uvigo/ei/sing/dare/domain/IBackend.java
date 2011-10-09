@@ -1,5 +1,6 @@
 package es.uvigo.ei.sing.dare.domain;
 
+import java.io.Closeable;
 import java.util.List;
 
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
@@ -11,7 +12,7 @@ import es.uvigo.ei.sing.dare.entities.Robot;
  * information and allowing to retrieve it. It also dispatches execution
  * petitions.
  */
-public interface IBackend {
+public interface IBackend extends Closeable {
 
     void save(Robot robot);
 

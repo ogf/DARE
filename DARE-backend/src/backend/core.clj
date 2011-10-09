@@ -148,7 +148,7 @@
     ;;TODO send execution to workers
     code))
 
-(defrecord Backend [conn workers]
+(defrecord Backend [conn workers closed]
   IBackend
 
   (^void
@@ -193,7 +193,15 @@
    findPeriodicalExecution [this ^String code]
    (on this
        (when-let [map (find-unique :periodical-executions code)]
-         (to-periodical map)))))
+         (to-periodical map))))
+
+  (^void
+   close [this]
+   (reset! (:closed this) true)
+   (workers/shutdown! (:workers this))
+   (on this
+       (mongo/close-connection mongo-config/*mongo-config*))))
+
 
 (defn- only-defined [map]
   (->> (filter second map)
@@ -215,19 +223,21 @@
                   :error-handler (fn [ex]
                                    (log/error "exception polling new workers" ex)
                                    (l/restart))
-                  (l/wait-stage 100)
+                  (l/wait-stage 10000)
                   (fn [_]
-                    (l/task (workers/add-new-workers! (:workers backend)
-                                                      (query-workers backend))))
+                    (when @(:closed backend)
+                      (l/task (workers/add-new-workers! (:workers backend)
+                                                        (query-workers backend)))))
                   (fn [_]
-                    l/restart)))
+                    (if-not @(:closed backend)
+                      (l/restart)))))
 
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
     (let [workers-handler (create-workers-handler mongo-connection)
-          backend (Backend. mongo-connection workers-handler)
+          backend (Backend. mongo-connection workers-handler (atom false))
           poller (poll-new-workers backend)]
       (log/info (str "Backend started. Connected to " host
                      " on " port + " with database " db))

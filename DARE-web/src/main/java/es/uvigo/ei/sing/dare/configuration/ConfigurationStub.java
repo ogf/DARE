@@ -1,5 +1,6 @@
 package es.uvigo.ei.sing.dare.configuration;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +159,10 @@ public class ConfigurationStub extends Configuration {
         public void save(PeriodicalExecution periodicalExecution) {
             periodicalsByCode.put(periodicalExecution.getCode(),
                     periodicalExecution);
+        }
+
+        @Override
+        public void close() throws IOException {
         }
 
     };

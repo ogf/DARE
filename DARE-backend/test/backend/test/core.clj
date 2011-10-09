@@ -1,5 +1,6 @@
 (ns backend.test.core
-  (:require [somnium.congomongo :as mongo])
+  (:require [somnium.congomongo :as mongo]
+            [workers.server :as server])
   (:use [backend.core] :reload)
   (:use [clojure.test])
   (:import [es.uvigo.ei.sing.dare.entities
@@ -10,9 +11,13 @@
 (def *backend*)
 
 (defn backend-fixture [f]
-  (binding [*backend* (create-backend :db :test)]
-    (on *backend*
-        (f))))
+  (let [server (server/local-setup :test 3333)]
+    (try
+      (binding [*backend* (create-backend :db :test)]
+        (on *backend*
+            (f)
+            (.close *backend*)))
+      (finally (server/shutdown server)))))
 
 (use-fixtures :once backend-fixture)
 
@@ -115,4 +120,4 @@
              :resultLines (.getResultLines last-execution))))))
 
 (deftest Backend-is-an-implementation-of-IBackend
-  (is (instance? IBackend (create-backend :db :test))))
+  (is (instance? IBackend *backend*)))
