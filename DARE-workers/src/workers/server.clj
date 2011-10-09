@@ -19,23 +19,34 @@
   (let [now (System/currentTimeMillis)]
     (map #(- now %) times)))
 
+(defn with-error-handling [f on-error]
+  (fn [& args]
+    (try
+      (apply f args)
+      (catch Throwable e
+        (on-error e)))))
+
 (defn callable-execution [{:keys [inputs robotXML result-code]}]
   {:pre [(sequential? inputs) (string? robotXML)
          ((complement nil?) result-code)]}
-  (let [submit-time (System/currentTimeMillis)]
+  (let [submit-time (System/currentTimeMillis)
+        on-exception (fn [ex]
+                       (log/error (str "error for execution: " result-code) ex))]
     [result-code
-     (fn []
-       (let [start-execution-time (System/currentTimeMillis)
-             result-array (-> (XMLUtil/toDocument robotXML)
-                              (XMLInputOutput/loadTransformer)
-                              (Util/runRobot (into-array String inputs)))
-             [all-time real-execution-time] (millis-elapsed-since
-                                             submit-time start-execution-time)]
-         (log/info (str "execution completed for : " result-code))
-         (db-update-result-execution! result-code
-                                      :resultLines (seq result-array)
-                                      :executionTimeMilliseconds all-time
-                                      :realExecutionTime real-execution-time)))]))
+     (->
+      (fn []
+        (let [start-execution-time (System/currentTimeMillis)
+              result-array (-> (XMLUtil/toDocument robotXML)
+                               (XMLInputOutput/loadTransformer)
+                               (Util/runRobot (into-array String inputs)))
+              [all-time real-execution-time] (millis-elapsed-since
+                                              submit-time start-execution-time)]
+          (log/info (str "execution completed for : " result-code))
+          (db-update-result-execution! result-code
+                                       :resultLines (seq result-array)
+                                       :executionTimeMilliseconds all-time
+                                       :realExecutionTime real-execution-time)))
+      (with-error-handling on-exception))]))
 
 (def automator-executor)
 
