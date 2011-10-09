@@ -1,6 +1,7 @@
 (ns backend.core
   (:require [somnium.congomongo :as mongo]
-            [somnium.congomongo.config :as mongo-config])
+            [somnium.congomongo.config :as mongo-config]
+            [workers.client :as workers])
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
@@ -145,7 +146,7 @@
     ;;TODO send execution to workers
     code))
 
-(defrecord Backend [conn]
+(defrecord Backend [conn workers]
   IBackend
 
   (^void
@@ -197,11 +198,17 @@
        (apply concat)
        (apply hash-map)))
 
+(defn- create-workers-handler [mongo-connection]
+  (on {:conn mongo-connection}
+      (->> (mongo/fetch :workers :only [:host :port])
+           (map (fn [m] [(:host m) (:port m)]))
+           (apply workers/workers-handler!))))
+
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
-    (Backend. mongo-connection)))
+    (Backend. mongo-connection (create-workers-handler mongo-connection))))
 
 (defrecord BackendBuilder [^String host ^int port ^String db]
   IBackendBuilder
