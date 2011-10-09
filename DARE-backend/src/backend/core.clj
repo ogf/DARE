@@ -143,9 +143,11 @@
                         :optionalRobotCode (.getCode robot)})
     code))
 
-(defn submit-execution! [^Robot robot ^List inputs]
+(defn submit-execution! [workers-handler ^Robot robot ^List inputs]
   (let [code (insert-execution-at-initial-state robot inputs)]
-    ;;TODO send execution to workers
+    (workers/send-request! workers-handler {:inputs inputs
+                                            :robotXML (.getTransformerInXML robot)
+                                            :result-code code})
     code))
 
 (defrecord Backend [conn workers closed]
@@ -166,14 +168,14 @@
    submitExecution [this ^Robot robot ^List inputs]
    (on this
        (save! :robots robot)
-       (submit-execution! robot inputs)))
+       (submit-execution! (:workers this) robot inputs)))
 
   (^String
    submitExecutionForExistentRobot [this ^String existentRobotCode ^List inputs]
    (on this
        (let [robot (.find this existentRobotCode)]
          (assert ((complement nil?) robot))
-         (submit-execution! robot inputs))))
+         (submit-execution! (:workers this) robot inputs))))
 
   (^Maybe
    retrieveExecution [this ^String executionCode]
@@ -202,6 +204,17 @@
    (on this
        (mongo/close-connection mongo-config/*mongo-config*))))
 
+(defn poll-for-execution-result [backend code]
+  (l/run-pipeline nil
+   (fn [_]
+     (l/task
+      (.retrieveExecution backend code)))
+   (fn [^Maybe result]
+     (when (.hasValue result)
+       (l/complete (.getValue result))))
+   (l/wait-stage 500)
+   (fn [_]
+     (l/restart))))
 
 (defn- only-defined [map]
   (->> (filter second map)

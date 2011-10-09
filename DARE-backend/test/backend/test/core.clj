@@ -1,6 +1,8 @@
 (ns backend.test.core
   (:require [somnium.congomongo :as mongo]
-            [workers.server :as server])
+            [workers.server :as server]
+            [workers.client :as client]
+            [lamina.core :as l])
   (:use [backend.core] :reload)
   (:use [clojure.test])
   (:import [es.uvigo.ei.sing.dare.entities
@@ -49,11 +51,18 @@
                                                 period ["http://www.twitter.com"])]
     (is (thrown? java.lang.AssertionError (.save *backend* periodical-execution)))))
 
-(deftest submiting-execution-saves-the-provided-robot
+(deftest submiting-robot-with-execution
   (let [robot (Robot/createFromMinilanguage "url")
-        code (.submitExecution *backend* robot [])
+        code (.submitExecution *backend* robot ["http://www.twitter.com"])
         robot-retrieved (.find *backend* (.getCode robot))]
-    (robots-equivalent robot robot-retrieved)))
+    (testing "saves the provided robot"
+      (robots-equivalent robot robot-retrieved))
+    (testing "eventually creates a result"
+      (let [execution-result (l/wait-for-result
+                              (poll-for-execution-result *backend* code) 8000)]
+        (is ((complement nil?) execution-result))
+        (is (= code (.getCode execution-result)))
+        (is (< 0 (count (.getResultLines execution-result))))))))
 
 (deftest retrieving-a-not-existent-execution-returns-nil
   (is (nil? (.retrieveExecution *backend* (new-unique-code)))))

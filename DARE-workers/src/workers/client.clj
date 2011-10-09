@@ -79,7 +79,7 @@
 (def attempt-send (wrap send-and-wait
                         :on-error (constantly nil)))
 
-(defn send-request [workers-handler request]
+(defn send-request! [workers-handler request]
   (let [alive (shuffle (seq @(:alive workers-handler)))]
     (when (empty? alive)
       (throw (RuntimeException. "No alive workers")))
