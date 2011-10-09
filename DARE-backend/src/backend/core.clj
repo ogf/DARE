@@ -2,7 +2,8 @@
   (:require [somnium.congomongo :as mongo]
             [somnium.congomongo.config :as mongo-config]
             [workers.client :as workers]
-            [clojure.contrib.logging :as log])
+            [clojure.contrib.logging :as log]
+            [lamina.core :as l])
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
@@ -199,18 +200,35 @@
        (apply concat)
        (apply hash-map)))
 
-(defn- create-workers-handler [mongo-connection]
-  (on {:conn mongo-connection}
+(defn- query-workers [backend]
+  (on backend
       (->> (mongo/fetch :workers :only [:host :port])
            (map (fn [m] [(:host m) (:port m)]))
-           (apply workers/workers-handler!))))
+           (into []))))
+
+(defn- create-workers-handler [mongo-connection]
+  (apply workers/workers-handler!
+         (query-workers {:conn mongo-connection})))
+
+(defn- poll-new-workers [backend]
+  (l/run-pipeline nil
+                  :error-handler (fn [ex]
+                                   (log/error "exception polling new workers" ex)
+                                   (l/restart))
+                  (l/wait-stage 100)
+                  (fn [_]
+                    (l/task (workers/add-new-workers! (:workers backend)
+                                                      (query-workers backend))))
+                  (fn [_]
+                    l/restart)))
 
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
-    (let [backend
-          (Backend. mongo-connection (create-workers-handler mongo-connection))]
+    (let [workers-handler (create-workers-handler mongo-connection)
+          backend (Backend. mongo-connection workers-handler)
+          poller (poll-new-workers backend)]
       (log/info (str "Backend started. Connected to " host
                      " on " port + " with database " db))
       backend)))
