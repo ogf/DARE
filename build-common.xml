@@ -59,13 +59,13 @@
       <include name="**/*.jar" />
     </fileset>
 
-    <fileset dir="lib" id="runtime-libs" includes="runtime/**/*.jar" />
+    <fileset dir="lib" id="runtime-libs" includes="runtime/jar/*.jar" />
 
-    <fileset dir="lib" id="compile-libs" includes="compile/**/*.jar" />
+    <fileset dir="lib" id="compile-libs" includes="compile/jar/*.jar" />
 
-    <fileset dir="lib" id="provided-libs" includes="provided/**/*.jar" />
+    <fileset dir="lib" id="provided-libs" includes="provided/jar/*.jar" />
 
-    <fileset dir="lib" id="test-libs" includes="test/**/*.jar" />
+    <fileset dir="lib" id="test-libs" includes="test/jar/*.jar" />
 
     <path id="compile-classpath">
       <fileset refid="compile-libs" />
@@ -85,7 +85,7 @@
     </path>
 
     <target name="dependencies" depends="init-ivy">
-      <ivy:retrieve pattern="lib/([conf]/)[artifact]-[revision].[ext]" resolveMode="dynamic"
+      <ivy:retrieve pattern="lib/([conf]/)([type]/)[artifact]-[revision].[ext]" resolveMode="dynamic"
                     overwriteMode="different" sync="true"/>
       <mkdir dir="lib" />
     </target>
