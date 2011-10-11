@@ -107,7 +107,7 @@
 
 (defn local-setup
   ([db port threads-number]
-     (-main "localhost" 27017 db port threads-number))
+     (-main "127.0.0.1" 27017 db port threads-number))
   ([db port] (local-setup db port 10)))
 
 (defn shutdown [server]
