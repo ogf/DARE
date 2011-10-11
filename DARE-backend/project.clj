@@ -5,5 +5,4 @@
                  [org.clojure/clojure-contrib "1.2.0"]
                  [es.uvigo.ei.sing/DARE-domain "0.1"]
                  [DARE-workers "0.1-SNAPSHOT"]
-                 [congomongo "0.1.7-SNAPSHOT"]]
-  :dev-dependencies [[swank-clojure/swank-clojure "1.2.1"]])
+                 [congomongo "0.1.7-SNAPSHOT"]])
