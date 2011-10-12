@@ -12,8 +12,17 @@
            [es.uvigo.ei.sing.stringeditor Util XMLInputOutput])
   (:gen-class))
 
-(defn db-update-result-execution! [result-code & {:as updated-fields}]
-  (mongo/update! :executions {:_id result-code} {:$set updated-fields}))
+
+(defn adapt-updated-fields [collection fields]
+  (case collection
+    :periodical-executions {:lastExecution
+                            (assoc fields :creationTime (System/currentTimeMillis))}
+    fields))
+
+(defn db-update-execution! [collection code & {:as updated-fields}]
+  (mongo/update! collection
+                 {:_id code}
+                 {:$set (adapt-updated-fields collection updated-fields)}))
 
 (defn millis-elapsed-since [& times]
   (let [now (System/currentTimeMillis)]
@@ -26,13 +35,18 @@
       (catch Throwable e
         (on-error e)))))
 
-(defn callable-execution [{:keys [inputs robotXML result-code]}]
+(defn callable-execution [{:keys [inputs robotXML result-code periodical-code]}]
   {:pre [(sequential? inputs) (string? robotXML)
-         ((complement nil?) result-code)]}
+         (or result-code periodical-code) (not (and result-code periodical-code))]}
   (let [submit-time (System/currentTimeMillis)
-        on-exception (fn [ex]
-                       (log/error (str "error for execution: " result-code) ex))]
-    [result-code
+        is-periodical periodical-code
+        code (or result-code periodical-code)
+        collection-to-update (if is-periodical
+                               :periodical-executions
+                               :executions)
+        name (str "["(when periodical-code "periodical") "execution " code "]")
+        on-exception (fn [ex] (log/error  (str "Error executing " name) ex))]
+    [name
      (->
       (fn []
         (let [start-execution-time (System/currentTimeMillis)
@@ -41,19 +55,20 @@
                                (Util/runRobot (into-array String inputs)))
               [all-time real-execution-time] (millis-elapsed-since
                                               submit-time start-execution-time)]
-          (log/info (str "execution completed for : " result-code))
-          (db-update-result-execution! result-code
-                                       :resultLines (seq result-array)
-                                       :executionTimeMilliseconds all-time
-                                       :realExecutionTime real-execution-time)))
+          (db-update-execution! collection-to-update
+                                code
+                                :resultLines (seq result-array)
+                                :executionTimeMilliseconds all-time
+                                :realExecutionTime real-execution-time)
+          (log/info (str "execution completed for: " name))))
       (with-error-handling on-exception))]))
 
 (def automator-executor)
 
 (defn accept-request [request]
-  (let [[code execution] (callable-execution request)]
+  (let [[name execution] (callable-execution request)]
     (.submit automator-executor execution)
-    (log/info (str "Request for result code " code " accepted"))))
+    (log/info (str name " accepted"))))
 
 (def query-alive-str "ping")
 

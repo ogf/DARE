@@ -129,7 +129,9 @@
               :robotCode
               (from-execution-period :executionPeriod)
               :inputs
-              (at-key :lastExecution to-execution-result)))
+              (at-key :lastExecution
+                      (comp to-execution-result
+                            #(when % (assoc % :_id (:_id map-from-mongo)))))))
        (apply create-periodical)))
 
 (defn new-unique-code []
@@ -143,12 +145,27 @@
                         :optionalRobotCode (.getCode robot)})
     code))
 
-(defn submit-execution! [workers-handler ^Robot robot ^List inputs]
+(defn common-request-part [^Robot robot ^List inputs]
+  {:inputs inputs
+   :robotXML (.getTransformerInXML robot)})
+
+(defn submit-execution-for-robot! [workers-handler ^Robot robot ^List inputs]
   (let [code (insert-execution-at-initial-state robot inputs)]
-    (workers/send-request! workers-handler {:inputs inputs
-                                            :robotXML (.getTransformerInXML robot)
-                                            :result-code code})
+    (workers/send-request! workers-handler (assoc (common-request-part robot inputs)
+                                             :result-code code))
     code))
+
+(defn find-robot [robot-code]
+  (when-let [from-mongo-map (find-unique :robots robot-code)]
+    (to-robot from-mongo-map)))
+
+(defn submit-execution-for-periodical-excecution!
+  [workers-handler ^PeriodicalExecution periodical-execution]
+  (let [robot (find-robot (.getRobotCode periodical-execution))
+        inputs (.getInputs periodical-execution)
+        periodical-code (.getCode periodical-execution)]
+    (workers/send-request! workers-handler (assoc (common-request-part robot inputs)
+                                             :periodical-code periodical-code))))
 
 (defrecord Backend [conn workers closed]
   IBackend
@@ -160,22 +177,21 @@
 
   (^Robot
    find [this ^String robotCode]
-   (on this
-       (when-let [from-mongo-map (find-unique :robots robotCode)]
-         (to-robot from-mongo-map))))
+    (on this
+        (find-robot robotCode)))
 
   (^String
    submitExecution [this ^Robot robot ^List inputs]
    (on this
        (save! :robots robot)
-       (submit-execution! (:workers this) robot inputs)))
+       (submit-execution-for-robot! (:workers this) robot inputs)))
 
   (^String
    submitExecutionForExistentRobot [this ^String existentRobotCode ^List inputs]
    (on this
        (let [robot (.find this existentRobotCode)]
          (assert ((complement nil?) robot))
-         (submit-execution! (:workers this) robot inputs))))
+         (submit-execution-for-robot! (:workers this) robot inputs))))
 
   (^Maybe
    retrieveExecution [this ^String executionCode]
