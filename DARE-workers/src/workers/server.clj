@@ -12,16 +12,21 @@
   (:gen-class))
 
 
-(defn adapt-updated-fields [collection fields]
+(defn adapt-updated-fields [collection next-execution-ms fields]
   (case collection
-    :periodical-executions {:lastExecution
-                            (assoc fields :creationTime (System/currentTimeMillis))}
+    :periodical-executions (assoc {:lastExecution
+                                   (assoc fields :creationTime
+                                          (System/currentTimeMillis))}
+                             :next-execution-ms next-execution-ms
+                             :scheduled false
+                             :execution-sent-at nil)
     fields))
 
-(defn db-update-execution! [collection code & {:as updated-fields}]
+(defn db-update-execution! [collection code next-execution-ms & {:as updated-fields}]
   (mongo/update! collection
                  {:_id code}
-                 {:$set (adapt-updated-fields collection updated-fields)}))
+                 {:$set (adapt-updated-fields
+                         collection next-execution-ms updated-fields)}))
 
 (defn millis-elapsed-since [& times]
   (let [now (System/currentTimeMillis)]
@@ -34,9 +39,11 @@
       (catch Throwable e
         (on-error e)))))
 
-(defn callable-execution [{:keys [inputs robotXML result-code periodical-code]}]
+(defn callable-execution
+  [{:keys [inputs robotXML result-code periodical-code next-execution-ms]}]
   {:pre [(sequential? inputs) (string? robotXML)
-         (or result-code periodical-code) (not (and result-code periodical-code))]}
+         (or result-code (and periodical-code next-execution-ms))
+         (not (and result-code periodical-code))]}
   (let [submit-time (System/currentTimeMillis)
         is-periodical periodical-code
         code (or result-code periodical-code)
@@ -53,9 +60,11 @@
                                (XMLInputOutput/loadTransformer)
                                (Util/runRobot (into-array String inputs)))
               [all-time real-execution-time] (millis-elapsed-since
-                                              submit-time start-execution-time)]
+                                              submit-time start-execution-time)
+              next-execution-ms (+ all-time (or next-execution-ms 0))]
           (db-update-execution! collection-to-update
                                 code
+                                next-execution-ms
                                 :resultLines (seq result-array)
                                 :executionTimeMilliseconds all-time
                                 :realExecutionTime real-execution-time)

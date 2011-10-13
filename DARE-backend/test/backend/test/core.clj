@@ -26,9 +26,11 @@
 
 (defn backend-fixture [f]
   (with-server [server (create-server 3333)]
-    (binding [*polling-interval-for-new-workers* 1000]
-      (binding [*backend* (create-backend :db :test)
-                client/*check-healthy-interval-ms* 100]
+    (binding [*fast-testing-polling-mode* true
+              *minimal-allowed-execution-period-ms* (* 2 1000)
+              *time-allowed-for-execution-ms* 2000
+              client/*check-healthy-interval-ms* 100]
+      (binding [*backend* (create-backend :db :test)]
         (on *backend*
             (f)
             (.close *backend*))))))
@@ -106,39 +108,37 @@
 (deftest finding-a-non-existent-periodical-execution-returns-nil
   (is (nil? (.findPeriodicalExecution *backend* (new-unique-code)))))
 
-(defn save-last-execution-on [periodical-execution last-execution]
-  (on *backend*
-      (mongo/update! :periodical-executions {:_id (.getCode periodical-execution)}
-                     {:$set {:lastExecution last-execution}})))
-
 (deftest a-periodical-execution-can-be-saved-and-retrieved
   (let [robot (Robot/createFromMinilanguage "url")
         _ (.save *backend* robot)
         period (ExecutionPeriod. 1 ExecutionPeriod$Unit/DAYS)
         periodical-execution (.createPeriodical robot
                                                 period ["http://www.esei.uvigo.es"])
-        retrieve-periodical (fn [] (.findPeriodicalExecution *backend*
-                                                            (.getCode periodical-execution)))]
+        code (.getCode periodical-execution)
+        retrieve-periodical (fn [] (.findPeriodicalExecution *backend* code))
+        assert-an-execution-eventually-exists
+        (fn []
+          (let [_ (l/wait-for-result (poll-for-next-periodical-execution-result
+                                      *backend* code) 8000)
+                updated-periodical (retrieve-periodical)
+                last-execution (.getLastExecutionResult updated-periodical)]
+            (is ((complement nil?) last-execution))
+            (equal-values-on [.getCreationTime .getInputs .getRobotCode]
+                             periodical-execution updated-periodical)))]
     (testing "without last execution"
       (.save *backend* periodical-execution)
       (equal-values-on [.getCreationTime .getInputs .getRobotCode .getLastExecutionResult]
                        periodical-execution (retrieve-periodical)))
-    (testing "with last execution added"
-      (let [new-execution-result-map {:_id (new-unique-code)
-                                      :creationTime (System/currentTimeMillis)
-                                      :executionTimeMilliseconds 1000
-                                      :resultLines ["example1" "example2"]}
-            _ (save-last-execution-on periodical-execution new-execution-result-map)
-            updated-periodical (retrieve-periodical)
-            last-execution (.getLastExecutionResult updated-periodical)]
-        (is ((complement nil?) last-execution))
-        (equal-values-on [.getCreationTime .getInputs .getRobotCode]
-                         periodical-execution updated-periodical)
-        (are [key-for-map value-on-last-execution] (= (key-for-map new-execution-result-map)
-                                                      value-on-last-execution)
-
-             :executionTimeMilliseconds (.getExecutionTimeMilliseconds last-execution)
-             :resultLines (.getResultLines last-execution))))))
+    (testing "eventually the periodical execution is scheduled and executed after being created"
+      (assert-an-execution-eventually-exists))
+    (testing "executions sent but not completed are cleaned so they can be scheduled again"
+      (mark-as-scheduled code)
+      (mongo/update! :periodical-executions {:_id code}
+                     {:$set {:last-execution nil
+                             :next-execution-ms (now-ms)}}
+                     :upsert false)
+      (mark-as-execution-sent code (- (now-ms) (inc *time-allowed-for-execution-ms*)))
+      (assert-an-execution-eventually-exists))))
 
 (deftest can-find-new-workers
   (letfn [(count-alive-workers [] (client/count-alive-workers (:workers *backend*)))]

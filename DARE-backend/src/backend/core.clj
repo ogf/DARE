@@ -7,11 +7,22 @@
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
-           [java.util List UUID]
+           [java.util UUID List ArrayList]
            [org.joda.time DateTime]
            [com.mongodb DBApiLayer]))
 
+(def ^{:dynamic true} *fast-testing-polling-mode* false)
+
 (def ^{:dynamic true} *polling-interval-for-new-workers* (* 1 60 1000))
+
+(def ^{:dynamic true} *polling-interval-for-periodical* (* 5 60 1000))
+
+(def ^{:dynamic true} *minimal-allowed-execution-period-ms* (* 60 60 1000))
+
+(def ^{:dynamic true} *polling-interval-for-cleaning-expired-executions*
+  (* 2 60 1000))
+
+(def ^{:dynamic true} *time-allowed-for-execution-ms* (* 4 60 1000))
 
 (defn code-to-mongo-id [map]
   (if-let [code (get map :code nil)]
@@ -40,6 +51,20 @@
   (update-in-if-exists map [:executionPeriod] #(-> (bean %)
                                                   standard-transformations
                                                   unit-as-string)))
+(defn now-ms []
+  (System/currentTimeMillis))
+
+(defn- next-execution [^ExecutionPeriod execution-period]
+  (max
+   (+ (now-ms) *minimal-allowed-execution-period-ms*)
+   (.getMillis (.calculateNextExecution execution-period (DateTime.)))))
+
+(defn add-scheduling-fields [map]
+  (assoc map
+    :next-execution-ms (now-ms)
+    :scheduled false
+    :execution-sent-at nil))
+
 (defprotocol Mongoable
   (to-mongo [this]))
 
@@ -49,6 +74,7 @@
 
   PeriodicalExecution
   (to-mongo [periodical-execution] (-> (bean periodical-execution)
+                                       add-scheduling-fields
                                        execution-period-to-map
                                        standard-transformations))
   clojure.lang.PersistentArrayMap
@@ -125,7 +151,7 @@
          (apply create-execution-result))))
 
 (defn to-periodical [map-from-mongo]
-  (->> map-from-mongo
+    (->> map-from-mongo
        ((juxt :_id
               (date-time-at :creationTime)
               :robotCode
@@ -143,7 +169,7 @@
   (let [code (new-unique-code)]
     (save! :executions {:_id code
                         :inputs inputs
-                        :creationTime (System/currentTimeMillis)
+                        :creationTime (now-ms)
                         :optionalRobotCode (.getCode robot)})
     code))
 
@@ -161,13 +187,28 @@
   (when-let [from-mongo-map (find-unique :robots robot-code)]
     (to-robot from-mongo-map)))
 
-(defn submit-execution-for-periodical-excecution!
-  [workers-handler ^PeriodicalExecution periodical-execution]
-  (let [robot (find-robot (.getRobotCode periodical-execution))
-        inputs (.getInputs periodical-execution)
-        periodical-code (.getCode periodical-execution)]
-    (workers/send-request! workers-handler (assoc (common-request-part robot inputs)
-                                             :periodical-code periodical-code))))
+(defn mark-as-execution-sent [periodical-code time-execution-was-sent]
+  (mongo/update! :periodical-executions
+                 {:_id periodical-code}
+                 {:$set {:execution-sent-at time-execution-was-sent}}
+                 :upsert false))
+
+(defn submit-execution-for-periodical-execution!
+  [workers-handler
+   {:keys [periodical-code robot-code inputs execution-period next-execution-ms] :as request}]
+  (l/run-pipeline (find-robot robot-code)
+    :error-handler (fn [ex]
+                     (log/error
+                      (str "Error submitting execution for periodical with code "
+                           periodical-code) ex))
+    (l/wait-stage (- next-execution-ms (now-ms)))
+    (fn [robot]
+      (log/info (str "sending execution for periodical with code: " periodical-code))
+      (workers/send-request! workers-handler
+                             (assoc (common-request-part robot (ArrayList. inputs))
+                               :periodical-code periodical-code
+                               :next-execution-ms (next-execution execution-period)))
+      (mark-as-execution-sent periodical-code (now-ms)))))
 
 (defrecord Backend [conn workers closed]
   IBackend
@@ -235,6 +276,24 @@
    (fn [_]
      (l/restart))))
 
+
+(defn poll-for-next-periodical-execution-result [backend code]
+  (let [retrieve-current #(.findPeriodicalExecution backend code)
+        original-execution (.getLastExecutionResult (retrieve-current))
+        creation-time-fn #(when % (.. % getCreationTime getMillis))]
+    (l/run-pipeline nil
+      :error-handler (fn [ex]
+                       (log/error
+                        (str "error polling for periodical execution with code "
+                             code) ex))
+      (fn [_] (l/task (.getLastExecutionResult (retrieve-current))))
+      (fn [current]
+        (when (not= (creation-time-fn current) (creation-time-fn original-execution))
+          (l/complete current)))
+      (l/wait-stage 500)
+      (fn [_]
+        (l/restart)))))
+
 (defn- only-defined [map]
   (->> (filter second map)
        (apply concat)
@@ -250,13 +309,19 @@
   (apply workers/workers-handler!
          (query-workers {:conn mongo-connection})))
 
+
+(defn convert-wait [time-ms]
+  (if *fast-testing-polling-mode*
+    (-> time-ms (/ 1000) (int))
+    time-ms))
+
 (defmacro while-backend-not-closed [{:keys [task-name backend period]} & body]
   `(l/run-pipeline nil
                    :error-handler (fn [~'ex]
                                     (when-not @(:closed ~backend)
                                       (log/error (str "exception " ~task-name) ~'ex)
                                       (l/restart)))
-                   (l/wait-stage ~period)
+                   (l/wait-stage (convert-wait ~period))
                    (fn [~'_]
                      (when-not @(:closed ~backend)
                        (log/info (str "Executing " ~task-name))
@@ -270,12 +335,67 @@
                              :period *polling-interval-for-new-workers*}
     (apply workers/add-new-workers! (:workers backend) (query-workers backend))))
 
+
+(defn mark-as-scheduled [periodical-code]
+  (mongo/update! :periodical-executions
+                 {:_id periodical-code}
+                 {:$set {:scheduled true}} :upsert false))
+
+(defmacro continue-on-error [name & body]
+  `(try ~@body
+        (catch Throwable ~'e
+          (log/error (str "error while " ~name) ~'e))))
+
+(defn submit-periodical [workers expiring-on-next-ms]
+  (let [before-time (+ (now-ms) expiring-on-next-ms)
+        where {:scheduled false
+               :next-execution-ms {:$lte before-time}}
+        select (zipmap [:_id :robotCode :inputs :executionPeriod :next-execution-ms]
+                       (repeat 1))
+        to-submit-map (fn [{:keys [_id robotCode inputs next-execution-ms] :as each}]
+                        {:periodical-code _id
+                         :robot-code robotCode
+                         :inputs inputs
+                         :next-execution-ms next-execution-ms
+                         :execution-period
+                         ((from-execution-period :executionPeriod) each)})
+        found (mongo/fetch :periodical-executions :where where :only select)]
+    (log/info (str "scheduling " (count found) " periodical executions"))
+    (doseq [each found]
+      (continue-on-error (str "submitting periodical execution: " (:_id each))
+        (mark-as-scheduled (:_id each))
+        (submit-execution-for-periodical-execution! workers (to-submit-map each))))))
+
+(defn submit-periodical-executions [backend]
+  (while-backend-not-closed {:task-name "submitting periodical executions"
+                             :backend backend
+                             :period *polling-interval-for-periodical*}
+    (on backend
+        (submit-periodical (:workers backend)
+                           *minimal-allowed-execution-period-ms*))))
+
+(defn clean-not-completed [time-allowed-to-execute-ms]
+  (mongo/update! :periodical-executions
+                 {:execution-sent-at {:$lte (- (now-ms) time-allowed-to-execute-ms)}}
+                 {:$set {:execution-sent-at nil
+                         :scheduled false}}
+                 :upsert false :multiple true))
+
+(defn clean-scheduled-but-not-completed [backend]
+  (while-backend-not-closed {:task-name "cleaning scheduled but not completed"
+                             :backend backend
+                             :period *polling-interval-for-cleaning-expired-executions*}
+    (on backend
+      (clean-not-completed *time-allowed-for-execution-ms*))))
+
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
         _ (mongo/set-write-concern mongo-connection :strict)]
     (let [workers-handler (create-workers-handler mongo-connection)
           backend (Backend. mongo-connection workers-handler (atom false))
+          submitter (submit-periodical-executions backend)
+          cleaner (clean-scheduled-but-not-completed backend)
           poller (poll-new-workers backend)]
       (log/info (str "Backend started. Connected to " host
                      " on " port + " with database " db))
