@@ -48,12 +48,12 @@
   (let [robot (Robot/createFromMinilanguage "url")
         period (ExecutionPeriod. 1 ExecutionPeriod$Unit/DAYS)
         periodical-execution (.createPeriodical robot
-                                                period ["http://www.twitter.com"])]
+                                                period ["http://www.esei.uvigo.es"])]
     (is (thrown? java.lang.AssertionError (.save *backend* periodical-execution)))))
 
 (deftest submiting-robot-with-execution
   (let [robot (Robot/createFromMinilanguage "url")
-        code (.submitExecution *backend* robot ["http://www.twitter.com"])
+        code (.submitExecution *backend* robot ["http://www.esei.uvigo.es"])
         robot-retrieved (.find *backend* (.getCode robot))]
     (testing "saves the provided robot"
       (robots-equivalent robot robot-retrieved))
@@ -104,7 +104,7 @@
         _ (.save *backend* robot)
         period (ExecutionPeriod. 1 ExecutionPeriod$Unit/DAYS)
         periodical-execution (.createPeriodical robot
-                                                period ["http://www.twitter.com"])
+                                                period ["http://www.esei.uvigo.es"])
         retrieve-periodical (fn [] (.findPeriodicalExecution *backend*
                                                             (.getCode periodical-execution)))]
     (testing "without last execution"
