@@ -4,7 +4,6 @@
             [lamina.connections :as c]
             [clojure.contrib.json :as json]
             [somnium.congomongo :as mongo]
-            [somnium.congomongo.config]
             [clojure.contrib.logging :as log])
   (:import [java.util concurrent.Executors UUID]
            [java.net InetSocketAddress InetAddress NetworkInterface]
@@ -65,39 +64,48 @@
 
 (def automator-executor)
 
-(defn accept-request [request]
+(defn accept-request [execution-wrapper request]
   (let [[name execution] (callable-execution request)]
-    (.submit automator-executor execution)
+    (.submit automator-executor (execution-wrapper execution))
     (log/info (str name " accepted"))))
 
 (def query-alive-str "ping")
 
-(defn accept-request-and-respond [response raw-request]
+(defn accept-request-and-respond [executor response raw-request]
   (try
     (let [request (json/read-json (.toString raw-request))]
       (when-not (= request query-alive-str)
-        (accept-request request))
+        (executor request))
       (enqueue response "ACCEPTED"))
     (catch Throwable e
       (log/error (str "Error processing: " raw-request) e)
       (enqueue response "ERROR"))))
 
-(defn petition-handler [channel connection-info]
-  (c/pipelined-server channel (var accept-request-and-respond)))
+(defn wrap-execution-with [mongo-connection f]
+  (fn [& args]
+    (mongo/with-mongo mongo-connection
+      (apply f args))))
+
+(defn wrap-executions-with [mongo-connection]
+  (partial wrap-execution-with mongo-connection))
+
+(defn petition-handler [mongo-connection channel connection-info]
+  (c/pipelined-server channel
+                      (partial
+                       (var accept-request-and-respond)
+                       (partial accept-request (wrap-executions-with mongo-connection)))))
 
 (defcodec protocol-frame
   (finite-frame :int32 (string :utf-8)))
 
-(defn server [port]
-  (let [result (tcp/start-tcp-server petition-handler {:frame protocol-frame
-                                                       :port port})]
+(defn server [mongo-connection port]
+  (let [result (tcp/start-tcp-server (partial petition-handler mongo-connection)
+                                     {:frame protocol-frame
+                                      :port port})]
     (log/info (str "Worker listening on " port))
     result))
 
 (def server-id (.toString (UUID/randomUUID)))
-
-(defn mongo-instance []
-  somnium.congomongo.config/*mongo-config*)
 
 (defn- guess-external-local-ip []
   (if-let [candidate (->> (NetworkInterface/getNetworkInterfaces)
@@ -108,17 +116,24 @@
                           (first))]
     (.getHostAddress candidate)))
 
+(defn- add-connection-info [server conn]
+  (with-meta server (-> (meta server) (merge {:conn conn}))))
+
+(defn- get-connection-info [server]
+  (:conn (meta server)))
+
 (defn -main [dbhost db-port db port threads-number]
   (def automator-executor (Executors/newFixedThreadPool (or threads-number 20)))
-  (let [result (server port)]
-    (mongo/mongo! :db db :host dbhost :port db-port)
-    (mongo/add-index! :workers [:server-id])
-    (mongo/set-write-concern (mongo-instance) :strict)
-    (if-let [ip (guess-external-local-ip)]
-      (mongo/update! :workers
-                     {:host ip :port port}
-                     {:$set {:server-id server-id}}))
-    result))
+  (let [conn (mongo/make-connection db :host dbhost :port db-port)
+        result (server conn port)]
+    (mongo/with-mongo conn
+      (mongo/add-index! :workers [:server-id])
+      (mongo/set-write-concern conn :strict)
+      (if-let [ip (guess-external-local-ip)]
+        (mongo/update! :workers
+                       {:host ip :port port}
+                       {:$set {:server-id server-id}})))
+    (add-connection-info result conn)))
 
 (defn local-setup
   ([db port threads-number]
@@ -127,6 +142,8 @@
 
 (defn shutdown [server]
   (server)
-  (mongo/destroy! :workers {:server-id server-id})
-  (mongo/close-connection (mongo-instance))
+  (let [connection (get-connection-info server)]
+    (mongo/with-mongo connection
+      (mongo/destroy! :workers {:server-id server-id}))
+    (mongo/close-connection connection))
   (.shutdownNow automator-executor))
