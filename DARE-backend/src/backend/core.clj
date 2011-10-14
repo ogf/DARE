@@ -194,11 +194,12 @@
          (submit-execution-for-robot! (:workers this) robot inputs))))
 
   (^Maybe
-   retrieveExecution [this ^String executionCode]
-   (when-let [found (find-unique :executions executionCode)]
-     (if (:resultLines found)
-       (Maybe/value (to-execution-result found))
-       (Maybe/none))))
+    retrieveExecution [this ^String executionCode]
+    (on this
+        (when-let [found (find-unique :executions executionCode)]
+          (if (:resultLines found)
+            (Maybe/value (to-execution-result found))
+            (Maybe/none)))))
 
   (^void
    save [this ^PeriodicalExecution periodicalExecution]
