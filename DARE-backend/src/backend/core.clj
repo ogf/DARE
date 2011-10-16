@@ -11,6 +11,8 @@
            [org.joda.time DateTime]
            [com.mongodb DBApiLayer]))
 
+(def ^{:dynamic true} *polling-interval-for-new-workers* (* 1 60 1000))
+
 (defn code-to-mongo-id [map]
   (if-let [code (get map :code nil)]
     (-> map (dissoc :code) (assoc :_id code))
@@ -248,19 +250,25 @@
   (apply workers/workers-handler!
          (query-workers {:conn mongo-connection})))
 
+(defmacro while-backend-not-closed [{:keys [task-name backend period]} & body]
+  `(l/run-pipeline nil
+                   :error-handler (fn [~'ex]
+                                    (when-not @(:closed ~backend)
+                                      (log/error (str "exception " ~task-name) ~'ex)
+                                      (l/restart)))
+                   (l/wait-stage ~period)
+                   (fn [~'_]
+                     (when-not @(:closed ~backend)
+                       (log/info (str "Executing " ~task-name))
+                       ~@body))
+                   (fn [~'_]
+                     (if-not @(:closed ~backend)
+                       (l/restart)))))
+
 (defn- poll-new-workers [backend]
-  (l/run-pipeline nil
-                  :error-handler (fn [ex]
-                                   (log/error "exception polling new workers" ex)
-                                   (l/restart))
-                  (l/wait-stage 10000)
-                  (fn [_]
-                    (when @(:closed backend)
-                      (l/task (workers/add-new-workers! (:workers backend)
-                                                        (query-workers backend)))))
-                  (fn [_]
-                    (if-not @(:closed backend)
-                      (l/restart)))))
+  (while-backend-not-closed {:task-name "polling new workers" :backend backend
+                             :period *polling-interval-for-new-workers*}
+    (apply workers/add-new-workers! (:workers backend) (query-workers backend))))
 
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db

@@ -12,14 +12,26 @@
 
 (def *backend*)
 
+(defmacro with-server [server-bindings & body]
+  {:pre [(vector? server-bindings) (even? (count server-bindings))]}
+  (cond
+   (= 0 (count server-bindings)) `(do ~@body)
+   :else `(let ~(subvec server-bindings 0 2)
+            (try
+              (with-server ~(subvec server-bindings 2) ~@body)
+              (finally
+               (server/shutdown ~(server-bindings 0)))))))
+
+(def create-server (partial server/local-setup :test))
+
 (defn backend-fixture [f]
-  (let [server (server/local-setup :test 3333)]
-    (try
-      (binding [*backend* (create-backend :db :test)]
+  (with-server [server (create-server 3333)]
+    (binding [*polling-interval-for-new-workers* 1000]
+      (binding [*backend* (create-backend :db :test)
+                client/*check-healthy-interval-ms* 100]
         (on *backend*
             (f)
-            (.close *backend*)))
-      (finally (server/shutdown server)))))
+            (.close *backend*))))))
 
 (use-fixtures :once backend-fixture)
 
@@ -127,6 +139,18 @@
 
              :executionTimeMilliseconds (.getExecutionTimeMilliseconds last-execution)
              :resultLines (.getResultLines last-execution))))))
+
+(deftest can-find-new-workers
+  (letfn [(count-alive-workers [] (client/count-alive-workers (:workers *backend*)))]
+    (is (= 1 (count-alive-workers)))
+    (with-server [new-server (create-server 44444)]
+      (Thread/sleep 500)
+      (is (= 2 (count-alive-workers))))
+    (Thread/sleep 700)
+    (is (= 1 (count-alive-workers)))
+    (with-server [new-server (create-server 44444)]
+      (Thread/sleep 500)
+      (is (= 2 (count-alive-workers))))))
 
 (deftest Backend-is-an-implementation-of-IBackend
   (is (instance? IBackend *backend*)))
