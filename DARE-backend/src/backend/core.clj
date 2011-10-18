@@ -388,6 +388,13 @@
     (on backend
       (clean-not-completed *time-allowed-for-execution-ms*))))
 
+(defn add-indexes [backend]
+  (on backend
+    (mongo/add-index! :periodical-executions
+                      {:scheduled 1 :next-execution-ms 1})
+    (mongo/add-index! :periodical-executions
+                      {:execution-sent-at 1})))
+
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
                                                 (only-defined {:host host :port port}))
@@ -397,6 +404,7 @@
           submitter (submit-periodical-executions backend)
           cleaner (clean-scheduled-but-not-completed backend)
           poller (poll-new-workers backend)]
+      (add-indexes backend)
       (log/info (str "Backend started. Connected to " host
                      " on " port + " with database " db))
       backend)))
