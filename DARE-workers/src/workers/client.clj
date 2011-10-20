@@ -113,9 +113,9 @@
   (let [{:keys [specified-workers new-workers-channel]} workers-handler
         new-workers (as-workers new-workers-specs)
         truly-added (set/difference new-workers @specified-workers)]
-    (log/info (str "adding new workers " new-workers))
     (swap! specified-workers set/union new-workers)
     (when (seq truly-added)
+      (log/info (str "adding new workers " truly-added))
       (enqueue new-workers-channel "New workers added"))))
 
 (defn shutdown! [workers-handler]
