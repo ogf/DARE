@@ -11,6 +11,8 @@
            [org.joda.time DateTime]
            [com.mongodb DBApiLayer]))
 
+(def ^{:dynamic true} *print-background-task* true)
+
 (def ^{:dynamic true} *fast-testing-polling-mode* false)
 
 (def ^{:dynamic true} *polling-interval-for-new-workers* (* 1 60 1000))
@@ -324,7 +326,8 @@
                    (l/wait-stage (convert-wait ~period))
                    (fn [~'_]
                      (when-not @(:closed ~backend)
-                       (log/info (str "Executing " ~task-name))
+                       (when *print-background-task*
+                         (log/info (str "Executing " ~task-name)))
                        ~@body))
                    (fn [~'_]
                      (if-not @(:closed ~backend)

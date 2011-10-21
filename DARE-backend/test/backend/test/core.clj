@@ -29,6 +29,7 @@
     (binding [*fast-testing-polling-mode* true
               *minimal-allowed-execution-period-ms* (* 2 1000)
               *time-allowed-for-execution-ms* 2000
+              *print-background-task* false
               client/*check-healthy-interval-ms* 100]
       (binding [*backend* (create-backend :db :test)]
         (on *backend*
