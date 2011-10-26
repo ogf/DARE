@@ -142,15 +142,19 @@
       (assert-an-execution-eventually-exists))))
 
 (deftest can-find-new-workers
-  (letfn [(count-alive-workers [] (client/count-alive-workers (:workers *backend*)))]
+  (letfn [(count-alive-workers [] (client/count-alive-workers (:workers *backend*)))
+          (wait-for-check-healthy [factor]
+            (Thread/sleep (-> client/*check-healthy-interval-ms*
+                              (* factor)
+                              (int))))]
     (is (= 1 (count-alive-workers)))
     (with-server [new-server (create-server 44444)]
-      (Thread/sleep 500)
+      (wait-for-check-healthy 5/2)
       (is (= 2 (count-alive-workers))))
-    (Thread/sleep 700)
+    (wait-for-check-healthy 5/2)
     (is (= 1 (count-alive-workers)))
     (with-server [new-server (create-server 44444)]
-      (Thread/sleep 500)
+      (wait-for-check-healthy 4)
       (is (= 2 (count-alive-workers))))))
 
 (deftest Backend-is-an-implementation-of-IBackend
