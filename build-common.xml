@@ -59,13 +59,17 @@
       <include name="**/*.jar" />
     </fileset>
 
-    <fileset dir="lib" id="runtime-libs" includes="runtime/jar/*.jar" />
+    <fileset dir="lib" id="runtime-libs"
+             includes="runtime/jar/*.jar runtime/bundle/*.jar" />
 
-    <fileset dir="lib" id="compile-libs" includes="compile/jar/*.jar" />
+    <fileset dir="lib" id="compile-libs"
+             includes="compile/jar/*.jar compile/bundle/*.jar" />
 
-    <fileset dir="lib" id="provided-libs" includes="provided/jar/*.jar" />
+    <fileset dir="lib" id="provided-libs"
+             includes="provided/jar/*.jar provided/bundle/*.jar" />
 
-    <fileset dir="lib" id="test-libs" includes="test/jar/*.jar" />
+    <fileset dir="lib" id="test-libs"
+             includes="test/jar/*.jar test/bundle/*.jar" />
 
     <path id="compile-classpath">
       <fileset refid="compile-libs" />
