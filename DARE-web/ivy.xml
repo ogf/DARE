@@ -24,6 +24,7 @@
         <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="provided,test->default; sources"/>
 
         <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="test->default; sources"/>
+        <dependency org="com.sun.jersey" name="jersey-core" rev="1.1.5" conf="test->default; sources"/>
         <dependency org="org.hamcrest" name="hamcrest-all" rev="1.1" conf="test->default; sources"/>
         <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources"/>
     </dependencies>
