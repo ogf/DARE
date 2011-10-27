@@ -25,6 +25,6 @@
       <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="compile->default; sources" />
 
       <dependency org="org.hamcrest" name="hamcrest-all" rev="1.1" conf="test->default; sources"/>
-      <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources"/>
+      <dependency org="junit" name="junit-dep" rev="4.8.2" transitive="false" conf="test->default; sources"/>
     </dependencies>
 </ivy-module>
