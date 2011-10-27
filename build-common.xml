@@ -90,6 +90,12 @@
       <mkdir dir="lib" />
     </target>
 
+    <target name="report" depends="dependencies">
+      <mkdir dir="${dist}" />
+      <ivy:resolve type="${ivy.resolve.types}"/>
+      <ivy:report todir="${dist}" />
+    </target>
+
     <target name="compile" depends="dependencies">
         <mkdir dir="${classes_dir}" />
         <javac srcdir="src/main/java" destdir="${classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
