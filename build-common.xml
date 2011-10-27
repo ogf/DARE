@@ -184,6 +184,7 @@
     <target name="publish" depends="jar, gen-pom">
       <ivy:resolve resolveMode="dynamic" />
       <ivy:publish resolver="local" overwrite="true" update="true"
+                   forcedeliver="true"
                    pubrevision="${project-version}">
         <artifacts pattern="${dist}/[type]s/[artifact].[ext]" />
       </ivy:publish>
