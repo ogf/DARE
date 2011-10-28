@@ -19,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 import org.codehaus.jettison.json.JSONObject;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.domain.ExecutionFailedException;
 import es.uvigo.ei.sing.dare.domain.ExecutionTimeExceededException;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
@@ -75,11 +76,16 @@ public class ExecutionResultResource {
                     result.getExecutionTimeMilliseconds(),
                     result.getResultLines());
         } catch (ExecutionTimeExceededException e) {
-            throw new WebApplicationException(Response
-                    .status(Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN)
-                    .entity(e.getMessage()).build());
+            throw errorResponse(e.getMessage());
+        } catch (ExecutionFailedException e) {
+            throw errorResponse(e.getMessage());
         }
+    }
+
+    WebApplicationException errorResponse(String errorMessage) {
+        return new WebApplicationException(Response
+                .status(Status.INTERNAL_SERVER_ERROR)
+                .type(MediaType.TEXT_PLAIN).entity(errorMessage).build());
     }
 
     private URI getCreatedFrom(ExecutionResult result) {

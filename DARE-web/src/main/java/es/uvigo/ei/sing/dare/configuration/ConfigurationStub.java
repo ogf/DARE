@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import es.uvigo.ei.sing.dare.domain.ExecutionFailedException;
 import es.uvigo.ei.sing.dare.domain.ExecutionTimeExceededException;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
@@ -41,6 +42,8 @@ public class ConfigurationStub extends Configuration {
             .withHarcodedCode("test-with-periodical");
 
     public static final String INPUT_THAT_ALWAYS_TIMEOUTS = "it always timeouts";
+
+    public static final String INPUT_THAT_ALWAYS_CAUSES_ERROR = "it always cause error";
 
     static {
         PERIODICAL_EXECUTION_WITH_RESULT.receiveLastResult(ExecutionResult
@@ -124,13 +127,18 @@ public class ConfigurationStub extends Configuration {
 
                         @Override
                         public ExecutionResult build()
-                                throws ExecutionTimeExceededException {
+                                throws ExecutionTimeExceededException,
+                                ExecutionFailedException {
                             if (hasTimeoutInput(inputs)) {
                                 throw new ExecutionTimeExceededException(100l);
+                            } else if (hasInputCausingErrors(inputs)) {
+                                throw new ExecutionFailedException(
+                                        INPUT_THAT_ALWAYS_CAUSES_ERROR);
                             }
                             final String[] result = robot.execute(inputs);
                             return ExecutionResult.create(code, robot, result);
                         }
+
                     };
                     return TimeTracker.trackTime(resultBuilder);
                 }
@@ -141,9 +149,13 @@ public class ConfigurationStub extends Configuration {
             return inputs.contains(INPUT_THAT_ALWAYS_TIMEOUTS);
         }
 
+        private boolean hasInputCausingErrors(final List<String> inputs) {
+            return inputs.contains(INPUT_THAT_ALWAYS_CAUSES_ERROR);
+        }
+
         @Override
         public Maybe<ExecutionResult> retrieveExecution(String executionCode)
-                throws ExecutionTimeExceededException {
+                throws ExecutionTimeExceededException, ExecutionFailedException {
             if (previousResultsByCode.containsKey(executionCode)) {
                 return Maybe.value(previousResultsByCode.get(executionCode));
             }
@@ -158,6 +170,9 @@ public class ConfigurationStub extends Configuration {
                 } catch (ExecutionException e) {
                     if (e.getCause() instanceof ExecutionTimeExceededException) {
                         throw (ExecutionTimeExceededException) e.getCause();
+                    }
+                    if (e.getCause() instanceof ExecutionFailedException) {
+                        throw (ExecutionFailedException) e.getCause();
                     }
                     throw new RuntimeException(e.getCause());
                 } catch (Exception e) {

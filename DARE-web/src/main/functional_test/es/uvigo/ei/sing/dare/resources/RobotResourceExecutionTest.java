@@ -10,12 +10,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -23,7 +21,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -123,20 +120,19 @@ public class RobotResourceExecutionTest {
     }
 
     @Test
-    @Ignore("review string editor execution handling")
     public void testErrorExecuting() throws Exception {
-        try {
-            postRobotExecution(new MultivaluedMapImpl() {
-                {
-                    add("robot",
-                            "url | xpath('//a/@href') | patternMatcher('(http://.*)') ");
-                    add("input", "http://www." + UUID.randomUUID() + ".es");
-                }
-            });
-            fail("it must fail since it can't be executed because one of the inputs is wrong");
-        } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), equalTo(500));
-        }
+        ClientResponse response = postRobotExecution(ClientResponse.class,
+                new MultivaluedMapImpl() {
+                    {
+                        add("robot", "url");
+                        add("input",
+                                ConfigurationStub.INPUT_THAT_ALWAYS_CAUSES_ERROR);
+                    }
+                });
+        assertThat(response.getStatus(), equalTo(500));
+        assertThat(
+                response.getEntity(String.class),
+                containsString(ConfigurationStub.INPUT_THAT_ALWAYS_CAUSES_ERROR));
     }
 
     @Test

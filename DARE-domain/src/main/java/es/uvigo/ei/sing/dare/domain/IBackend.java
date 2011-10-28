@@ -64,7 +64,7 @@ public interface IBackend extends Closeable {
      * @see IBackend#submitExecution
      */
     Maybe<ExecutionResult> retrieveExecution(String executionCode)
-            throws ExecutionTimeExceededException;
+            throws ExecutionTimeExceededException, ExecutionFailedException;
 
     void save(PeriodicalExecution periodicalExecution);
 
