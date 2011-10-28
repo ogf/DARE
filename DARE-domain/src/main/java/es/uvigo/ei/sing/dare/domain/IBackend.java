@@ -63,7 +63,8 @@ public interface IBackend extends Closeable {
      * @return <code>null</code> if there is no execution for executionCode.
      * @see IBackend#submitExecution
      */
-    Maybe<ExecutionResult> retrieveExecution(String executionCode);
+    Maybe<ExecutionResult> retrieveExecution(String executionCode)
+            throws ExecutionTimeExceededException;
 
     void save(PeriodicalExecution periodicalExecution);
 

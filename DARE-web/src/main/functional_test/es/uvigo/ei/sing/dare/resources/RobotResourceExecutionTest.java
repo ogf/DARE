@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -38,6 +39,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import es.uvigo.ei.sing.dare.configuration.ConfigurationStub;
 import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 
@@ -135,6 +137,21 @@ public class RobotResourceExecutionTest {
         } catch (UniformInterfaceException e) {
             assertThat(e.getResponse().getStatus(), equalTo(500));
         }
+    }
+
+    @Test
+    public void testTimeoutExecuting() throws Exception {
+        ClientResponse response = postRobotExecution(ClientResponse.class,
+                new MultivaluedMapImpl() {
+                    {
+                        add("robot", "url");
+                        add("input",
+                                ConfigurationStub.INPUT_THAT_ALWAYS_TIMEOUTS);
+                    }
+                });
+        assertThat(response.getStatus(), equalTo(500));
+        assertThat(response.getEntity(String.class),
+                containsString("took more than"));
     }
 
     @Test

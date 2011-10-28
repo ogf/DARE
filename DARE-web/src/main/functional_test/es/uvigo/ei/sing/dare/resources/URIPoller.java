@@ -62,6 +62,9 @@ public class URIPoller {
                     Thread.sleep(pollingIntervalMilliseconds);
                     clientResponse = doGet(uriToExecution, acceptedType);
                 }
+                if (resultType.equals(ClientResponse.class)) {
+                    return resultType.cast(clientResponse);
+                }
                 return clientResponse.getEntity(resultType);
             }
 

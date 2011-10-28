@@ -5,10 +5,11 @@ import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 public class TimeTracker {
 
     public interface IExecutionResultBuilder {
-        ExecutionResult build();
+        ExecutionResult build() throws ExecutionTimeExceededException;
     }
 
-    public static ExecutionResult trackTime(IExecutionResultBuilder builder) {
+    public static ExecutionResult trackTime(IExecutionResultBuilder builder)
+            throws ExecutionTimeExceededException {
         long start = System.currentTimeMillis();
         ExecutionResult built = builder.build();
         long elapsed = System.currentTimeMillis() - start;

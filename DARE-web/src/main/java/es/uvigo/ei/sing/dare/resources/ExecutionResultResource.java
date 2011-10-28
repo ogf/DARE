@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 import org.codehaus.jettison.json.JSONObject;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.domain.ExecutionTimeExceededException;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
@@ -57,18 +59,27 @@ public class ExecutionResultResource {
     public RobotExecutionResultView retrieve(
             @PathParam("executionResultCode") String executionResultCode) {
 
-        Maybe<ExecutionResult> possibleResult = getStore().retrieveExecution(
-                executionResultCode);
-        if (possibleResult == null) {
-            throw new WebApplicationException(Status.NOT_FOUND);
+        try {
+            Maybe<ExecutionResult> possibleResult = getStore()
+                    .retrieveExecution(executionResultCode);
+            if (possibleResult == null) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+            if (possibleResult.isNone()) {// not completed
+                throw new WebApplicationException(Status.NO_CONTENT);
+            }
+            ExecutionResult result = possibleResult.getValue();
+            URI createdFrom = getCreatedFrom(result);
+            return new RobotExecutionResultView(createdFrom,
+                    result.getCreationTime(),
+                    result.getExecutionTimeMilliseconds(),
+                    result.getResultLines());
+        } catch (ExecutionTimeExceededException e) {
+            throw new WebApplicationException(Response
+                    .status(Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN)
+                    .entity(e.getMessage()).build());
         }
-        if (possibleResult.isNone()) {// not completed
-            throw new WebApplicationException(Status.NO_CONTENT);
-        }
-        ExecutionResult result = possibleResult.getValue();
-        URI createdFrom = getCreatedFrom(result);
-        return new RobotExecutionResultView(createdFrom, result.getCreationTime(),
-                result.getExecutionTimeMilliseconds(), result.getResultLines());
     }
 
     private URI getCreatedFrom(ExecutionResult result) {

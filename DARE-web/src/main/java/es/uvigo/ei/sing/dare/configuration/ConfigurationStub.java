@@ -2,15 +2,18 @@ package es.uvigo.ei.sing.dare.configuration;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import es.uvigo.ei.sing.dare.domain.ExecutionTimeExceededException;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.domain.TimeTracker;
@@ -36,6 +39,9 @@ public class ConfigurationStub extends Configuration {
     public static final PeriodicalExecution PERIODICAL_EXECUTION_WITH_RESULT = new PeriodicalExecution(
             robotExample, oneDay, Arrays.asList("http://www.google.com"))
             .withHarcodedCode("test-with-periodical");
+
+    public static final String INPUT_THAT_ALWAYS_TIMEOUTS = "it always timeouts";
+
     static {
         PERIODICAL_EXECUTION_WITH_RESULT.receiveLastResult(ExecutionResult
                 .create("test-result", PERIODICAL_EXECUTION_WITH_RESULT,
@@ -117,7 +123,11 @@ public class ConfigurationStub extends Configuration {
                     IExecutionResultBuilder resultBuilder = new IExecutionResultBuilder() {
 
                         @Override
-                        public ExecutionResult build() {
+                        public ExecutionResult build()
+                                throws ExecutionTimeExceededException {
+                            if (hasTimeoutInput(inputs)) {
+                                throw new ExecutionTimeExceededException(100l);
+                            }
                             final String[] result = robot.execute(inputs);
                             return ExecutionResult.create(code, robot, result);
                         }
@@ -127,8 +137,13 @@ public class ConfigurationStub extends Configuration {
             };
         }
 
+        private boolean hasTimeoutInput(Collection<? extends String> inputs) {
+            return inputs.contains(INPUT_THAT_ALWAYS_TIMEOUTS);
+        }
+
         @Override
-        public Maybe<ExecutionResult> retrieveExecution(String executionCode) {
+        public Maybe<ExecutionResult> retrieveExecution(String executionCode)
+                throws ExecutionTimeExceededException {
             if (previousResultsByCode.containsKey(executionCode)) {
                 return Maybe.value(previousResultsByCode.get(executionCode));
             }
@@ -140,6 +155,11 @@ public class ConfigurationStub extends Configuration {
             if (future.isDone()) {
                 try {
                     return Maybe.value(future.get());
+                } catch (ExecutionException e) {
+                    if (e.getCause() instanceof ExecutionTimeExceededException) {
+                        throw (ExecutionTimeExceededException) e.getCause();
+                    }
+                    throw new RuntimeException(e.getCause());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
