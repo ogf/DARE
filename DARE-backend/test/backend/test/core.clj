@@ -7,7 +7,7 @@
   (:use [clojure.test])
   (:import [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
-           [es.uvigo.ei.sing.dare.domain IBackend Maybe]
+           [es.uvigo.ei.sing.dare.domain IBackend Maybe ExecutionTimeExceededException]
            backend.core.Backend))
 
 (def *backend*)
@@ -28,7 +28,7 @@
   (with-server [server (create-server 3333)]
     (binding [*fast-testing-polling-mode* true
               *minimal-allowed-execution-period-ms* (* 2 1000)
-              *time-allowed-for-execution-ms* 2000
+              *time-allowed-for-periodical-execution-ms* 2000
               *print-background-task* false
               client/*check-healthy-interval-ms* 100]
       (binding [*backend* (create-backend :db :test)]
@@ -68,7 +68,9 @@
 
 (deftest submiting-robot-with-execution
   (let [robot (Robot/createFromMinilanguage "url")
-        code (.submitExecution *backend* robot ["http://www.esei.uvigo.es"])
+        submit-execution #(.submitExecution *backend*
+                                            robot ["http://www.esei.uvigo.es"])
+        code (submit-execution)
         robot-retrieved (.find *backend* (.getCode robot))]
     (testing "saves the provided robot"
       (robots-equivalent robot robot-retrieved))
@@ -77,7 +79,12 @@
                               (poll-for-execution-result *backend* code) 8000)]
         (is ((complement nil?) execution-result))
         (is (= code (.getCode execution-result)))
-        (is (< 0 (count (.getResultLines execution-result))))))))
+        (is (< 0 (count (.getResultLines execution-result))))))
+    (testing "if the execution timeouts, appropriate error is returned"
+      (binding [*time-allowed-for-execution-ms* 1]
+        (let [code (submit-execution)]
+          (is (thrown? ExecutionTimeExceededException
+                       (.retrieveExecution *backend* code))))))))
 
 (deftest retrieving-a-not-existent-execution-returns-nil
   (is (nil? (.retrieveExecution *backend* (new-unique-code)))))

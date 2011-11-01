@@ -4,7 +4,8 @@
             [workers.client :as workers]
             [clojure.contrib.logging :as log]
             [lamina.core :as l])
-  (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder]
+  (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder
+            ExecutionTimeExceededException]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
            [java.util UUID List ArrayList]
@@ -24,7 +25,9 @@
 (def ^{:dynamic true} *polling-interval-for-cleaning-expired-executions*
   (* 2 60 1000))
 
-(def ^{:dynamic true} *time-allowed-for-execution-ms* (* 4 60 1000))
+(def ^{:dynamic true} *time-allowed-for-periodical-execution-ms* (* 4 60 1000))
+
+(def ^{:dynamic true} *time-allowed-for-execution-ms* (* 2 60 1000))
 
 (defn code-to-mongo-id [map]
   (if-let [code (get map :code nil)]
@@ -212,6 +215,12 @@
                                :next-execution-ms (next-execution execution-period)))
       (mark-as-execution-sent periodical-code (now-ms)))))
 
+(defn- check-no-execution-time-exceeded [start-time-fn max-time-allowed-ms]
+  (when (> (now-ms) (+ (start-time-fn) max-time-allowed-ms))
+            (throw (ExecutionTimeExceededException. (-> max-time-allowed-ms
+                                                        (/ 1000)
+                                                        (int))))))
+
 (defrecord Backend [conn workers closed]
   IBackend
 
@@ -242,6 +251,8 @@
     retrieveExecution [this ^String executionCode]
     (on this
         (when-let [found (find-unique :executions executionCode)]
+          (check-no-execution-time-exceeded #(:creationTime found)
+                                            *time-allowed-for-execution-ms*)
           (if (:resultLines found)
             (Maybe/value (to-execution-result found))
             (Maybe/none)))))
@@ -389,7 +400,7 @@
                              :backend backend
                              :period *polling-interval-for-cleaning-expired-executions*}
     (on backend
-      (clean-not-completed *time-allowed-for-execution-ms*))))
+      (clean-not-completed *time-allowed-for-periodical-execution-ms*))))
 
 (defn add-indexes [backend]
   (on backend
