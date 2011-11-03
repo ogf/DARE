@@ -4,13 +4,23 @@
             [workers.client :as client]
             [lamina.core :as l])
   (:use [backend.core] :reload)
-  (:use [clojure.test])
+  (:use clojure.test
+        robert.hooke)
   (:import [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
-           [es.uvigo.ei.sing.dare.domain IBackend Maybe ExecutionTimeExceededException]
+           [es.uvigo.ei.sing.dare.domain IBackend Maybe ExecutionTimeExceededException ExecutionFailedException]
            backend.core.Backend))
 
 (def *backend*)
+
+(def input-causing-error (str "input-causing-error" (rand-int 100)))
+
+(defn send-exception-on-input-causing-error [f robot inputs]
+  (when (some #{input-causing-error} inputs)
+    (throw (Exception. "Stubbed error")))
+  (f robot inputs))
+
+(add-hook #'server/execute-robot send-exception-on-input-causing-error)
 
 (defmacro with-server [server-bindings & body]
   {:pre [(vector? server-bindings) (even? (count server-bindings))]}
@@ -68,8 +78,9 @@
 
 (deftest submiting-robot-with-execution
   (let [robot (Robot/createFromMinilanguage "url")
-        submit-execution #(.submitExecution *backend*
-                                            robot ["http://www.esei.uvigo.es"])
+        submit-execution-with-inputs #(.submitExecution *backend* robot %)
+        submit-execution (partial submit-execution-with-inputs
+                                  ["http://www.esei.uvigo.es"])
         code (submit-execution)
         robot-retrieved (.find *backend* (.getCode robot))]
     (testing "saves the provided robot"
@@ -84,7 +95,12 @@
       (binding [*time-allowed-for-execution-ms* 1]
         (let [code (submit-execution)]
           (is (thrown? ExecutionTimeExceededException
-                       (.retrieveExecution *backend* code))))))))
+                       (.retrieveExecution *backend* code))))))
+    (testing "if the execution fails, appropiate error is returned"
+      (let [code (submit-execution-with-inputs [input-causing-error])]
+        (is (thrown? ExecutionFailedException
+                     (l/wait-for-result
+                      (poll-for-execution-result *backend* code))))))))
 
 (deftest retrieving-a-not-existent-execution-returns-nil
   (is (nil? (.retrieveExecution *backend* (new-unique-code)))))

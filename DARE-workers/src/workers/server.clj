@@ -4,7 +4,8 @@
             [lamina.connections :as c]
             [clojure.contrib.json :as json]
             [somnium.congomongo :as mongo]
-            [clojure.contrib.logging :as log])
+            [clojure.contrib.logging :as log]
+            [clj-stacktrace.repl :as stacktrace])
   (:import [java.util concurrent.Executors UUID]
            [java.net InetSocketAddress InetAddress NetworkInterface]
            [es.uvigo.ei.sing.dare.util XMLUtil]
@@ -22,11 +23,20 @@
                              :execution-sent-at nil)
     fields))
 
-(defn db-update-execution! [collection code next-execution-ms & {:as updated-fields}]
-  (mongo/update! collection
-                 {:_id code}
-                 {:$set (adapt-updated-fields
-                         collection next-execution-ms updated-fields)}))
+(defn db-update! [collection code mongo-updates]
+  (mongo/update! collection {:_id code} mongo-updates :upsert false))
+
+(defn db-execution-completed! [collection code next-execution-ms & {:as updated-fields}]
+  (db-update! collection code
+              {:$set (adapt-updated-fields
+                      collection next-execution-ms updated-fields)
+               :$unset {:error 1}}))
+
+(defn db-execution-error! [collection code & {:as fields-to-update}]
+  (db-update! collection code {:$set fields-to-update}))
+
+(defn exception-message [ex]
+  (stacktrace/pst-str ex))
 
 (defn millis-elapsed-since [& times]
   (let [now (System/currentTimeMillis)]
@@ -38,6 +48,11 @@
       (apply f args)
       (catch Throwable e
         (on-error e)))))
+
+(defn execute-robot [robotXML inputs]
+  (-> (XMLUtil/toDocument robotXML)
+      (XMLInputOutput/loadTransformer)
+      (Util/runRobot (into-array String inputs))))
 
 (defn callable-execution
   [{:keys [inputs robotXML result-code periodical-code next-execution-ms]}]
@@ -51,18 +66,21 @@
                                :periodical-executions
                                :executions)
         name (str "["(when periodical-code "periodical") "execution " code "]")
-        on-exception (fn [ex] (log/error  (str "Error executing " name) ex))]
+        on-exception (fn [ex]
+                       (log/error  (str "Error executing " name) ex)
+                       (db-execution-error! collection-to-update
+                                            code
+                                            :error {:type :error
+                                                    :message (exception-message ex)}))]
     [name
      (->
       (fn []
         (let [start-execution-time (System/currentTimeMillis)
-              result-array (-> (XMLUtil/toDocument robotXML)
-                               (XMLInputOutput/loadTransformer)
-                               (Util/runRobot (into-array String inputs)))
+              result-array (execute-robot robotXML inputs)
               [all-time real-execution-time] (millis-elapsed-since
                                               submit-time start-execution-time)
               next-execution-ms (+ all-time (or next-execution-ms 0))]
-          (db-update-execution! collection-to-update
+          (db-execution-completed! collection-to-update
                                 code
                                 next-execution-ms
                                 :resultLines (seq result-array)

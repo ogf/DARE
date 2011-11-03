@@ -5,7 +5,7 @@
             [clojure.contrib.logging :as log]
             [lamina.core :as l])
   (:import [es.uvigo.ei.sing.dare.domain IBackend Maybe IBackendBuilder
-            ExecutionTimeExceededException]
+            ExecutionTimeExceededException ExecutionFailedException]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
            [java.util UUID List ArrayList]
@@ -253,6 +253,10 @@
         (when-let [found (find-unique :executions executionCode)]
           (check-no-execution-time-exceeded #(:creationTime found)
                                             *time-allowed-for-execution-ms*)
+          (when-let [{:keys [type message] :as error} (:error found)]
+            (throw (case (keyword type)
+                     :error (ExecutionFailedException. message)
+                     :timeout (ExecutionTimeExceededException. message))))
           (if (:resultLines found)
             (Maybe/value (to-execution-result found))
             (Maybe/none)))))

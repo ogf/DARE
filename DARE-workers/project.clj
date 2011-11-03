@@ -6,5 +6,6 @@
                  [es.uvigo.ei.sing/minilanguage "0.1"]
                  [es.uvigo.ei.sing/DARE-util "0.1"]
                  [es.uvigo.ei.sing/stringeditor "1.0"]
-                 [congomongo "0.1.7-SNAPSHOT"]]
+                 [congomongo "0.1.7-SNAPSHOT"]
+                 [clj-stacktrace "0.2.3"]]
   :repositories {"codehaus repository" "http://dist.wso2.org/maven2/"})
