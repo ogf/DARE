@@ -22,6 +22,19 @@
 
 (add-hook #'server/execute-robot send-exception-on-input-causing-error)
 
+(def input-causing-reduced-timeout (str "reduced-timeout" (rand-int 100)))
+
+(defn cause-reduced-timeout [f {:keys [inputs] :as request}]
+  (let [pred #{input-causing-reduced-timeout}]
+    (if-not (some pred inputs)
+      (f request)
+      (let [[name callable] (f (assoc request :inputs (remove pred inputs)))]
+        [name (fn [& args]
+                (binding [server/*time-allowed-for-execution-ms* 1]
+                  (apply callable args)))]))))
+
+(add-hook #'server/callable-execution cause-reduced-timeout)
+
 (defmacro with-server [server-bindings & body]
   {:pre [(vector? server-bindings) (even? (count server-bindings))]}
   (cond
@@ -78,16 +91,17 @@
 
 (deftest submiting-robot-with-execution
   (let [robot (Robot/createFromMinilanguage "url")
-        submit-execution-with-inputs #(.submitExecution *backend* robot %)
+        submit-execution-with-inputs #(.submitExecution *backend* robot %&)
         submit-execution (partial submit-execution-with-inputs
-                                  ["http://www.esei.uvigo.es"])
+                                  "http://www.esei.uvigo.es")
         code (submit-execution)
-        robot-retrieved (.find *backend* (.getCode robot))]
+        robot-retrieved (.find *backend* (.getCode robot))
+        wait-for-result #(l/wait-for-result
+                          (poll-for-execution-result *backend* %) 8000)]
     (testing "saves the provided robot"
       (robots-equivalent robot robot-retrieved))
     (testing "eventually creates a result"
-      (let [execution-result (l/wait-for-result
-                              (poll-for-execution-result *backend* code) 8000)]
+      (let [execution-result (wait-for-result code)]
         (is ((complement nil?) execution-result))
         (is (= code (.getCode execution-result)))
         (is (< 0 (count (.getResultLines execution-result))))))
@@ -97,10 +111,11 @@
           (is (thrown? ExecutionTimeExceededException
                        (.retrieveExecution *backend* code))))))
     (testing "if the execution fails, appropiate error is returned"
-      (let [code (submit-execution-with-inputs [input-causing-error])]
-        (is (thrown? ExecutionFailedException
-                     (l/wait-for-result
-                      (poll-for-execution-result *backend* code))))))))
+      (let [code (submit-execution-with-inputs input-causing-error)]
+        (is (thrown? ExecutionFailedException (wait-for-result code)))))
+    (testing "If the execution timeouts in the server, appropiate error is returned"
+      (let [code (submit-execution input-causing-reduced-timeout)]
+        (is (thrown? ExecutionTimeExceededException (wait-for-result code)))))))
 
 (deftest retrieving-a-not-existent-execution-returns-nil
   (is (nil? (.retrieveExecution *backend* (new-unique-code)))))

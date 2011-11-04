@@ -217,9 +217,9 @@
 
 (defn- check-no-execution-time-exceeded [start-time-fn max-time-allowed-ms]
   (when (> (now-ms) (+ (start-time-fn) max-time-allowed-ms))
-            (throw (ExecutionTimeExceededException. (-> max-time-allowed-ms
-                                                        (/ 1000)
-                                                        (int))))))
+    (throw (ExecutionTimeExceededException. (-> max-time-allowed-ms
+                                                (/ 1000)
+                                                (long))))))
 
 (defrecord Backend [conn workers closed]
   IBackend

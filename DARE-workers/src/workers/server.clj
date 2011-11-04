@@ -42,6 +42,42 @@
   (let [now (System/currentTimeMillis)]
     (map #(- now %) times)))
 
+(def ^{:dynamic true} *time-allowed-for-execution-ms* (* 1 60 1000))
+
+(defn with-timeout-handling [f on-timeout]
+  (fn [& args]
+    (let [start (System/currentTimeMillis)
+          success (constant-channel)
+          timeout-ms *time-allowed-for-execution-ms*
+          thread (Thread/currentThread)
+          timeout-pipeline (run-pipeline nil
+                             (fn [_]
+                               (poll {:success success} timeout-ms))
+                             read-channel
+                             (fn [result]
+                               (when-not result
+                                 (.interrupt thread))))]
+      (try
+        (let [on-success (apply f args)]
+          (enqueue success true)
+          (on-success))
+        (catch InterruptedException e
+          (if (< (first (millis-elapsed-since start)) timeout-ms)
+            (throw e)
+            (on-timeout
+             (str "The execution took more than the maximum allowed: " timeout-ms " ms"))))
+        (finally
+         (enqueue success true)
+         (try
+           (wait-for-result timeout-pipeline)
+           (catch InterruptedException e
+             ;; it can happen if the thread has been interrupted,
+             ;; .interrupt has already been reached
+             )
+           (finally
+            ;; clear possible interrupted flag
+            (Thread/interrupted))))))))
+
 (defn with-error-handling [f on-error]
   (fn [& args]
     (try
@@ -49,9 +85,16 @@
       (catch Throwable e
         (on-error e)))))
 
+(defn check-for-interruption [x]
+  (when (Thread/interrupted)
+    (throw (InterruptedException.)))
+  x)
+
 (defn execute-robot [robotXML inputs]
   (-> (XMLUtil/toDocument robotXML)
+      (check-for-interruption)
       (XMLInputOutput/loadTransformer)
+      (check-for-interruption)
       (Util/runRobot (into-array String inputs))))
 
 (defn callable-execution
@@ -66,12 +109,14 @@
                                :periodical-executions
                                :executions)
         name (str "["(when periodical-code "periodical") "execution " code "]")
+        on-error (fn [type message]
+                   (db-execution-error! collection-to-update
+                                        code
+                                        :error {:type type
+                                                :message message}))
         on-exception (fn [ex]
-                       (log/error  (str "Error executing " name) ex)
-                       (db-execution-error! collection-to-update
-                                            code
-                                            :error {:type :error
-                                                    :message (exception-message ex)}))]
+                       (log/error (str "Error executing " name) ex)
+                       (on-error :error (exception-message ex)))]
     [name
      (->
       (fn []
@@ -80,13 +125,15 @@
               [all-time real-execution-time] (millis-elapsed-since
                                               submit-time start-execution-time)
               next-execution-ms (+ all-time (or next-execution-ms 0))]
-          (db-execution-completed! collection-to-update
-                                code
-                                next-execution-ms
-                                :resultLines (seq result-array)
-                                :executionTimeMilliseconds all-time
-                                :realExecutionTime real-execution-time)
-          (log/info (str "execution completed for: " name))))
+          (fn []
+            (db-execution-completed! collection-to-update
+                                     code
+                                     next-execution-ms
+                                     :resultLines (seq result-array)
+                                     :executionTimeMilliseconds all-time
+                                     :realExecutionTime real-execution-time)
+            (log/info (str "execution completed for: " name)))))
+      (with-timeout-handling (partial on-error :timeout))
       (with-error-handling on-exception))]))
 
 (def automator-executor)
