@@ -32,7 +32,7 @@
                       collection next-execution-ms updated-fields)
                :$unset {:error 1}}))
 
-(defn db-execution-error! [collection code & {:as fields-to-update}]
+(defn db-execution-error! [collection code fields-to-update]
   (db-update! collection code {:$set fields-to-update}))
 
 (defn exception-message [ex]
@@ -109,11 +109,17 @@
                                :periodical-executions
                                :executions)
         name (str "["(when periodical-code "periodical") "execution " code "]")
+
         on-error (fn [type message]
-                   (db-execution-error! collection-to-update
-                                        code
-                                        :error {:type type
-                                                :message message}))
+                   (let [delay-next-execution
+                         (when is-periodical
+                           {:next-execution-ms (+ next-execution-ms 3600)})]
+                     (db-execution-error! collection-to-update
+                                          code
+                                          (merge
+                                           {:error {:type type
+                                                    :message message}}
+                                           delay-next-execution))))
         on-exception (fn [ex]
                        (log/error (str "Error executing " name) ex)
                        (on-error :error (exception-message ex)))]
