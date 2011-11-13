@@ -111,7 +111,10 @@
         name (str "["(when periodical-code "periodical") "execution " code "]")
 
         on-error (fn [type message]
-                   (let [delay-next-execution
+                   (let [mark-as-not-scheduled
+                         (when is-periodical
+                           {:scheduled false})
+                         delay-next-execution
                          (when is-periodical
                            {:next-execution-ms (+ next-execution-ms 3600)})]
                      (db-execution-error! collection-to-update
@@ -119,6 +122,7 @@
                                           (merge
                                            {:error {:type type
                                                     :message message}}
+                                            mark-as-not-scheduled
                                            delay-next-execution))))
         on-exception (fn [ex]
                        (log/error (str "Error executing " name) ex)
