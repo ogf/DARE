@@ -47,6 +47,10 @@
 
 (def create-server (partial server/local-setup :test))
 
+(defn erase-all-data! []
+  (doseq [coll [:periodical-executions :robots :executions]]
+    (mongo/destroy! coll {})))
+
 (defn backend-fixture [f]
   (with-server [server (create-server 3333)]
     (binding [*fast-testing-polling-mode* true
@@ -55,6 +59,8 @@
               *print-background-task* false
               client/*check-healthy-interval-ms* 100]
       (binding [*backend* (create-backend :db :test)]
+        (on *backend*
+          (erase-all-data!))
         (on *backend*
             (f)
             (.close *backend*))))))
