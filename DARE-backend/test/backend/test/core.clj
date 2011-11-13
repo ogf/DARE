@@ -155,6 +155,11 @@
                                                 period ["http://www.esei.uvigo.es"])
         code (.getCode periodical-execution)
         retrieve-periodical (fn [] (.findPeriodicalExecution *backend* code))
+        erase-previous-periodical-result
+        (fn [] (mongo/update! :periodical-executions {:_id code}
+                             {:$set {:last-execution nil
+                                     :next-execution-ms (now-ms)}}
+                             :upsert false))
         assert-an-execution-eventually-exists
         (fn []
           (let [_ (l/wait-for-result (poll-for-next-periodical-execution-result
@@ -170,13 +175,9 @@
                        periodical-execution (retrieve-periodical)))
     (testing "eventually the periodical execution is scheduled and executed after being created"
       (assert-an-execution-eventually-exists))
-    (testing "executions sent but not completed are cleaned so they can be scheduled again"
+    (testing "executions scheduled but not send are cleaned so they can be scheduled again"
+      (erase-previous-periodical-result)
       (mark-as-scheduled code)
-      (mongo/update! :periodical-executions {:_id code}
-                     {:$set {:last-execution nil
-                             :next-execution-ms (now-ms)}}
-                     :upsert false)
-      (mark-as-execution-sent code (- (now-ms) (inc *time-allowed-for-execution-ms*)))
       (assert-an-execution-eventually-exists))))
 
 (deftest can-find-new-workers

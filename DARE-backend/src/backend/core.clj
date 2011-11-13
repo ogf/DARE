@@ -67,8 +67,7 @@
 (defn add-scheduling-fields [map]
   (assoc map
     :next-execution-ms (now-ms)
-    :scheduled false
-    :execution-sent-at nil))
+    :scheduled false))
 
 (defprotocol Mongoable
   (to-mongo [this]))
@@ -192,12 +191,6 @@
   (when-let [from-mongo-map (find-unique :robots robot-code)]
     (to-robot from-mongo-map)))
 
-(defn mark-as-execution-sent [periodical-code time-execution-was-sent]
-  (mongo/update! :periodical-executions
-                 {:_id periodical-code}
-                 {:$set {:execution-sent-at time-execution-was-sent}}
-                 :upsert false))
-
 (defn submit-execution-for-periodical-execution!
   [workers-handler
    {:keys [periodical-code robot-code inputs execution-period next-execution-ms] :as request}]
@@ -212,8 +205,7 @@
       (workers/send-request! workers-handler
                              (assoc (common-request-part robot (ArrayList. inputs))
                                :periodical-code periodical-code
-                               :next-execution-ms (next-execution execution-period)))
-      (mark-as-execution-sent periodical-code (now-ms)))))
+                               :next-execution-ms (next-execution execution-period))))))
 
 (defn- check-no-execution-time-exceeded [start-time-fn max-time-allowed-ms]
   (when (> (now-ms) (+ (start-time-fn) max-time-allowed-ms))
@@ -394,9 +386,10 @@
 
 (defn clean-not-completed [time-allowed-to-execute-ms]
   (mongo/update! :periodical-executions
-                 {:execution-sent-at {:$lte (- (now-ms) time-allowed-to-execute-ms)}}
-                 {:$set {:execution-sent-at nil
-                         :scheduled false}}
+                 {:scheduled true
+                  :next-execution-ms {:$lte (- (now-ms)
+                                               time-allowed-to-execute-ms)}}
+                 {:$set {:scheduled false}}
                  :upsert false :multiple true))
 
 (defn clean-scheduled-but-not-completed [backend]
@@ -404,14 +397,12 @@
                              :backend backend
                              :period *polling-interval-for-cleaning-expired-executions*}
     (on backend
-      (clean-not-completed *time-allowed-for-periodical-execution-ms*))))
+        (clean-not-completed *time-allowed-for-periodical-execution-ms*))))
 
 (defn add-indexes [backend]
   (on backend
     (mongo/add-index! :periodical-executions
-                      {:scheduled 1 :next-execution-ms 1})
-    (mongo/add-index! :periodical-executions
-                      {:execution-sent-at 1})))
+                      {:scheduled 1 :next-execution-ms 1})))
 
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db
