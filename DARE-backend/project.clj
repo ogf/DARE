@@ -1,5 +1,6 @@
 (defproject DARE-backend "1.0.0-SNAPSHOT"
   :description ""
+  :aot [backend.core]
   :repositories {"codehaus repository" "http://dist.wso2.org/maven2/"}
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [org.clojure/clojure-contrib "1.2.0"]

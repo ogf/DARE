@@ -5,11 +5,6 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
-     <context-param>
-        <param-name>configuration-class-name</param-name>
-        <param-value>es.uvigo.ei.sing.dare.configuration.ConfigurationStub</param-value>
-    </context-param>
-
     <servlet>
         <servlet-name>Jersey Web Application</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -24,4 +19,21 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
+    <env-entry>
+        <description>
+         The name of the class that configures the backend for
+         this web app. It can be:
+         - stub: Used for testing purposes.
+         - production: It requires additional env-entries to work. Consult the
+         documentation of your application server to see how to do this. For
+         example in Tomcat is done using Environment entries within a context
+         element.
+         The additional required entries in the case you use production would be:
+         - mongo-host: The host on which the mongodb is located
+         - mongo-port: The port on which the mongodb is listening
+         - mongo-db: The name of the database to use within the mongodb instance.
+        </description>
+        <env-entry-name>backend-type</env-entry-name>
+        <env-entry-value>stub</env-entry-value>
+    </env-entry>
 </web-app>

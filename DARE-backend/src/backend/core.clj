@@ -8,7 +8,7 @@
             ExecutionTimeExceededException ExecutionFailedException]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
-           [java.util UUID List ArrayList]
+           [java.util UUID List ArrayList Map Collection]
            [org.joda.time DateTime]
            [com.mongodb DBApiLayer]))
 
@@ -418,7 +418,17 @@
                      " on " port + " with database " db))
       backend)))
 
-(defrecord BackendBuilder [^String host ^int port ^String db]
+(defn keywordize [m]
+  (zipmap (->> (keys m)
+               (map keyword))
+          (vals m)))
+
+(defrecord BackendBuilder []
   IBackendBuilder
-  (^IBackend build [this]
-             (create-backend :host host :port port :db db)))
+  (^IBackend build [this ^Map parameters]
+    (let [{:keys [mongo-host mongo-port mongo-db]} (keywordize parameters)]
+      (create-backend :host mongo-host
+                      :port (Integer/parseInt (str mongo-port))
+                      :db mongo-db)))
+  (^Collection getParametersNeeded [this]
+    ["mongo-host" "mongo-port" "mongo-db"]))
