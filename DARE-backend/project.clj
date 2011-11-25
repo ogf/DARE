@@ -2,7 +2,7 @@
   :description ""
   :aot [backend.core]
   :repositories {"codehaus repository" "http://dist.wso2.org/maven2/"}
-  :dependencies [[org.clojure/clojure "1.2.0"]
+  :dependencies [[org.clojure/clojure "1.2.1"]
                  [org.clojure/clojure-contrib "1.2.0"]
                  [es.uvigo.ei.sing/DARE-domain "0.1"]
                  [DARE-workers "0.1-SNAPSHOT"]
