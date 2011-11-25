@@ -209,10 +209,7 @@
     </target>
 
     <target name="clean">
-        <delete dir="${dist}" />
-    </target>
-
-    <target name="clean-cache">
+      <delete dir="${dist}" />
       <ivy:cleancache />
     </target>
 

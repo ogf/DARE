@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="top" default="build">
+
+  <property name="dist" location="target" />
+
+  <macrodef name="lein">
+    <attribute name="dir" />
+    <attribute name="target" />
+    <sequential>
+      <exec executable="lein" dir="@{dir}" failonerror="true">
+        <arg value="@{target}" />
+      </exec>
+    </sequential>
+  </macrodef>
+
+  <target name="clean">
+    <ant dir="DARE-util" target="clean" inheritAll="false"/>
+    <ant dir="minilanguage" target="clean" inheritAll="false"/>
+    <ant dir="DARE-domain" target="clean" inheritAll="false"/>
+    <ant dir="DARE-web" target="clean" inheritAll="false"/>
+    <lein dir="DARE-workers" target="clean" />
+    <lein dir="DARE-backend" target="clean" />
+  </target>
+
+  <target name="build">
+    <exec dir="lib/es.uvigo.ei.sing" executable="./install-on-local-repository.sh"
+          failonerror="true"/>
+    <ant dir="DARE-util" target="publish" inheritAll="false"/>
+    <ant dir="minilanguage" target="publish" inheritAll="false"/>
+    <ant dir="DARE-domain" target="publish" inheritAll="false"/>
+    <lein dir="DARE-workers" target="deps" />
+    <lein dir="DARE-workers" target="install" />
+    <lein dir="DARE-backend" target="deps" />
+    <lein dir="DARE-backend" target="install" />
+    <ant dir="DARE-web" target="war" inheritAll="false"/>
+    <mkdir dir="${dist}" />
+    <lein dir="DARE-workers" target="uberjar" />
+    <copy todir="${dist}">
+      <fileset dir="DARE-workers" includes="*-standalone.jar" />
+      <fileset dir="DARE-web/target" includes="*.war" />
+    </copy>
+  </target>
+
+</project>
