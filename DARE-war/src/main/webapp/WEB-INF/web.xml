@@ -34,6 +34,7 @@
          - mongo-db: The name of the database to use within the mongodb instance.
         </description>
         <env-entry-name>backend-type</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>stub</env-entry-value>
     </env-entry>
 </web-app>
