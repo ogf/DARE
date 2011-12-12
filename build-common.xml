@@ -163,7 +163,7 @@
         </javac>
     </target>
 
-    <target name="functional-test" depends="compile-functional-test, deploy" if="functional-tests-exist">
+    <target name="functional-test" depends="compile-functional-test" if="functional-tests-exist">
         <mkdir dir="${reports.tests}" />
         <junit printsummary="yes" haltonfailure="yes">
             <classpath refid="test-classpath" />

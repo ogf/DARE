@@ -8,11 +8,7 @@
 
     <property environment="env"/>
 
-	<property name="glassfish_home" value="${env.GLASSFISH_HOME}" />
-
 	<property name="WEB-INF" location="${webapp}/WEB-INF/" />
-
-	<property name="asadmin" location="${glassfish_home}/bin/asadmin" />
 
     <import file="../build-common.xml"/>
 
@@ -42,50 +38,28 @@
 		</copy>
 	</target>
 
-	<target name="check-already-started">
-		<exec executable="${asadmin}" resultproperty="asadmin_result">
-			<arg value="uptime" />
-		</exec>
-		<condition property="start_required">
-			<not>
-				<equals arg1="${asadmin_result}" arg2="0" />
-			</not>
-		</condition>
+	<target name="start">
+		<parallel>
+			<daemons>
+				<java classname="DARE_web.web" classpathref="test-classpath"
+					inputstring="" fork="true">
+					<arg value="-p"/>
+					<arg value="8080"/>
+					<arg value="-w"/>
+					<arg value="${dist}/${ant.project.name}.war"/>
+					<arg value="--stub"/>
+				</java>
+			</daemons>
+			<sequential>
+				<waitfor maxwait="30" maxwaitunit="second"
+					checkevery="1" checkeveryunit="second">
+					<socket server="localhost" port="8080"/>
+				</waitfor>
+			</sequential>
+		</parallel>
 	</target>
 
-	<target name="start" depends="check-already-started" if="start_required">
-		<echo message="starting glassfish" />
-		<exec executable="${asadmin}">
-			<arg value="start-domain" />
-			<arg value="--debug" />
-		</exec>
-	</target>
-
-	<target name="stop" depends="check-already-started" unless="start_required">
-		<echo message="stoping glassfish" />
-		<exec executable="${asadmin}">
-			<arg value="stop-domain" />
-		</exec>
-	</target>
-
-	<target name="deploy" depends="expand, copy-libs, start">
-		<exec executable="${asadmin}">
-			<arg value="deploy" />
-			<arg value="--force=true" />
-			<arg value="--name=${ant.project.name}" />
-			<arg value="${expanded_dir}" />
-		</exec>
-	</target>
-
-	<target name="undeploy" depends="start">
-		<exec executable="${asadmin}">
-			<arg value="undeploy" />
-			<arg value="${ant.project.name}" />
-		</exec>
-	</target>
-
-	<target name="reload" depends="expand, start">
-		<touch file="${expanded_dir}/.reload" />
+	<target name="functional-test" depends="war, start, common.functional-test">
 	</target>
 
 	<target name="war" depends="compile, unit-test, copy-libs" description="web application archive">

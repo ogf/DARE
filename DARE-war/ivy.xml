@@ -21,11 +21,11 @@
         <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="compile->default; sources" />
 
         <dependency org="org.apache.tomcat" name="tomcat-servlet-api" rev="7.0.5" conf="provided->default; sources"/>
-        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1" conf="provided->default; sources"/>
-        <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="provided,test->default; sources"/>
+        <dependency org="com.sun.jersey" name="jersey-server" rev="1.1.5" conf="compile->default; sources"/>
+        <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="compile->default; sources"/>
 
         <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="test->default; sources"/>
-        <dependency org="com.sun.jersey" name="jersey-core" rev="1.1.5" conf="test->default; sources"/>
+        <dependency org="DARE-web" name="DARE-web" rev="latest.integration" changing="true" conf="test->default; sources"/>
         <dependency org="org.hamcrest" name="hamcrest-all" rev="1.1" conf="test->default; sources"/>
         <dependency org="junit" name="junit-dep" rev="4.8.2" transitive="false" conf="test->default; sources"/>
     </dependencies>

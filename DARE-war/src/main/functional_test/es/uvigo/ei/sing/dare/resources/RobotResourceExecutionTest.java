@@ -45,7 +45,7 @@ import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 public class RobotResourceExecutionTest {
 
     public static final URI APPLICATION_URI = UriBuilder
-            .fromUri("http://localhost/").port(8080).path("DARE").build();
+            .fromUri("http://localhost/").port(8080).build();
 
     @Parameters
     public static Collection<Object[]> acceptedTypes() {
