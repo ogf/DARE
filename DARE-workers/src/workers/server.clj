@@ -1,5 +1,5 @@
 (ns workers.server
-  (:use gloss.core gloss.io lamina.core)
+  (:use gloss.core gloss.io lamina.core clojure.tools.cli)
   (:require [aleph.tcp :as tcp]
             [lamina.connections :as c]
             [clojure.contrib.json :as json]
@@ -206,28 +206,74 @@
 (defn- get-connection-info [server]
   (:conn (meta server)))
 
-(defn -main [dbhost db-port db port threads-number]
+(defmacro continue-on-error [& body]
+  `(try
+     ~@body
+     (catch Throwable ~'e
+       (log/error "Execution continues in spite of:" ~'e))))
+
+(defn other-not-daemon-threads []
+  (->> (Thread/getAllStackTraces)
+       keys
+       (filter #(not (.isDaemon %)))
+       (remove (partial identical? (Thread/currentThread)))))
+
+(defn exit-with-error-code [exit-code]
+  (doseq [t (other-not-daemon-threads)]
+    (.join t))
+  (System/exit (- exit-code 256)))
+
+(defn shutdown [server]
+  (continue-on-error
+   (server))
+  (continue-on-error
+   (let [connection (get-connection-info server)]
+     (continue-on-error
+      (mongo/with-mongo connection
+        (mongo/destroy! :workers {:server-id server-id})))
+     (mongo/close-connection connection)))
+  (continue-on-error
+   (.shutdownNow automator-executor)
+   (shutdown-agents)))
+
+(defn run [dbhost db-port db port threads-number]
   (def automator-executor (Executors/newFixedThreadPool (or threads-number 20)))
   (let [conn (mongo/make-connection db :host dbhost :port db-port)
-        result (server conn port)]
-    (mongo/with-mongo conn
-      (mongo/add-index! :workers [:server-id])
-      (mongo/set-write-concern conn :strict)
-      (if-let [ip (guess-external-local-ip)]
-        (mongo/update! :workers
-                       {:host ip :port port}
-                       {:$set {:server-id server-id}})))
-    (add-connection-info result conn)))
+        tcp-server (server conn port)
+        tcp-server (add-connection-info tcp-server conn)]
+    (try
+      (mongo/with-mongo conn
+        (mongo/add-index! :workers [:server-id])
+        (mongo/set-write-concern conn :strict)
+        (if-let [ip (guess-external-local-ip)]
+          (mongo/update! :workers
+                         {:host ip :port port}
+                         {:$set {:server-id server-id}})))
+
+      (catch Throwable e
+        (log/warn "Error connecting to mongo" e)
+        (shutdown tcp-server)
+        (exit-with-error-code 69))))) ;; EX_UNAVAILABLE
+
+(defn parse-args [args]
+  (cli args
+       ["--mongo-host" "The hostname on which mongoDB is" :default "127.0.0.1"]
+       ["--mongo-port" "The port on which the mongoDB to be used is listening to"
+        :default 27017 :parse-fn #(Integer. %)]
+       ["--mongo-db" "The name of the database to use within the mongoDB instance"
+        :default "test"]
+       ["-p" "--port" "The port this worker will listen to for requests" :default 40100 :parse-fn #(Integer. %)]
+       ["--threads-number" :default 20 :parse-fn #(Integer. %)]
+       ["-h" "--help" "Print this help" :flag true :default false]))
+
+(defn -main [& args]
+  (let [[{:keys [mongo-host mongo-port mongo-db port threads-number help]} _ help-banner] (parse-args args)]
+    (cond
+     help (println help-banner)
+     :else
+     (run mongo-host mongo-port mongo-db port threads-number))))
 
 (defn local-setup
   ([db port threads-number]
-     (-main "127.0.0.1" 27017 db port threads-number))
+     (run "127.0.0.1" 27017 db port threads-number))
   ([db port] (local-setup db port 10)))
-
-(defn shutdown [server]
-  (server)
-  (let [connection (get-connection-info server)]
-    (mongo/with-mongo connection
-      (mongo/destroy! :workers {:server-id server-id}))
-    (mongo/close-connection connection))
-  (.shutdownNow automator-executor))
