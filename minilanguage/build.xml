@@ -7,14 +7,17 @@
     <!-- This is the base version. Ivy will append a build number. -->
     <property name="project-version" value="0.1"/>
 
-    <property name="spec-file-location" location="src/main/resources/es/uvigo/ei/sing/stringeditor/" />
+    <property name="spec-file-dir" location="src/main/resources/es/uvigo/ei/sing/stringeditor/" />
 
     <target name="unit-test" depends="common.unit-test">
-        <java jar="lib/runtime/jar/jruby-complete-1.5.6.jar" failonerror="true" fork="true" dir="${spec-file-location}">
+        <java jar="lib/runtime/jar/jruby-complete-1.6.5.jar" failonerror="true" fork="true">
             <classpath refid="runtime-classpath"></classpath>
             <arg value="-S" />
-            <arg value="spec"/>
-            <arg value="transformer_spec.rb"/>
+            <arg value="gems/bin/rspec" />
+            <arg value="--default_path" />
+            <arg value="${spec-file-dir}" />
+            <arg value="-I" />
+            <arg value="${spec-file-dir}" />
         </java>
     </target>
 
