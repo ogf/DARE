@@ -33,6 +33,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
@@ -46,6 +47,13 @@ public class RobotResourceExecutionTest {
 
     public static final URI APPLICATION_URI = UriBuilder
             .fromUri("http://localhost/").port(8080).build();
+
+    public static Client buildClientWithLoggingAndCaching() {
+        Client result = new Client();
+        result.addFilter(new GZIPContentEncodingFilter());
+        result.addFilter(new LoggingFilter());
+        return result;
+    }
 
     @Parameters
     public static Collection<Object[]> acceptedTypes() {
@@ -63,7 +71,7 @@ public class RobotResourceExecutionTest {
     private URIPoller poller;
 
     public RobotResourceExecutionTest(MediaType acceptedType) {
-        client = Client.create();
+        client = buildClientWithLoggingAndCaching();
         this.appResource = client.resource(APPLICATION_URI);
         this.acceptedType = acceptedType;
         client.addFilter(new LoggingFilter());
