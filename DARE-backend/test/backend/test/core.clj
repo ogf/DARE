@@ -57,7 +57,7 @@
               *minimal-allowed-execution-period-ms* (* 2 1000)
               *time-allowed-for-periodical-execution-ms* 2000
               *print-background-task* false
-              client/*check-healthy-interval-ms* 100]
+              client/*check-healthy-interval-ms* 300]
       (binding [*backend* (create-backend :db :test)]
         (on *backend*
           (erase-all-data!))
