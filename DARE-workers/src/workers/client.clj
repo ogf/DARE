@@ -39,34 +39,27 @@
 (defn- loop-while-healthy [client alive-ref spec polling-interval]
   (run-pipeline client
     :error-handler (fn [ex]
-                     (try
-                       (swap! alive-ref dissoc spec)
-                       (log/warn (str "Couldn't connect to " spec) ex)
-                       (c/close-connection client)
-                       (finally
-                       (complete nil))))
+                     (swap! alive-ref dissoc spec)
+                     (log/warn (str "Couldn't connect to " spec) ex))
     (fn [_]
       (async-send query-alive-str polling-interval client))
     (fn [_]
-      (swap! alive-ref assoc spec client)
-      client)
+      (when-not (contains? @alive-ref spec)
+        (swap! alive-ref assoc spec client)
+        (log/info (str "[Re]Connected to " spec))))
      (wait-stage polling-interval)
      restart))
 
-(defn- check-alive-connection [alive-ref polling-interval spec]
-  (run-pipeline spec
-    :error-handler (fn [ex]
-                     (log/error (str "Unexpected error for " spec) ex)
-                     (restart spec))
-    (fn [[host port]]
-      (client host port))
-    (fn [client]
-      (log/info (str  "Client for " spec " created"))
-      client)
-    (fn [client]
-      (loop-while-healthy client alive-ref spec polling-interval))
-    (fn [_]
-      (restart spec))))
+(defn- check-alive-connection [alive-ref polling-interval [host port :as spec]]
+  (let [client (client host port)]
+    (run-pipeline 0
+      :error-handler (fn [ex]
+                       (restart polling-interval))
+      (fn [wait-interval]
+        ((wait-stage wait-interval) nil))
+      (fn [_]
+        (loop-while-healthy client alive-ref spec polling-interval))
+      restart)))
 
 (defn- as-workers [workers-data]
   (apply hash-set workers-data))
