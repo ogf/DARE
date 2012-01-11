@@ -207,6 +207,41 @@
                                :periodical-code periodical-code
                                :next-execution-ms (next-execution execution-period))))))
 
+(defn mark-as-scheduled [periodical-code]
+  (mongo/update! :periodical-executions
+                 {:_id periodical-code}
+                 {:$set {:scheduled true}} :upsert false))
+
+(defmacro continue-on-error [name & body]
+  `(try ~@body
+        (catch Throwable ~'e
+          (log/error (str "error while " ~name) ~'e))))
+
+(defn unscheduled-on-next [expiring-on-next-ms]
+  (let [before-time (+ (now-ms) expiring-on-next-ms)]
+    {:scheduled false
+     :next-execution-ms {:$lte before-time}}))
+
+(defn with-id [code]
+  {:_id code})
+
+(defn submit-periodical [workers where]
+  (let [select (zipmap [:_id :robotCode :inputs :executionPeriod :next-execution-ms]
+                       (repeat 1))
+        to-submit-map (fn [{:keys [_id robotCode inputs next-execution-ms] :as each}]
+                        {:periodical-code _id
+                         :robot-code robotCode
+                         :inputs inputs
+                         :next-execution-ms next-execution-ms
+                         :execution-period
+                         ((from-execution-period :executionPeriod) each)})
+        found (mongo/fetch :periodical-executions :where where :only select)]
+    (log/info (str "scheduling " (count found) " periodical executions"))
+    (doseq [each found]
+      (continue-on-error (str "submitting periodical execution: " (:_id each))
+        (mark-as-scheduled (:_id each))
+        (submit-execution-for-periodical-execution! workers (to-submit-map each))))))
+
 (defn- check-no-execution-time-exceeded [start-time-fn max-time-allowed-ms]
   (when (> (now-ms) (+ (start-time-fn) max-time-allowed-ms))
     (throw (ExecutionTimeExceededException. (-> max-time-allowed-ms
@@ -258,7 +293,11 @@
    (on this
        (assert (find-unique :robots
                             (.getRobotCode periodicalExecution)))
-       (save! :periodical-executions periodicalExecution)))
+       (save! :periodical-executions periodicalExecution)
+       (future
+         (on this
+           (submit-periodical (:workers this)
+                              (with-id (.getCode periodicalExecution)))))))
 
   (^PeriodicalExecution
    findPeriodicalExecution [this ^String code]
@@ -346,43 +385,14 @@
     (apply workers/add-new-workers! (:workers backend) (query-workers backend))))
 
 
-(defn mark-as-scheduled [periodical-code]
-  (mongo/update! :periodical-executions
-                 {:_id periodical-code}
-                 {:$set {:scheduled true}} :upsert false))
-
-(defmacro continue-on-error [name & body]
-  `(try ~@body
-        (catch Throwable ~'e
-          (log/error (str "error while " ~name) ~'e))))
-
-(defn submit-periodical [workers expiring-on-next-ms]
-  (let [before-time (+ (now-ms) expiring-on-next-ms)
-        where {:scheduled false
-               :next-execution-ms {:$lte before-time}}
-        select (zipmap [:_id :robotCode :inputs :executionPeriod :next-execution-ms]
-                       (repeat 1))
-        to-submit-map (fn [{:keys [_id robotCode inputs next-execution-ms] :as each}]
-                        {:periodical-code _id
-                         :robot-code robotCode
-                         :inputs inputs
-                         :next-execution-ms next-execution-ms
-                         :execution-period
-                         ((from-execution-period :executionPeriod) each)})
-        found (mongo/fetch :periodical-executions :where where :only select)]
-    (log/info (str "scheduling " (count found) " periodical executions"))
-    (doseq [each found]
-      (continue-on-error (str "submitting periodical execution: " (:_id each))
-        (mark-as-scheduled (:_id each))
-        (submit-execution-for-periodical-execution! workers (to-submit-map each))))))
-
 (defn submit-periodical-executions [backend]
   (while-backend-not-closed {:task-name "submitting periodical executions"
                              :backend backend
                              :period *polling-interval-for-periodical*}
     (on backend
         (submit-periodical (:workers backend)
-                           *minimal-allowed-execution-period-ms*))))
+                           (unscheduled-on-next
+                            *minimal-allowed-execution-period-ms*)))))
 
 (defn clean-not-completed [time-allowed-to-execute-ms]
   (mongo/update! :periodical-executions
