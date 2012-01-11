@@ -311,7 +311,7 @@
 (defn- query-workers [backend]
   (on backend
       (->> (mongo/fetch :workers :only [:host :port])
-           (map (fn [m] [(:host m) (:port m)]))
+           (map (fn [m] [(:host m) (-> m :port int)]))
            (into []))))
 
 (defn- create-workers-handler [mongo-connection]
