@@ -43,7 +43,7 @@
             (try
               (with-server ~(subvec server-bindings 2) ~@body)
               (finally
-               (server/shutdown ~(server-bindings 0)))))))
+               (server/shutdown ~(server-bindings 0) :complete-exit false))))))
 
 (def create-server (partial server/local-setup :test))
 

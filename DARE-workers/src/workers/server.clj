@@ -223,7 +223,7 @@
     (.join t))
   (System/exit (- exit-code 256)))
 
-(defn shutdown [server]
+(defn shutdown [server & {:keys [complete-exit] :or {complete-exit true}}]
   (continue-on-error
    (server))
   (continue-on-error
@@ -232,12 +232,13 @@
       (mongo/with-mongo connection
         (mongo/destroy! :workers {:server-id server-id})))
      (mongo/close-connection connection)))
-  (continue-on-error
-   (.shutdownNow automator-executor)
-   (shutdown-agents)))
+  (when complete-exit
+    (continue-on-error
+     (.shutdownNow automator-executor)
+     (shutdown-agents))))
 
 (defn run [dbhost db-port db port threads-number]
-  (def automator-executor (Executors/newFixedThreadPool (or threads-number 20)))
+  (defonce automator-executor (Executors/newFixedThreadPool (or threads-number 20)))
   (let [conn (mongo/make-connection db :host dbhost :port db-port)
         tcp-server (server conn port)
         tcp-server (add-connection-info tcp-server conn)]
