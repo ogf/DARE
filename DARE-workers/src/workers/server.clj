@@ -250,7 +250,7 @@
           (mongo/update! :workers
                          {:host ip :port port}
                          {:$set {:server-id server-id}})))
-
+      tcp-server
       (catch Throwable e
         (log/warn "Error connecting to mongo" e)
         (shutdown tcp-server)
