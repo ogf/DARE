@@ -77,4 +77,27 @@ public interface IBackend extends Closeable {
      */
     PeriodicalExecution findPeriodicalExecution(String code);
 
+    /**
+     * Removes from the storage the execution with code <code>code</code>
+     *
+     * @param code
+     */
+    void deleteExecution(String code);
+
+    /**
+     * Removes from the storage the execution with code <code>code</code> code
+     * and all its associated executions.
+     *
+     * @param code
+     */
+    void deleteRobot(String code);
+
+    /**
+     * Removes from the storage the periodical execution with <code>code</code>
+     * code. It's no longer scheduled.
+     *
+     * @param code
+     */
+    void deletePeriodical(String code);
+
 }

@@ -3,6 +3,7 @@ package es.uvigo.ei.sing.dare.resources;
 import java.net.URI;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -10,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -101,5 +103,13 @@ public class PeriodicalExecutionResource {
             @PathParam("periodical-execution-code") String periodicalExecutionCode) {
         return retrievePeriodicalExecution(periodicalExecutionCode).asJSON();
     }
+
+    @DELETE
+    @Path("/result/{periodical-execution-code}")
+    public Response delete(@PathParam("periodical-execution-code") String code) {
+        getConfiguration().getBackend().deletePeriodical(code);
+        return Response.ok().build();
+    }
+
 
 }

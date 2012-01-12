@@ -136,9 +136,6 @@
               :description))
        (apply create-robot)))
 
-(defn from-robot-code [key]
-  (at-key key (comp to-robot (partial find-unique :robots))))
-
 (defn from-execution-period [key]
   (at-key key #(ExecutionPeriod.
                 (:amount %)
@@ -307,6 +304,23 @@
          (to-periodical map))))
 
   (^void
+    deleteExecution [this ^String code]
+    (on this
+      (mongo/destroy! :executions {:_id code})))
+
+  (^void
+    deleteRobot [this ^String code]
+    (on this
+      (mongo/destroy! :robots {:_id code})
+      (mongo/destroy! :executions {:optionalRobotCode code})
+      (mongo/destroy! :periodical-executions {:robotCode code})))
+
+  (^void
+    deletePeriodical [this ^String code]
+    (on this
+      (mongo/destroy! :periodical-executions {:_id code})))
+
+  (^void
    close [this]
    (reset! (:closed this) true)
    (workers/shutdown! (:workers this))
@@ -413,7 +427,8 @@
 (defn add-indexes [backend]
   (on backend
     (mongo/add-index! :periodical-executions
-                      {:scheduled 1 :next-execution-ms 1})))
+                      {:scheduled 1 :next-execution-ms 1 :robotCode 1})
+    (mongo/add-index! :executions {:optionalRobotCode 1})))
 
 (defn create-backend  [& {:keys [host port db]}]
   (let [mongo-connection (mongo/make-connection db

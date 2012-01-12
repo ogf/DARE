@@ -186,6 +186,41 @@
       (mark-as-scheduled code)
       (assert-an-execution-eventually-exists))))
 
+(deftest robots-periodical-executions-and-result-executions-can-be-deleted
+  (let [robot (Robot/createFromMinilanguage "url")
+        _ (.save *backend* robot)
+        period (ExecutionPeriod. 1 ExecutionPeriod$Unit/DAYS)
+        inputs ["http://www.esei.uvigo.es"]
+        save-periodical
+        (fn []
+          (let [result (.createPeriodical robot period inputs)]
+            (.save *backend* result)
+            (.getCode result)))
+        save-execution
+        (fn []
+          (.submitExecutionForExistentRobot *backend* (.getCode robot) inputs))
+        retrieve-execution (fn [code] (.retrieveExecution *backend* code))
+        retrieve-periodical (fn [code] (.findPeriodicalExecution *backend* code))
+        retrieve-robot (fn [code] (.find *backend* code))]
+    (testing "Deleting an execution removes it from storage"
+      (let [code (save-execution)]
+        (is ((complement nil?) (retrieve-execution code)))
+        (.deleteExecution *backend* code)
+        (is (nil? (retrieve-execution code)))))
+    (testing "Deleting a periodical execution removes it from storage"
+      (let [code (save-periodical)]
+        (is ((complement nil?) (retrieve-periodical code)))
+        (.deletePeriodical *backend* code)
+        (is (nil? (retrieve-periodical code)))))
+    (testing "Deleting the robot makes it unavailable along with the associated robots and periodical executions"
+      (let [robot-code (.getCode robot)
+            execution-code (save-execution)
+            periodical-code (save-periodical)]
+        (.deleteRobot *backend* robot-code)
+        (is (nil? (retrieve-robot robot-code)))
+        (is (nil? (retrieve-execution execution-code)))
+        (is (nil? (retrieve-periodical periodical-code)))))))
+
 (deftest can-find-new-workers
   (letfn [(count-alive-workers [] (client/count-alive-workers (:workers *backend*)))
           (wait-for-check-healthy [factor]

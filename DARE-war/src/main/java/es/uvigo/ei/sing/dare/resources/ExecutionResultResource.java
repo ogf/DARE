@@ -4,6 +4,7 @@ import java.net.URI;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -51,6 +52,14 @@ public class ExecutionResultResource {
 
     private IBackend getStore() {
         return getConfiguration().getBackend();
+    }
+
+    @DELETE
+    @Path("{executionResultCode}")
+    public Response delete(
+            @PathParam("executionResultCode") String executionResultCode) {
+        getStore().deleteExecution(executionResultCode);
+        return Response.ok().build();
     }
 
     @GET

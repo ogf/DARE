@@ -200,6 +200,21 @@ public class ConfigurationStub extends Configuration {
         public void close() throws IOException {
         }
 
+        @Override
+        public void deleteExecution(String code) {
+            executions.remove(code);
+        }
+
+        @Override
+        public void deleteRobot(String code) {
+            robotsByCode.remove(code);
+        }
+
+        @Override
+        public void deletePeriodical(String code) {
+            periodicalsByCode.remove(code);
+        }
+
     };
 
     public IBackend getBackend() {

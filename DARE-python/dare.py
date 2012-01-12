@@ -53,6 +53,10 @@ class Server(object):
         return self.do_get(url, {'Accept': 'application/json'},
                            lambda r, c: json.loads(c))
 
+    def do_delete(self, url, headers = None):
+        return self._http.request(url, "DELETE",  headers = None)
+
+
 class Resource(object):
 
     def __init__(self, server, url):
@@ -111,10 +115,16 @@ class Robot(Resource):
                                              'input': inputs_list})
         return Periodical(self.server, url)
 
+    def delete(self):
+        return self.server.do_delete(self.url)
+
 class Execution(Resource):
 
     def show(self):
         return self.server.do_get_json(self.url)
+
+    def delete(self):
+        return self.server.do_delete(self.url)
 
 class Period(object):
 
@@ -132,3 +142,7 @@ class Periodical(Resource):
 
     def show(self):
         return self.server.do_get_json(self.url)
+
+    def delete(self):
+        return self.server.do_delete(self.url)
+
