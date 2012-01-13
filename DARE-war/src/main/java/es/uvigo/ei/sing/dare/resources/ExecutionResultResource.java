@@ -17,8 +17,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.codehaus.jettison.json.JSONObject;
-
 import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.domain.ExecutionFailedException;
 import es.uvigo.ei.sing.dare.domain.ExecutionTimeExceededException;
@@ -66,9 +64,13 @@ public class ExecutionResultResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @Path("{executionResultCode}")
-    public RobotExecutionResultView retrieve(
+    public Response retrieve(
             @PathParam("executionResultCode") String executionResultCode) {
+        return CacheUtil.cacheImmutable(retrieveExecution(executionResultCode));
+    }
 
+    private RobotExecutionResultView retrieveExecution(
+            String executionResultCode) {
         try {
             Maybe<ExecutionResult> possibleResult = getStore()
                     .retrieveExecution(executionResultCode);
@@ -80,10 +82,11 @@ public class ExecutionResultResource {
             }
             ExecutionResult result = possibleResult.getValue();
             URI createdFrom = getCreatedFrom(result);
-            return new RobotExecutionResultView(createdFrom,
+            RobotExecutionResultView entity = new RobotExecutionResultView(createdFrom,
                     result.getCreationTime(),
                     result.getExecutionTimeMilliseconds(),
                     result.getResultLines());
+            return entity;
         } catch (ExecutionTimeExceededException e) {
             throw errorResponse(e.getMessage());
         } catch (ExecutionFailedException e) {
@@ -106,8 +109,9 @@ public class ExecutionResultResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{executionResultCode}")
-    public JSONObject retrieveAsJSON(
+    public Response retrieveAsJSON(
             @PathParam("executionResultCode") String executionResultCode) {
-        return retrieve(executionResultCode).asJSON();
+        return CacheUtil.cacheImmutable(retrieveExecution(executionResultCode)
+                .asJSON());
     }
 }

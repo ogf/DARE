@@ -104,19 +104,22 @@ public class RobotResource {
     @GET
     @Path("{code}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RobotJSONView viewAsJSON(@PathParam("code") String robotCode) {
+    public Response viewAsJSON(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
-        return new RobotJSONView(robot.getCode(), robot.getCreationTime(),
+        RobotJSONView result = new RobotJSONView(robot.getCode(),
+                robot.getCreationTime(),
                 robot.getTransformerInMinilanguage());
+        return CacheUtil.cacheImmutable(result);
     }
 
     @GET
     @Path("{code}")
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public RobotXMLView viewAsXML(@PathParam("code") String robotCode) {
+    public Response viewAsXML(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
-        return new RobotXMLView(robot.getCode(), robot.getCreationTime(),
-                XMLUtil.toDocument(robot.getTransformerInXML()));
+        return CacheUtil.cacheImmutable(new RobotXMLView(robot.getCode(),
+                robot.getCreationTime(), XMLUtil.toDocument(robot
+                        .getTransformerInXML())));
     }
 
     @DELETE
