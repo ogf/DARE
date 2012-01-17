@@ -59,6 +59,16 @@
 		</parallel>
 	</target>
 
+    <target name="run-stub-mode">
+        <java classname="DARE_web.web" classpathref="test-classpath" inputstring="" fork="true">
+			<arg value="-p"/>
+			<arg value="8080"/>
+			<arg value="-w"/>
+			<arg value="${dist}/${ant.project.name}.war"/>
+			<arg value="--stub"/>
+		</java>
+    </target>
+
 	<target name="functional-test" depends="war, start, common.functional-test">
 	</target>
 
