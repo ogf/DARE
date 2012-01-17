@@ -19,6 +19,8 @@ public class RobotJSONView {
 
     private final String robotInMinilanguage;
 
+    private String robotXML;
+
     /**
      * Default constructor for JAXB. DO NOT USE!
      */
@@ -26,13 +28,15 @@ public class RobotJSONView {
         this.code = null;
         this.creationDateMillis = -1;
         this.robotInMinilanguage = null;
+        this.robotXML = null;
     }
 
-    public RobotJSONView(String code, DateTime creationDate,
+    public RobotJSONView(String code, DateTime creationDate, String robotXML,
             String robotInMinilanguage) {
         this.code = code;
         this.creationDateMillis = creationDate.getMillis();
         this.robotInMinilanguage = robotInMinilanguage;
+        this.robotXML = robotXML;
     }
 
     public String getCode() {
@@ -45,6 +49,10 @@ public class RobotJSONView {
 
     public String getRobotInMinilanguage() {
         return robotInMinilanguage;
+    }
+
+    public String getRobotXML() {
+        return robotXML;
     }
 
 }

@@ -25,17 +25,22 @@ public class RobotXMLView {
     @XmlAnyElement
     private final Element robot;
 
+    private final String robotInMinilanguage;
+
     /**
      * Default constructor for JAXB. DO NOT USE!
      */
     public RobotXMLView() {
         this.code = "";
         this.creationDateMillis = -1;
+        this.robotInMinilanguage = "";
         this.robot = null;
     }
 
-    public RobotXMLView(String code, DateTime creationDate, Document robot) {
+    public RobotXMLView(String code, DateTime creationDate,
+            String robotInMinilanguage, Document robot) {
         this.code = code;
+        this.robotInMinilanguage = robotInMinilanguage;
         this.creationDateMillis = creationDate.getMillis();
         this.robot = robot.getDocumentElement();
     }
@@ -46,6 +51,10 @@ public class RobotXMLView {
 
     public DateTime getCreationDate() {
         return new DateTime(creationDateMillis);
+    }
+
+    public String getRobotInMinilanguage() {
+        return robotInMinilanguage;
     }
 
     public Element getRobot() {

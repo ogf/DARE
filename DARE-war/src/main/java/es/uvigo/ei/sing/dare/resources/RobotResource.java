@@ -107,7 +107,7 @@ public class RobotResource {
     public Response viewAsJSON(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
         RobotJSONView result = new RobotJSONView(robot.getCode(),
-                robot.getCreationTime(),
+                robot.getCreationTime(), robot.getTransformerInXML(),
                 robot.getTransformerInMinilanguage());
         return CacheUtil.cacheImmutable(result);
     }
@@ -117,8 +117,9 @@ public class RobotResource {
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Response viewAsXML(@PathParam("code") String robotCode) {
         Robot robot = find(robotCode);
-        return CacheUtil.cacheImmutable(new RobotXMLView(robot.getCode(),
-                robot.getCreationTime(), XMLUtil.toDocument(robot
+        return CacheUtil.cacheImmutable(new RobotXMLView(robot.getCode(), robot
+                .getCreationTime(), robot.getTransformerInMinilanguage(),
+                XMLUtil.toDocument(robot
                         .getTransformerInXML())));
     }
 

@@ -87,6 +87,9 @@ public class RobotResourceTest {
                 .fromRootDocumentElement(robot.getRobot());
         Robot recreated = Robot.createFromXML(fromRootDocumentElement);
         assertNotNull(recreated);
+        Robot recreatedFromMinilanguage = Robot.createFromMinilanguage(robot
+                .getRobotInMinilanguage());
+        assertNotNull(recreatedFromMinilanguage);
     }
 
     @Test
@@ -99,6 +102,8 @@ public class RobotResourceTest {
         Robot recreated = Robot.createFromMinilanguage(robot
                 .getRobotInMinilanguage());
         assertNotNull(recreated);
+        Robot recreatedFromXML = Robot.createFromXML(robot.getRobotXML());
+        assertNotNull(recreatedFromXML);
     }
 
     @Test
