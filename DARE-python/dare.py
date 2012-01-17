@@ -15,26 +15,37 @@ def as_tuples(params):
 
 class Server(object):
 
+    NO_CONTENT = 204
+
+    SUCESSFUL_RANGE = xrange(200, 300)
+
     def __init__(self):
         self._http = httplib2.Http(".cache")
 
-    def do_post(self, url, params = {}, headers = None,
-                processor = None):
-        headers_ = {'Content-Type': 'application/x-www-form-urlencoded'}
-        headers_.update(headers or {})
-        entity = urlencode(as_tuples(params))
-        resp, content = self._http.request(url, "POST", entity, headers_)
+    def do_post(self, url, body, headers = {}, processor = None):
+        resp, content = self._http.request(url, "POST", body, headers)
+        if not resp.status in self.SUCESSFUL_RANGE:
+            raise Exception('Unexpected error code %s and content:\n %s'
+                            % (resp.status, content))
         if processor:
             return processor(resp, content)
         else:
             return (resp, content)
 
-    NO_CONTENT = 204
+    def do_post_form(self, url, params = {}, processor = None):
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        body = urlencode(as_tuples(params))
+        return self.do_post(url, body, headers, processor)
 
-    SUCESSFUL_RANGE = xrange(200, 300)
+    def do_post_xml(self, url, xml_str, processor = None):
+        headers = {'Content-Type': 'application/xml'}
+        return self.do_post(url, xml_str, headers, processor)
 
-    def do_post__location(self, url, params, headers = None):
-        return self.do_post(url, params, headers, lambda r, c: r['location'])
+    def do_post_form__location(self, url, params):
+        return self.do_post_form(url, params, lambda r, c: r['location'])
+
+    def do_post_xml__location(self, url, xml_str):
+        return self.do_post_xml(url, xml_str, lambda r, c: r['location'])
 
     def do_get(self, url, headers = None, processor = None, poll_seconds = 2):
         do_request = lambda: self._http.request(url, "GET", headers = headers)
@@ -80,8 +91,13 @@ class DARE(Resource):
         Resource.__init__(self, Server(), url)
 
     def create_robot(self, robot_in_minilanguage):
-        url =  self.server.do_post__location(self.path('robot/create'),
+        url =  self.server.do_post_form__location(self.path('robot/create'),
                                              {'minilanguage': robot_in_minilanguage})
+        return Robot(self.server, url)
+
+    def create_robot_from_xml(self, robot_xml_str):
+        url = self.server.do_post_xml__location(self.path('robot/create'),
+                                                robot_xml_str)
         return Robot(self.server, url)
 
     def robot(self, robot_url):
@@ -92,7 +108,7 @@ class DARE(Resource):
 
     def execute(self, robot_in_minilanguage, inputs_list):
         params = {'robot': robot_in_minilanguage, 'input': inputs_list}
-        url = self.server.do_post__location(self.path('robot/execute'), params)
+        url = self.server.do_post_form__location(self.path('robot/execute'), params)
         return Execution(self.server, url)
 
 
@@ -105,12 +121,12 @@ class Robot(Resource):
         return self.server.do_get_json(self.url)
 
     def execute(self, inputs_list):
-        url = self.server.do_post__location(self.path("execute"),
+        url = self.server.do_post_form__location(self.path("execute"),
                                             {'input': inputs_list})
         return Execution(self.server, url)
 
     def periodical(self, period, inputs_list):
-        url = self.server.do_post__location(self.path("periodical"),
+        url = self.server.do_post_form__location(self.path("periodical"),
                                             {'period': period,
                                              'input': inputs_list})
         return Periodical(self.server, url)
