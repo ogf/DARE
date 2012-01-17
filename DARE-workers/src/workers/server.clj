@@ -223,15 +223,17 @@
     (.join t))
   (System/exit (- exit-code 256)))
 
+(defn remove-registered-workers [server]
+  (mongo/with-mongo (get-connection-info server)
+    (mongo/destroy! :workers {:server-id server-id})))
+
 (defn shutdown [server & {:keys [complete-exit] :or {complete-exit true}}]
   (continue-on-error
    (server))
   (continue-on-error
-   (let [connection (get-connection-info server)]
-     (continue-on-error
-      (mongo/with-mongo connection
-        (mongo/destroy! :workers {:server-id server-id})))
-     (mongo/close-connection connection)))
+   (remove-registered-workers server))
+  (continue-on-error
+   (mongo/close-connection (get-connection-info server)))
   (when complete-exit
     (continue-on-error
      (.shutdownNow automator-executor)
@@ -250,6 +252,8 @@
           (mongo/update! :workers
                          {:host ip :port port}
                          {:$set {:server-id server-id}})))
+      (.addShutdownHook (Runtime/getRuntime)
+                        (Thread. #(remove-registered-workers tcp-server)))
       tcp-server
       (catch Throwable e
         (log/warn "Error connecting to mongo" e)
