@@ -188,6 +188,7 @@ def create_robot(args):
         else:
             return dare.create_robot(input_str)
     input_str = args.file and args.file.read() or sys.stdin.read()
+    input_str = input_str.strip()
     robot = send_creation(args.server, args.xml, input_str)
     store = Store()
     code = store.add_robot(robot.url, input_str)
