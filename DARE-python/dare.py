@@ -353,9 +353,13 @@ def show_execution(execution_id):
     url = store.find_url_for_execution_with_code(execution_id)
     if url:
         execution = rest.Execution(url)
-        execution_data = execution.show()
-        #TODO make human readable
-        print execution_data
+        result = execution.show()
+        print 'execution', execution_id
+        print 'Date:', as_local_date_from_ms(result['date'])
+        print 'Execution time:', result['executionTime'], 'ms'
+        print 'from robot', extract_code_from(result['createdFrom'])
+        for l in result['resultLines']:
+            print l
     else:
         not_found('execution', execution_id)
 
