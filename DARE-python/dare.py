@@ -394,9 +394,18 @@ def show_periodical(periodical_id):
     url = store.find_url_for_periodical_with_code(periodical_id)
     if url:
         periodical = rest.Periodical(url)
-        data = periodical.show()
-        #TODO make human readable
-        print data
+        result = periodical.show()
+        print 'periodical', result['code']
+        print 'Date:', as_local_date_from_ms(result['creationDateMillis'])
+        print 'from robot', extract_code_from(result['robot'])
+        print 'period:', '{periodAmount}{periodUnit}'.format(**result)
+        print 'inputs', result['inputs']
+        last = result['lastExecutionResult']
+        if last:
+            print 'Last execution date:', as_local_date_from_ms(last['date'])
+            print 'Execution time', last['executionTime'], 'ms'
+            for l in last['resultLines']:
+                print l
     else:
         not_found('periodical execution', periodical_id)
 
