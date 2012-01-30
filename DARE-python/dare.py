@@ -281,26 +281,26 @@ def add_robot_spec(parser):
     create_periodical_spec(create_periodical_parser)
 
 def list_robots(args):
-    #TODO improve readability
     store =  Store()
     robots = store.robots
+    margin = ' ' * 4
     for r in robots:
-        print r['code']
-        print r['creation_date']
+        print 'robot', r['code']
+        print 'Date: ', r['creation_date']
         print r['summary']
         if r['executions']:
-            print 'Executions: '
+            print 'Executions:'
             for e in r['executions']:
-                print e['code']
-                print e['inputs']
-                print e['creation_date']
+                print margin, 'execution', e['code']
+                print margin, 'Date:',  e['creation_date']
+                print margin, 'Inputs: ', e['inputs']
         if r['periodicals']:
             print 'Periodicals: '
             for p in r['periodicals']:
-                print p['code']
-                print p['period']
-                print p['inputs']
-                print p['creation_date']
+                print margin, 'periodical', p['code']
+                print margin, 'Date:',  p['creation_date']
+                print margin, 'Inputs:', p['inputs']
+                print margin, 'Period:', p['period']
         print '-' * 70
 
 def add_show_and_delete_options(parser, on, caption = None):
