@@ -7,6 +7,12 @@ import re
 import rest
 import argparse
 
+#hack to set the encoding when the stdout is piped
+if not sys.stdout.encoding:
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
+
 class Store(object):
 
     def __init__(self):
@@ -151,6 +157,9 @@ def as_local_date(seconds_as_stored_in_db):
     return time.strftime('%a, %d %b %Y %H:%M:%S',
                          time.localtime(int(seconds_as_stored_in_db)))
 
+def as_local_date_from_ms(millis_since_epoch):
+    return as_local_date(millis_since_epoch / 1000)
+
 def extract_code_from(url):
     match = re.search(DARE_CODE_PATTERN, url)
     if match:
@@ -249,8 +258,16 @@ def show_robot(args):
     url = store.find_url_robot_for_code(args.robot)
     if url:
         robot = rest.Robot(url)
-        #TODO human readable show
-        print "result is: ", robot.show()
+        result = robot.show()
+        show_all = not args.minilanguage and not args.xml
+        if show_all:
+            print 'robot', result['code']
+            print 'Date:', as_local_date_from_ms(result['creationDateMillis'])
+        if show_all: print 'XML:'
+        if show_all or args.xml: print result['robotXML']
+
+        if show_all: print 'Minilanguage:'
+        if show_all or args.minilanguage: print result['robotInMinilanguage']
     else:
         not_found('robot', args.robot)
 
@@ -269,6 +286,10 @@ def add_robot_spec(parser):
     show_parser = subparsers.add_parser('show', help='Show information about robot')
     show_parser.set_defaults(command=show_robot)
     add_id_argument(show_parser, 'robot')
+    show_parser.add_argument('-xml', '--xml', action='store_true',
+                             help='Show only the xml of the robot')
+    show_parser.add_argument('-mini', '--minilanguage',  action='store_true',
+                             help='Show only the minilanguage of the robot')
 
     delete_parser = subparsers.add_parser('delete', help='Delete the robot')
     delete_parser.set_defaults(command=delete_robot)
