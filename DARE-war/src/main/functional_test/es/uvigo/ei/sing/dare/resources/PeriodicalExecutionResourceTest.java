@@ -112,7 +112,7 @@ public class PeriodicalExecutionResourceTest {
         JSONObject last = result.getJSONObject("lastExecutionResult");
         assertThat(last.get("resultLines"), is(JSONArray.class));
         assertThat(last.get("executionTime"), is(Number.class));
-        assertThat(last.get("date"), is(Number.class));
+        assertThat(last.get("creationDateMillis"), is(Number.class));
 
         JSONArray inputs = result.getJSONArray("inputs");
         assertThat(inputs.get(0), is(String.class));

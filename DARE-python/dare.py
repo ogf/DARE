@@ -355,7 +355,7 @@ def show_execution(execution_id):
         execution = rest.Execution(url)
         result = execution.show()
         print 'execution', execution_id
-        print 'Date:', as_local_date_from_ms(result['date'])
+        print 'Date:', as_local_date_from_ms(result['creationDateMillis'])
         print 'Execution time:', result['executionTime'], 'ms'
         print 'from robot', extract_code_from(result['createdFrom'])
         for l in result['resultLines']:
@@ -402,7 +402,7 @@ def show_periodical(periodical_id):
         print 'inputs', result['inputs']
         last = result['lastExecutionResult']
         if last:
-            print 'Last execution date:', as_local_date_from_ms(last['date'])
+            print 'Last execution date:', as_local_date_from_ms(last['creationDateMillis'])
             print 'Execution time', last['executionTime'], 'ms'
             for l in last['resultLines']:
                 print l

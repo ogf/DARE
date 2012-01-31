@@ -212,7 +212,7 @@ public class RobotResourceExecutionTest {
 
     private static final String executionTimePropertyName = "executionTime";
 
-    private static final String datePropertyName = "date";
+    private static final String datePropertyName = "creationDateMillis";
 
     @Test
     public void testStructureDocumentReturnedDirectly() throws Exception {

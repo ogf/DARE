@@ -28,7 +28,7 @@ public class ExecutionResultView {
     /**
      * The number of milliseconds since 1970-01-01T00:00:00Z
      */
-    private final long date;
+    private final long creationDateMillis;
 
     public ExecutionResultView() {
         this(new DateTime(), 0, Collections.<String> emptyList());
@@ -39,7 +39,7 @@ public class ExecutionResultView {
         Validate.isTrue(executionTime >= 0);
         this.resultLines = new ArrayList<String>(resutLines);
         this.executionTime = executionTime;
-        this.date = creationTime.getMillis();
+        this.creationDateMillis = creationTime.getMillis();
     }
 
     public List<String> getResultLines() {
@@ -51,13 +51,14 @@ public class ExecutionResultView {
     }
 
     public DateTime getDate() {
-        return new DateTime(date);
+        return new DateTime(creationDateMillis);
     }
 
     public static ExecutionResultView fromJSON(JSONObject object) {
         try {
             return new ExecutionResultView(new DateTime(
-                    object.getLong("date")), object.getLong("executionTime"),
+                    object.getLong("creationDateMillis")),
+                    object.getLong("executionTime"),
                     asList(object.getJSONArray("resultLines")));
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -81,7 +82,7 @@ public class ExecutionResultView {
         try {
             result.put("resultLines", resultLines);
             result.put("executionTime", executionTime);
-            result.put("date", date);
+            result.put("creationDateMillis", creationDateMillis);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
