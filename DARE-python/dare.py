@@ -356,6 +356,7 @@ def show_execution(execution_id):
         result = execution.show()
         print 'execution', execution_id
         print 'Date:', as_local_date_from_ms(result['creationDateMillis'])
+        print 'Inputs:', result['inputs']
         print 'Execution time:', result['executionTime'], 'ms'
         print 'from robot', extract_code_from(result['createdFrom'])
         for l in result['resultLines']:

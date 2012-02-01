@@ -85,6 +85,7 @@ public class ExecutionResultResource {
             RobotExecutionResultView entity = new RobotExecutionResultView(createdFrom,
                     result.getCreationTime(),
                     result.getExecutionTimeMilliseconds(),
+                    result.getInputs(),
                     result.getResultLines());
             return entity;
         } catch (ExecutionTimeExceededException e) {

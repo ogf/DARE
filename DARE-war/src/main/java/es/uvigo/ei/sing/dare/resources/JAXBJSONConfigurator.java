@@ -22,7 +22,8 @@ public class JAXBJSONConfigurator implements ContextResolver<JAXBContext> {
         {
             add(RobotExecutionResultView.class,
                     JSONConfiguration.mapped().nonStrings("executionTime")
-                            .nonStrings("date").arrays("resultLines").build());
+                            .nonStrings("date").arrays("inputs")
+                            .arrays("resultLines").build());
             add(RobotJSONView.class,
                     JSONConfiguration.mapped().nonStrings("creationDateMillis")
                             .build());

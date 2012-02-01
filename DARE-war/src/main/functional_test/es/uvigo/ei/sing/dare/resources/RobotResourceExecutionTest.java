@@ -170,6 +170,8 @@ public class RobotResourceExecutionTest {
                     }
                 });
         assertNotNull(result);
+        assertNotNull(result.getInputs());
+        assertFalse(result.getInputs().isEmpty());
         assertNotNull(result.getResultLines());
         assertFalse(result.getResultLines().isEmpty());
     }
@@ -214,6 +216,8 @@ public class RobotResourceExecutionTest {
 
     private static final String datePropertyName = "creationDateMillis";
 
+    private static final String inputsPropertyName = "inputs";
+
     @Test
     public void testStructureDocumentReturnedDirectly() throws Exception {
         MultivaluedMapImpl request = new MultivaluedMapImpl() {
@@ -237,6 +241,8 @@ public class RobotResourceExecutionTest {
 
     private void checkStructureIsCorrect(JSONObject result)
             throws JSONException {
+        assertTrue(result.has(inputsPropertyName));
+        assertThat(result.get(inputsPropertyName), is(JSONArray.class));
         assertTrue(result.has(linesPropertyName));
         assertThat(result.get(linesPropertyName), is(JSONArray.class));
 
@@ -263,6 +269,10 @@ public class RobotResourceExecutionTest {
 
         NodeList linesElements = root.getElementsByTagName(linesPropertyName);
         assertThat("there is one lines property name in the response",
+                linesElements.getLength(), equalTo(1));
+
+        NodeList inputsElement = root.getElementsByTagName(inputsPropertyName);
+        assertThat("there is one inputs elementin the response",
                 linesElements.getLength(), equalTo(1));
 
         NodeList dateElements = root.getElementsByTagName(datePropertyName);
