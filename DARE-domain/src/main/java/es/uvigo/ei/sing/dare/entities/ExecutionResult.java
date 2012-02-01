@@ -1,5 +1,6 @@
 package es.uvigo.ei.sing.dare.entities;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,13 +11,16 @@ import org.joda.time.DateTime;
 public class ExecutionResult {
 
     public static ExecutionResult create(String code, Robot robot,
+            List<String> inputs,
             String... resultLines) {
-        return new ExecutionResult(code, robot.getCode(), 0, resultLines);
+        return new ExecutionResult(code, robot.getCode(), 0, inputs,
+                resultLines);
     }
 
     public static ExecutionResult create(String code,
-            PeriodicalExecution parent, String... resultLines) {
-        return new ExecutionResult(code, null, 0, resultLines);
+            PeriodicalExecution parent, List<String> inputs,
+            String... resultLines) {
+        return new ExecutionResult(code, null, 0, inputs, resultLines);
     }
 
     private final String code;
@@ -28,27 +32,33 @@ public class ExecutionResult {
 
     private final DateTime creationTime;
 
+    private final List<String> inputs;
+
     private final long executionTimeMilliseconds;
 
     private final List<String> resultLines;
 
     private ExecutionResult(String code, String createdFromCode,
-            long executionTimeMilliseconds, String[] resultLines) {
+            long executionTimeMilliseconds, List<String> inputs,
+            String[] resultLines) {
         this(code, new DateTime(), createdFromCode, executionTimeMilliseconds,
-                resultLines);
+                inputs, resultLines);
     }
 
     public ExecutionResult(String code, DateTime creationTime,
             String optionalRobotCode, long executionTimeMilliseconds,
-            String[] resultLines) {
+            List<String> inputs, String[] resultLines) {
         Validate.notNull(code);
         Validate.notNull(creationTime);
         Validate.isTrue(executionTimeMilliseconds >= 0);
+        Validate.notNull(inputs);
         Validate.notNull(resultLines);
         this.code = code;
         this.creationTime = creationTime;
         this.optionalRobotCode = optionalRobotCode;
         this.executionTimeMilliseconds = executionTimeMilliseconds;
+        this.inputs = Collections
+                .unmodifiableList(new ArrayList<String>(inputs));
         this.resultLines = Collections.unmodifiableList(Arrays
                 .asList(resultLines));
     }
@@ -59,6 +69,10 @@ public class ExecutionResult {
 
     public String getOptionalRobotCode() {
         return optionalRobotCode;
+    }
+
+    public List<String> getInputs() {
+        return inputs;
     }
 
     public DateTime getCreationTime() {
@@ -75,7 +89,8 @@ public class ExecutionResult {
 
     public ExecutionResult withExecutionTime(long executionTime) {
         return new ExecutionResult(this.code, this.optionalRobotCode,
-                executionTime, this.resultLines.toArray(new String[0]));
+                executionTime, this.inputs,
+                this.resultLines.toArray(new String[0]));
     }
 
 }

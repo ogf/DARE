@@ -114,11 +114,12 @@
   (PeriodicalExecution. code creationTime robotCode executionPeriod inputs lastExecution))
 
 (defn create-execution-result
-  [code optionalRobotCode creationTime executionTimeMilliseconds resultLines]
+  [code optionalRobotCode creationTime executionTimeMilliseconds inputs resultLines]
   (ExecutionResult. code
                     creationTime
                     optionalRobotCode
                     executionTimeMilliseconds
+                    inputs
                     (into-array String resultLines)))
 
 (defn at-key [key f]
@@ -148,6 +149,7 @@
                 :optionalRobotCode
                 (date-time-at :creationTime)
                 (at-key :executionTimeMilliseconds #(.longValue %))
+                :inputs
                 :resultLines))
          (apply create-execution-result))))
 
@@ -160,7 +162,9 @@
               :inputs
               (at-key :lastExecution
                       (comp to-execution-result
-                            #(when % (assoc % :_id (:_id map-from-mongo)))))))
+                            #(when % (assoc %
+                                       :_id (:_id map-from-mongo)
+                                       :inputs (:inputs map-from-mongo)))))))
        (apply create-periodical)))
 
 (defn new-unique-code []

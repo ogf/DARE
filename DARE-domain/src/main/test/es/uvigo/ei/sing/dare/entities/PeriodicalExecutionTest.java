@@ -103,8 +103,8 @@ public class PeriodicalExecutionTest {
         List<String> inputs = periodicalExecution.getInputs();
         String[] lines = robot.execute(inputs);
         ExecutionResult result = ExecutionResult.create("test",
-                periodicalExecution, lines).withExecutionTime(
-                System.currentTimeMillis() - time);
+                periodicalExecution, periodicalExecution.getInputs(), lines)
+                .withExecutionTime(System.currentTimeMillis() - time);
         periodicalExecution.receiveLastResult(result);
 
         ExecutionResult executionResult = periodicalExecution

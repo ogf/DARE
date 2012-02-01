@@ -48,6 +48,7 @@ public class ConfigurationStub extends Configuration {
     static {
         PERIODICAL_EXECUTION_WITH_RESULT.receiveLastResult(ExecutionResult
                 .create("test-result", PERIODICAL_EXECUTION_WITH_RESULT,
+                        PERIODICAL_EXECUTION_WITH_RESULT.getInputs(),
                         "result-line-1",
                         "result-line-2"));
     }
@@ -136,7 +137,8 @@ public class ConfigurationStub extends Configuration {
                                         INPUT_THAT_ALWAYS_CAUSES_ERROR);
                             }
                             final String[] result = robot.execute(inputs);
-                            return ExecutionResult.create(code, robot, result);
+                            return ExecutionResult.create(code, robot, inputs,
+                                    result);
                         }
 
                     };

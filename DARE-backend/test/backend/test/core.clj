@@ -110,6 +110,7 @@
       (let [execution-result (wait-for-result code)]
         (is ((complement nil?) execution-result))
         (is (= code (.getCode execution-result)))
+        (is (= 1 (count (.getInputs execution-result))))
         (is (< 0 (count (.getResultLines execution-result))))))
     (testing "if the execution timeouts, appropriate error is returned"
       (binding [*time-allowed-for-execution-ms* 1]
