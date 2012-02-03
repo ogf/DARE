@@ -48,9 +48,13 @@ public class ConfigurationBootstrapper implements ServletContextListener {
                         builder.getParametersNeeded());
 
                 final IBackend backend = builder.build(parameters);
+
                 final int processors = Runtime.getRuntime()
                         .availableProcessors();
                 final int maxWaiting = 100;
+
+                final MinilanguageProducer producer = new MinilanguageProducer(
+                        10);
                 return new Configuration() {
                     // since parsing the robot doesn't use IO, only use a pool
                     // with not more threads than number of processors
@@ -66,6 +70,11 @@ public class ConfigurationBootstrapper implements ServletContextListener {
                     @Override
                     public ExecutorService getRobotParserExecutor() {
                         return executor;
+                    }
+
+                    @Override
+                    public MinilanguageProducer getMinilanguageProducer() {
+                        return producer;
                     }
                 };
             }

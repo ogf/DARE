@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 import org.w3c.dom.Document;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.configuration.MinilanguageProducer;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
@@ -32,7 +33,6 @@ import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
-import es.uvigo.ei.sing.stringeditor.Minilanguage;
 
 @Path("robot")
 public class RobotResource {
@@ -72,8 +72,10 @@ public class RobotResource {
 
     private Robot parseRobot(String miniLanguage) {
         try {
-            return Robot.createFromMinilanguage(new Minilanguage(),
-                    miniLanguage, getConfiguration().getRobotParserExecutor(),
+            Configuration conf = getConfiguration();
+            MinilanguageProducer producer = conf.getMinilanguageProducer();
+            return Robot.createFromMinilanguage(producer.newMinilanguage(),
+                    miniLanguage, conf.getRobotParserExecutor(),
                     1, TimeUnit.SECONDS);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(e, Status.BAD_REQUEST);

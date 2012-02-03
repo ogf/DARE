@@ -58,6 +58,7 @@ public class ConfigurationStub extends Configuration {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
+    private MinilanguageProducer producer = new MinilanguageProducer(4);
 
     private final IBackend store = new IBackend() {
 
@@ -226,6 +227,11 @@ public class ConfigurationStub extends Configuration {
     @Override
     public ExecutorService getRobotParserExecutor() {
         return executor;
+    }
+
+    @Override
+    public MinilanguageProducer getMinilanguageProducer() {
+        return producer;
     }
 
 }
