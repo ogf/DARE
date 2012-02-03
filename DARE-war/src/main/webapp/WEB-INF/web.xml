@@ -40,6 +40,8 @@
          - mongo-host: The host on which the mongodb is located
          - mongo-port: The port on which the mongodb is listening
          - mongo-db: The name of the database to use within the mongodb instance.
+         - max-queue-minilanguage-parsing: Not required. The number of robots creation
+           requests than can be waiting for being parsed. By default it's 100.
         </description>
         <env-entry-name>backend-type</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>

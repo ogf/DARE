@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -51,7 +52,9 @@ public class ConfigurationBootstrapper implements ServletContextListener {
 
                 final int processors = Runtime.getRuntime()
                         .availableProcessors();
-                final int maxWaiting = 100;
+                Object m = lookup(context, "max-queue-minilanguage-parsing");
+                final int maxWaiting = m != null ? Integer.parseInt(m
+                        .toString()) : 100;
 
                 final MinilanguageProducer producer = new MinilanguageProducer(
                         10);
@@ -109,6 +112,8 @@ public class ConfigurationBootstrapper implements ServletContextListener {
     private static Object lookup(Context context, String name) {
         try {
             return context.lookup(name);
+        } catch (NameNotFoundException e) {
+            return null;
         } catch (NamingException e) {
             throw new RuntimeException(e);
         }

@@ -22,9 +22,14 @@
   (doseq [[key value] env-options]
     (EnvEntry. context (unkeywordize key) value true)))
 
+(defn is-production-option [[key value]]
+  (let [as-string (unkeywordize key)]
+    (or (.startsWith as-string "mongo-")
+        (and (.startsWith as-string "max-queue") value))))
+
 (defn get-production-options [options]
   (->> options
-       (filter (comp #(.startsWith % "mongo-") unkeywordize first))
+       (filter is-production-option)
        (into {})
        (merge {:backend-type "production"})))
 
@@ -81,6 +86,8 @@
         :default 27017 :parse-fn #(Integer. %)]
        ["--mongo-db" "The name of the database to use within the mongoDB instance"
         :default "test"]
+       ["--max-queue-minilanguage-parsing" "Not required. The number of robots
+       creation requests than can be waiting for being parsed"]
        ["-h" "--help" "Print this help" :flag true :default false]))
 
 (defn -main [& args]
