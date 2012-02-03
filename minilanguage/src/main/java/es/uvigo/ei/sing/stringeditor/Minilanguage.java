@@ -28,56 +28,6 @@ import org.w3c.dom.Document;
 
 public class Minilanguage {
 
-    private static BSFEngine engine;
-
-    static {
-        BSFManager.registerScriptingEngine("ruby",
-                "org.jruby.javasupport.bsf.JRubyEngine", new String[] { "rb" });
-        try {
-            engine = new BSFManager().loadScriptingEngine("ruby");
-            engine.exec("ruby", 1, 1, extractString(loadFile("transformer.rb")));
-        } catch (BSFException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static InputStreamReader loadFile(String fileName) {
-        return new InputStreamReader(
-                Minilanguage.class.getResourceAsStream(fileName));
-    }
-
-    public static Transformer eval(File file) {
-        return eval(file, Charset.forName("utf8"));
-    }
-
-    public static Transformer eval(File file, Charset charset) {
-        try {
-            return eval(new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), charset)), file.getName());
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Transformer eval(Reader reader) {
-        return eval(extractString(reader));
-    }
-
-    public static Transformer eval(Reader reader, String fileName) {
-        return eval(extractString(reader), fileName, null);
-    }
-
-    public static Transformer eval(Reader reader, String fileName, Integer line) {
-        return eval(extractString(reader), fileName, line);
-    }
-
-    public static Transformer eval(String minilanguageProgram, String fileName,
-            Integer lineNumber) {
-        return XMLInputOutput.loadTransformer(callScriptFunction(
-                Document.class, "get_xml", minilanguageProgram, fileName,
-                lineNumber));
-    }
-
     private static String extractString(Reader reader) {
         StringBuilder result = new StringBuilder();
         char[] buffer = new char[1024];
@@ -98,29 +48,80 @@ public class Minilanguage {
         return result.toString();
     }
 
-    public static Transformer eval(String minilanguageProgram) {
+    private static InputStreamReader loadFile(String fileName) {
+        return new InputStreamReader(
+                Minilanguage.class.getResourceAsStream(fileName));
+    }
+
+    private static final String TRANSFORMER_RB = extractString(loadFile("transformer.rb"));
+
+    private final BSFEngine engine;
+
+    public Minilanguage() {
+        BSFManager.registerScriptingEngine("ruby",
+                "org.jruby.javasupport.bsf.JRubyEngine", new String[] { "rb" });
+        try {
+            engine = new BSFManager().loadScriptingEngine("ruby");
+            engine.exec("ruby", 1, 1, TRANSFORMER_RB);
+        } catch (BSFException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Transformer eval(File file) {
+        return eval(file, Charset.forName("utf8"));
+    }
+
+    public Transformer eval(File file, Charset charset) {
+        try {
+            return eval(new BufferedReader(new InputStreamReader(
+                    new FileInputStream(file), charset)), file.getName());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Transformer eval(Reader reader) {
+        return eval(extractString(reader));
+    }
+
+    public Transformer eval(Reader reader, String fileName) {
+        return eval(extractString(reader), fileName, null);
+    }
+
+    public Transformer eval(Reader reader, String fileName, Integer line) {
+        return eval(extractString(reader), fileName, line);
+    }
+
+    public Transformer eval(String minilanguageProgram, String fileName,
+            Integer lineNumber) {
+        return XMLInputOutput.loadTransformer(callScriptFunction(
+                Document.class, "get_xml", minilanguageProgram, fileName,
+                lineNumber));
+    }
+
+    public Transformer eval(String minilanguageProgram) {
         return eval(minilanguageProgram, null, null);
     }
 
-    public static String[] exec(String minilanguageProgram, String... input) {
-        return Util.runRobot(Minilanguage.eval(minilanguageProgram), input);
+    public String[] exec(String minilanguageProgram, String... input) {
+        return Util.runRobot(eval(minilanguageProgram), input);
     }
 
-    public static String[] exec(File minilanguageProgram, String... input) {
-        return Util.runRobot(Minilanguage.eval(minilanguageProgram), input);
+    public String[] exec(File minilanguageProgram, String... input) {
+        return Util.runRobot(eval(minilanguageProgram), input);
     }
 
-    public static String[] exec(Reader minilanguageProgram, String... input) {
-        return Util.runRobot(Minilanguage.eval(minilanguageProgram), input);
+    public String[] exec(Reader minilanguageProgram, String... input) {
+        return Util.runRobot(eval(minilanguageProgram), input);
     }
 
-    public static String[] exec(Reader minilanguageProgram, String name,
+    public String[] exec(Reader minilanguageProgram, String name,
             int line, String... input) {
-        return Util.runRobot(
-                Minilanguage.eval(minilanguageProgram, name, line), input);
+        return Util.runRobot(eval(minilanguageProgram, name, line), input);
     }
 
-    public static String xmlToLanguage(File file) {
+    public String xmlToLanguage(File file) {
         try {
             return xmlToLanguage(new BufferedInputStream(new FileInputStream(
                     file)));
@@ -129,15 +130,15 @@ public class Minilanguage {
         }
     }
 
-    public static String xmlToLanguage(InputStream inputStream) {
+    public String xmlToLanguage(InputStream inputStream) {
         return xmlToLanguage(XMLInputOutput.asDoc(inputStream));
     }
 
-    public static String xmlToLanguage(Document document) {
+    public String xmlToLanguage(Document document) {
         return callScriptFunction(String.class, "to_minilanguage", document);
     }
 
-    private static <T> T callScriptFunction(final Class<T> klass,
+    private <T> T callScriptFunction(final Class<T> klass,
             final String function, final Object... parameters) {
         return AccessController.doPrivileged(new PrivilegedAction<T>() {
 
@@ -175,8 +176,8 @@ public class Minilanguage {
 
     public static void main(String[] args) throws MalformedURLException,
             IOException {
-
-        for (String s : Minilanguage.exec(
+        Minilanguage minilanguage = new Minilanguage();
+        for (String s : minilanguage.exec(
                 "url | xpath('//a/@href') | patternMatcher('(http://.*)') ",
                 "http://www.google.com")) {
             System.out.println(s);

@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import es.uvigo.ei.sing.dare.util.XMLUtil;
+import es.uvigo.ei.sing.stringeditor.Minilanguage;
 
 public class RobotTest {
 
@@ -74,8 +75,9 @@ public class RobotTest {
 
     @Test
     public void aRobotHasACreationTime() {
+        Minilanguage minilanguage = new Minilanguage();
         DateTime beforeCreating = new DateTime();
-        Robot robot = Robot.createFromMinilanguage("url");
+        Robot robot = Robot.createFromMinilanguage(minilanguage, "url");
         Interval interval = new Interval(beforeCreating, robot.getCreationTime());
 
         // 60 milliseconds should be more than enough

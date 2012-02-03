@@ -30,13 +30,21 @@ public class Robot {
     public static Robot createFromMinilanguage(
             final String transformerInMinilanguage, ExecutorService executor,
             long timeout, TimeUnit timeUnit) throws TimeoutException {
+        return createFromMinilanguage(new Minilanguage(),
+                transformerInMinilanguage, executor, timeout, timeUnit);
+    }
+
+    public static Robot createFromMinilanguage(final Minilanguage minilanguage,
+            final String transformerInMinilanguage, ExecutorService executor,
+            long timeout, TimeUnit timeUnit) throws TimeoutException {
         final AtomicReference<Thread> threadRef = new AtomicReference<Thread>();
         Future<Robot> f = executor.submit(new Callable<Robot>() {
 
             @Override
             public Robot call() throws Exception {
                 threadRef.set(Thread.currentThread());
-                return createFromMinilanguage(transformerInMinilanguage);
+                return createFromMinilanguage(minilanguage,
+                        transformerInMinilanguage);
             }
         });
         try {
@@ -61,9 +69,15 @@ public class Robot {
     }
 
     public static Robot createFromMinilanguage(String transformerInminilanguage) {
+        return createFromMinilanguage(new Minilanguage(),
+                transformerInminilanguage);
+    }
+
+    public static Robot createFromMinilanguage(Minilanguage minilanguage,
+            String transformerInminilanguage) {
         Transformer transformer;
         try {
-            transformer = Minilanguage.eval(transformerInminilanguage);
+            transformer = minilanguage.eval(transformerInminilanguage);
         } catch (Exception e) {
             throw new IllegalArgumentException(quote(transformerInminilanguage)
                     + "is wrong");
@@ -89,9 +103,19 @@ public class Robot {
         return createFrom(robotXML, XMLUtil.toString(robotXML));
     }
 
+    private static Minilanguage SAFELY_SHARED;
+
+    private static Minilanguage getMinilanguageAptToTranslateToXML() {
+        if (SAFELY_SHARED != null) {
+            return SAFELY_SHARED;
+        }
+        return SAFELY_SHARED = new Minilanguage();
+    }
+
     private static Robot createFrom(Document robotXML, String robotXMLAsString) {
         checkValidRobot(robotXML);
-        String minilanguage = Minilanguage.xmlToLanguage(robotXML);
+        String minilanguage = getMinilanguageAptToTranslateToXML()
+                .xmlToLanguage(robotXML);
         return new Robot(minilanguage, robotXMLAsString, new DateTime(),
                 minilanguage);
 
