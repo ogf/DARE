@@ -9,8 +9,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.ReflectPermission;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.CodeSource;
+import java.security.Permissions;
+import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
+import java.util.PropertyPermission;
 
 import org.apache.bsf.BSFEngine;
 import org.apache.bsf.BSFException;
@@ -128,13 +137,40 @@ public class Minilanguage {
         return callScriptFunction(String.class, "to_minilanguage", document);
     }
 
-    private static <T> T callScriptFunction(Class<T> klass, String function,
-            Object... parameters) {
-        try {
-            return klass.cast(engine.call(null, function, parameters));
-        } catch (BSFException e) {
-            throw new RuntimeException(e);
+    private static <T> T callScriptFunction(final Class<T> klass,
+            final String function, final Object... parameters) {
+        return AccessController.doPrivileged(new PrivilegedAction<T>() {
+
+            @Override
+            public T run() {
+                try {
+                    return klass.cast(engine.call(null, function, parameters));
+                } catch (BSFException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, sandboxContext());
+    }
+
+    private static AccessControlContext CACHED_CONTEXT = null;
+
+    private static AccessControlContext sandboxContext() {
+        if (CACHED_CONTEXT != null) {
+            return CACHED_CONTEXT;
         }
+        CodeSource dummyCodeSource = new CodeSource(null, new Certificate[0]);
+        AccessControlContext result = new AccessControlContext(
+                new ProtectionDomain[] { new ProtectionDomain(dummyCodeSource,
+                        permissionsNeededForJRuby()) });
+        return CACHED_CONTEXT = result;
+    }
+
+    private static Permissions permissionsNeededForJRuby() {
+        Permissions result = new Permissions();
+        result.add(new PropertyPermission("jruby.*", "read"));
+        result.add(new RuntimePermission("accessDeclaredMembers"));
+        result.add(new ReflectPermission("suppressAccessChecks"));
+        return result;
     }
 
     public static void main(String[] args) throws MalformedURLException,
