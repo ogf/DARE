@@ -16,6 +16,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import backend.core.BackendBuilder;
 import clojure.lang.RT;
 import es.uvigo.ei.sing.dare.domain.IBackend;
@@ -23,6 +26,9 @@ import es.uvigo.ei.sing.dare.domain.IBackendBuilder;
 
 @WebListener
 public class ConfigurationBootstrapper implements ServletContextListener {
+
+    private static final Log LOG = LogFactory
+            .getLog(ConfigurationBootstrapper.class);
 
     public enum ConfigurationType {
         STUB {
@@ -47,7 +53,7 @@ public class ConfigurationBootstrapper implements ServletContextListener {
             protected Configuration build(final Context context) {
                 final Map<String, Object> parameters = from(context,
                         builder.getParametersNeeded());
-
+                LOG.info("backend parameters: " + parameters);
                 final IBackend backend = builder.build(parameters);
 
                 final int processors = Runtime.getRuntime()
@@ -55,7 +61,7 @@ public class ConfigurationBootstrapper implements ServletContextListener {
                 Object m = lookup(context, "max-queue-minilanguage-parsing");
                 final int maxWaiting = m != null ? Integer.parseInt(m
                         .toString()) : 100;
-
+                LOG.info("max-queue-minilanguage-parsing: " + maxWaiting);
                 final MinilanguageProducer producer = new MinilanguageProducer(
                         10);
                 return new Configuration() {
