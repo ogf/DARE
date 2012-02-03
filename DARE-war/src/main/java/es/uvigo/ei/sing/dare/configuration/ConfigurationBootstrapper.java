@@ -3,6 +3,10 @@ package es.uvigo.ei.sing.dare.configuration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -42,11 +46,26 @@ public class ConfigurationBootstrapper implements ServletContextListener {
             protected Configuration build(final Context context) {
                 final Map<String, Object> parameters = from(context,
                         builder.getParametersNeeded());
+
                 final IBackend backend = builder.build(parameters);
+                final int processors = Runtime.getRuntime()
+                        .availableProcessors();
+                final int maxWaiting = 100;
                 return new Configuration() {
+                    // since parsing the robot doesn't use IO, only use a pool
+                    // with not more threads than number of processors
+                    private ExecutorService executor = new ThreadPoolExecutor(
+                            processors, processors, 1, TimeUnit.MINUTES,
+                            new ArrayBlockingQueue<Runnable>(maxWaiting, true));
+
                     @Override
                     public IBackend getBackend() {
                         return backend;
+                    }
+
+                    @Override
+                    public ExecutorService getRobotParserExecutor() {
+                        return executor;
                     }
                 };
             }

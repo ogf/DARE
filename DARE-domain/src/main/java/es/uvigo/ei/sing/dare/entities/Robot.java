@@ -7,6 +7,13 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
@@ -19,6 +26,39 @@ import es.uvigo.ei.sing.stringeditor.Util;
 import es.uvigo.ei.sing.stringeditor.XMLInputOutput;
 
 public class Robot {
+
+    public static Robot createFromMinilanguage(
+            final String transformerInMinilanguage, ExecutorService executor,
+            long timeout, TimeUnit timeUnit) throws TimeoutException {
+        final AtomicReference<Thread> threadRef = new AtomicReference<Thread>();
+        Future<Robot> f = executor.submit(new Callable<Robot>() {
+
+            @Override
+            public Robot call() throws Exception {
+                threadRef.set(Thread.currentThread());
+                return createFromMinilanguage(transformerInMinilanguage);
+            }
+        });
+        try {
+            return f.get(timeout, timeUnit);
+        } catch (TimeoutException e) {
+            f.cancel(true);
+            Thread thread = threadRef.get();
+            // interrupt is too weak. we must stop the execution no matter what
+            // in order to prevent DoS attack
+            thread.stop();
+            throw e;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                RuntimeException ex = (RuntimeException) cause;
+                throw ex;
+            }
+            throw new RuntimeException(cause);
+        }
+    }
 
     public static Robot createFromMinilanguage(String transformerInminilanguage) {
         Transformer transformer;

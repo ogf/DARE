@@ -2,6 +2,8 @@ package es.uvigo.ei.sing.dare.resources;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -69,9 +71,15 @@ public class RobotResource {
 
     private Robot parseRobot(String miniLanguage) {
         try {
-            return Robot.createFromMinilanguage(miniLanguage);
+            return Robot.createFromMinilanguage(miniLanguage,
+                    getConfiguration().getRobotParserExecutor(),
+                    1, TimeUnit.SECONDS);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(e, Status.BAD_REQUEST);
+        } catch (TimeoutException e) {
+            throw new WebApplicationException(Response.serverError()
+                            .entity("Max time(1 second) to parse the minilanguage exceeded. ")
+                            .build());
         }
     }
 

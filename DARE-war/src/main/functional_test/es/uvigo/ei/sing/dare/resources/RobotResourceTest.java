@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.UUID;
@@ -59,6 +60,16 @@ public class RobotResourceTest {
         ClientResponse response = postRobotCreationReturningResponse("wrong");
         assertThat(response.getStatus(),
                 equalTo(Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
+    public void ifTheEvaluationOfMinilanguageTakesMoreThanOneSecondAnErrorIsReturned() {
+        ClientResponse response = postRobotCreationReturningResponse("sleep(2); url");
+        assertThat(response.getStatus(),
+                equalTo(Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+        String errorMessage = response.getEntity(String.class);
+        assertNotNull(errorMessage);
+        assertTrue(errorMessage.matches(".*Max time.*exceeded.*"));
     }
 
     @Test

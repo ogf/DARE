@@ -223,4 +223,9 @@ public class ConfigurationStub extends Configuration {
         return store;
     }
 
+    @Override
+    public ExecutorService getRobotParserExecutor() {
+        return executor;
+    }
+
 }

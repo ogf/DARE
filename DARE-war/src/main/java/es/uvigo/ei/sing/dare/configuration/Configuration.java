@@ -1,5 +1,7 @@
 package es.uvigo.ei.sing.dare.configuration;
 
+import java.util.concurrent.ExecutorService;
+
 import javax.servlet.ServletContext;
 
 import es.uvigo.ei.sing.dare.domain.IBackend;
@@ -34,5 +36,7 @@ public abstract class Configuration {
     }
 
     public abstract IBackend getBackend();
+
+    public abstract ExecutorService getRobotParserExecutor();
 
 }

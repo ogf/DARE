@@ -5,11 +5,16 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -107,6 +112,24 @@ public class RobotTest {
                 equalTo(robot.getTransformerInXML()));
         assertThat(robotWithDescription.getCreationTime(),
                 equalTo(robot.getCreationTime()));
+    }
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    @Test
+    public void aRobotCanBeCreatedWithATimeout() throws TimeoutException {
+        try {
+            Robot.createFromMinilanguage("sleep(10);url", executor, 100,
+                    TimeUnit.MILLISECONDS);
+            fail("it should have timeout");
+        } catch (TimeoutException e) {
+        }
+        long t = System.currentTimeMillis();
+        Robot robot = Robot.createFromMinilanguage("url", executor, 20,
+                TimeUnit.SECONDS);
+        long elapsedTime = System.currentTimeMillis() - t;
+        assertThat(elapsedTime, lessThan(1000l));
+        assertThat(robot, not(nullValue()));
     }
 
     private static String readAsString(URL resource) {
