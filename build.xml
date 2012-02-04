@@ -49,6 +49,7 @@
       <fileset dir="DARE-war/target" includes="*.war" />
       <fileset dir="DARE-web" includes="*-standalone.jar" />
     </copy>
+    <copy file="all.policy" tofile="${dist}/server.policy" />
   </target>
 
 </project>
