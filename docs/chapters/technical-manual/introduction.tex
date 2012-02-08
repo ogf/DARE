@@ -1,0 +1,200 @@
+\subsection{¿Qué es aAUTOMATOR?}
+\emph{aAUTOMATOR} es una herramienta para el desarrollo fácil y rápido
+de agentes software a medida destinados a la extracción de información
+de la Web \cite{aAUTOMATOR}. Estas aplicaciones, denominadas robots,
+recorren y analizan las páginas web extrayendo y combinando la
+información existente según el formato especificado por el
+usuario. aAUTOMATOR se compone de una herramienta visual para el
+diseño y ejecución de robots que evita la necesidad de disponer de
+conocimientos avanzados de lenguajes de programación.
+
+En la actualidad la \emph{WWW} presenta una cantidad ingente de
+información. Concretamente, en el campo de la bioinformática y la
+biología computacional cabe destacar la amplia disponibilidad de
+recursos en-línea.  Un problema al que nos enfrentamos es que esta
+información es difícil de procesar y extraer automáticamente, ya que
+la inmensa mayoría de esta información está destinada a ser leída por
+humanos. Mientras existen esfuerzos, como la web semántica, para
+codificar toda esa información de una manera más formal y tratable por
+computadoras; hoy por hoy no es posible acceder a la mayor parte de la
+información de la web por medio de procedimientos automáticos.
+
+En este sentido, la Web es el medio que posibilita el acceso al nuevo
+conocimiento generado por diferentes grupos de investigación de todo
+el mundo y que, sin embargo, continúa presentando importantes retos
+relacionados con el acceso y la extracción de información
+útil. Entre otros, cabe mencionar los siguientes inconvenientes:
+\begin{itemize}
+\item Elevada cantidad de información. Las interfaces web de acceso a
+  información genómica suelen generar como resultado datos de elevado
+  nivel de detalle que, si bien en muchos casos es lo buscado, en
+  otros únicamente resulta de interés una parte reducida del
+  resultado.
+\item Múltiples formatos de presentación. El aspecto y estructura de
+  los resultados es diferente en función de la fuente de información a
+  la que se accede.
+\item Información distribuida en diferentes lugares. Suele ser muy
+  habitual que la información buscada no se encuentre únicamente en un
+  lugar, sino que sea necesario el acceso a múltiples fuentes de
+  información realizando búsquedas y copiando/pegando resultados que
+  se dirigirán de forma manual hacia nuevas búsquedas en otros
+  lugares.
+\end{itemize}
+
+Ante este panorama una de las mayores iniciativas es la introducción
+de la web semántica: RDF, OWL, SPARQL, Servicios Web SOAP/WSDL,
+etc. No obstante, el uso de estas herramientas dista todavía de
+ser algo generalizado debido sobre todo a la antigüedad de las webs o
+a que no ha sido considerado su acceso por parte programas software.
+
+Nos vemos abocados al desarrollo de aplicaciones software que acceden
+a las páginas web seleccionando, formateando y combinando la
+información extraída con el fin de generar una versión personalizada
+que cumpla los requisitos. la única alternativa para la creación de
+estas aplicaciones implica un esfuerzo a mayores durante la fase de
+extracción de información, que se basa en el análisis del código HTML
+en busca de patrones de cadenas de texto. A mayores, se hacen
+necesarios conocimientos de programación para la construcción de este
+tipo de `agentes', tanto si se utilizan tecnologías de la web
+semántica, como si se analiza texto HTML.
+
+En este contexto surge aAUTOMATOR, una herramienta altamente flexible
+que permite la creación de \emph{robots}\footnote{No son más que
+  agentes de software, por brevedad en aAUTOMATOR se llaman robots.}
+para la extracción de información en sitios web.
+
+aAUTOMATOR se compone de dos partes fundamentales:
+\begin{description}
+\item[Herramienta de edición robots.] Permite el diseño y la ejecución
+  de robots en un entorno visual y amigable. El objetivo de esta
+  herramienta es la creación de robots sin conocimientos de
+  programación, una de las características clave
+
+\item[aAUTOMATOR API.] Librería sobre la que se basa el componente
+  anterior. Permite la creación, instanciación y ejecución de robots a
+  nivel de programación desde otras aplicaciones.
+\end{description}
+
+El interés de \emph{DARE} está en este último componente. \emph{DARE} está
+enfocado para ser usado directamente por programadores ofreciendo todo
+el poder de \emph{aAUTOMATOR API} en una forma conveniente.
+
+Para entender el funcionamiento de DARE y su terminología vamos a
+necesitar adentrarnos en el funcionamiento de \emph{aAUTOMATOR}.
+
+\subsubsection{Estructura de un robot}
+
+Un robot está compuesto por elementos denominados
+\emph{transformadores}. Cada uno de ellos realizan una función simple y bien
+definida. Un transformador recibe un vector de cadenas de texto,
+aplica una serie de transformaciones y devuelve otro vector de cadenas
+de texto como salidas. Ejemplos de transformadores incluidos en
+aAUTOMATOR son la conversión de URLs a su contenido HTML, búsquedas de
+texto, reemplazos, etc.
+
+Un robot se puede contemplar como un grafo acíclico dirigido,
+DAG\cite{DAG}, en el que los nodos son los transformadores y las
+aristas indican que sus resultados se dirigen a otro transformador.
+
+Sin embargo, la representación real es en forma de árbol. El
+transformador realiza su operación sobre el vector de entrada,
+proporciona su vector de salida a cada hijo y combina el resultado de
+éstos para obtener el resultado final del transformador.
+
+%TODO: introducir figura con vista en arbol y vista logica
+
+Un transformador se define por el comportamiento que realiza sobre el
+vector de entrada. El modo en el que se proporciona el vector de
+salida a cada hijo y como se recombina el resultado de éstos es
+parametrizable.
+
+\begin{description}
+  \item{BRANCH TYPE.} Indica como el transformador proporciona su
+    vector de salida a sus hijos. Nos ofrece tres opciones:
+    \begin{itemize}
+      \item CASCADE. El vector de salida de proporciona únicamente al
+        primer hijo, el resultado del primer hijo al segundo y así
+        sucesivamente. El resultado generado por el último hijo será
+        el resultado final del transformador.
+      \item BRANCH-DUPLICATED. El vector de salida se proporciona a
+        todos los hijos, cada hijo recibe una copia.
+      \item BRANCH-SCATTERED. El vector de salida se reparte entre los
+        hijos, correspondiendo la primera posición al primer hijo, la
+        segunda posición al segundo hijo y así sucesivamente. Si el
+        número de elementos del vector de salida es mayor que el
+        número de hijos, se vuelve a repetir el proceso con la parte
+        todavía no repartida empezando por el primer hijo.
+    \end{itemize}
+  \item{MERGE MODE.} Sólo tiene validez en el caso de que
+    BRANCH-TYPE no sea CASCADE. Indica como se recombina el resultado
+    de los hijos para formar el resultado final. Nos ofrece tres
+    opciones:
+    \begin{itemize}
+      \item ORDERED. El resultado final será un único vector resultado
+        de concatenar el resultado final de todos los hijos.
+      \item SCATTERED. El resultado final será un único vector
+        resultado de ir tomando un elemento del resultado final de
+        cada hijo hasta consumir los resultados de todos los hijos. Es
+        decir, funciona igual que ORDERED, salvo que se toman las
+        cadenas de los hijos de forma alternada. El resultado final
+        sería un vector en el que en primer lugar irían las primeras
+        posiciones de los hijos, luego las segundas posiciones, etc.
+      \item COLLAPSED. El resultado sería un vector con una única
+        posición en el que se concatenan todas y cada una de las
+        cadenas de los resultados finales de los hijos.
+    \end{itemize}
+\end{description}
+
+Ya podemos observar como a partir de transformadores con
+comportamientos sencillos, por medio de composición y parametrización
+se pueden alcanzar comportamientos complejos. Sin embargo, para
+alcanzar los objetivos deseados, necesitamos permitir la
+implementación de bucles.
+
+Cualquier transformador se puede ejecutar de manera cíclica si se le
+indica con el parámetro LOOP a \emph{true}. Un transformador en modo
+LOOP se comporta del siguiente modo:
+
+\begin{itemize}
+  \item El primer hijo del transformador se utiliza para controlar el
+    bucle. Sus resultados no serán incluidos en el resultado final. A
+    este primer hijo se le proporciona el vector de salida generado
+    por el transformador (no el resultado final).
+  \item El transformador examina el vector de salida de este primer
+    hijo. Si no proporciona ningún resultado, el bucle ha de
+    terminar. En caso contrario la salida del primer hijo se empleará
+    como nuevo vector de entrada.
+  \item Una vez finalizado el bucle, se produce el resultado
+    final. Por cada iteración del bucle se produce un resultado
+    intermedio empleando el MERGE-MODE especificado. Una vez
+    finalizado el bucle se toma el resultado de cada iteración y se
+    añade al resultado final. De modo que las primeras posiciones se
+    corresponderán al resultado de la primera iteración, las
+    siguientes a la segunda iteración, etc. Por ejemplo, si el
+    MERGE-MODE es COLLAPSED el resultado final tendrá una posición por
+    cada iteración.
+\end{itemize}
+
+Los bucles son imprescindibles a la hora de procesar resultados
+devueltos en varias páginas.
+
+\subsubsection{Transformadores incluidos}
+
+aAUTOMATOR trae incorporados una serie de transformers predefinidos.
+\begin{table}[!hbp]
+\small{
+\begin{tabular}{l p{6cm} p{5cm}}
+Clase Java & Descripción & Parámetros \\ \hline
+
+SimpleTransformer & La entrada es igual a la salida & \\ \hline
+URLRetriever & Cada cadena del vector de entrada se interpreta como
+una URL y se obtiene un vector con las líneas de texto de las que está
+compuesto el recurso & \\ \hline
+URLDownloader & Cada cadena del vector de entrada se interpreta como
+una URL y su contenido se guarda en un fichero & \emph{DownloadPath:}
+directorio donde guardar los ficheros \linebreak[4] \emph{overwrite:}
+sobreescribir ficheros ya existentes \\ \hline
+\end{tabular}
+}
+\caption{Transformers incluidos}
+\end{table}

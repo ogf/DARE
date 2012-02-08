@@ -1,0 +1,40 @@
+\documentclass[a4paper,12pt,twoside]{report}
+
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{hyperref}
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text,Ligatures={Common,Rare,Discretionary}]{Linux Libertine O}
+
+\usepackage{polyglossia}
+\setdefaultlanguage{spanish}
+\setotherlanguage{english}
+
+\pagestyle{headings}
+
+\author{Óscar González Fernández}
+\title{DARE: Distributed aAutomator Runtime Environment}
+\begin{document}
+\maketitle
+\tableofcontents
+\chapter{Memoria}
+\input{chapters/memoria.tex}
+\chapter{Manual técnico}
+\input{chapters/technical-manual.tex}
+\chapter{Manual usuario}
+\input{chapters/user-manual.tex}
+
+\begin{thebibliography}{1}
+
+\bibitem{aAUTOMATOR}
+  D. Glez-Peña; J.R. Méndez; F. Fdez-Riverola (2007)
+  \newblock \emph{aAUTOMATOR}: Herramienta Flexible Para La
+  Extracción De Información En Sitios Web Bioinformáticos. Vila Real,
+  Portugal. 07 - octubre
+
+\bibitem{DAG}
+\newblock Directed acyclic graph
+\newblock \url{http://en.wikipedia.org/wiki/Directed_acyclic_graph}, 2012.
+
+\end{thebibliography}
+\end{document}

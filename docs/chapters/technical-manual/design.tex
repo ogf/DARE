@@ -1,0 +1,78 @@
+\subsection{Introducción}
+\subsubsection{Componentes}
+% hacer introducción apoyándose en diagrama
+\begin{figure}[!hbp]
+\makebox[\textwidth]{\framebox[5cm]{\rule{0pt}{5cm}}}
+\caption{Diagrama componentes}
+\end{figure}
+\subsection{Minilanguage}
+Finalmente la DSL se ha implementado por medio de una DSL~interna en
+JRuby. Discutiremos las características de las DSL~internas y las
+DSL~externas, así como la razón para elegir JRuby.
+\subsubsection{DSL internas}
+Definición, ventajas, incovenientes, \ldots{}
+\subsubsection{DSL externas}
+Definición, ventajas, incovenientes, \ldots{}
+% JavaCC, ANTLR
+\subsubsection{¿Por qué DSL interna?}
+\subsubsection{Ruby y JRuby}
+\subsubsection{Sintaxis}
+\subsubsection{Ejemplos}
+\subsubsection{Diagrama clases}
+\subsubsection{Implementación}
+Descripción general \ldots{}
+% transformer.rb en modo literario
+\subsubsection{Inyección código malicioso}
+Se ha empleado una sandbox, Java Security Architecture, \ldots{}
+\subsubsection{Timeouts}
+\subsubsection{Manipulación estado intérprete}
+
+\subsection{DARE-war}
+\subsubsection{REST}
+Explicar REST y justificar su uso.
+\subsubsection{JAX-RS}
+Bla\ldots
+\subsubsection{Diagrama clases}
+\begin{figure}[!hbp]
+\makebox[\textwidth]{\framebox[5cm]{\rule{0pt}{5cm}}}
+\caption{Diagrama dominio}
+\end{figure}
+\subsubsection{Implementación}
+Etc\ldots
+
+\subsection{Sistema almacenamiento}
+\subsubsection{Opciones valoradas}
+\subsubsection{MongoDB}
+\subsubsection{Razón elección}
+\subsubsection{Esquema datos}
+
+\subsection{Backend}
+\subsubsection{Introducción}
+Introducción general a la arquitectura del backend
+\begin{figure}[!hbp]
+\makebox[\textwidth]{\framebox[5cm]{\rule{0pt}{5cm}}}
+\caption{Diagrama componentes backend}
+\end{figure}
+\subsubsection{Clojure}
+Características, razón elección, \ldots{}
+\subsubsection{Librerías Empleadas}
+\begin{description}
+\item{CongoMongo} es \ldots{}
+\item{Lamina} es\ldots{}
+\item{Aleph} es\ldots{}
+\item{Gloss} es\ldots{}
+\end{description}
+\subsubsection{DARE-backend}
+% a fondo backend/core.clj?
+\subsubsection{DARE-workers}
+% a fondo workers/client.clj, workers/server.clj?
+
+\subsection{DARE-web}
+Hablar de por qué se eligió Jetty en vez de Glassfish. Por qué modo
+embebido. http://www.12factor.net/
+
+\subsection{Librerías acceso}
+\subsubsection{Java, JAX-RS cliente}
+\subsubsection{Python, httplib2}
+% rest.py a fondo?
+\subsubsection{Interfaz Línea Comandos}
