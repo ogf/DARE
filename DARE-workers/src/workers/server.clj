@@ -239,7 +239,7 @@
      (.shutdownNow automator-executor)
      (shutdown-agents))))
 
-(defn run [dbhost db-port db port threads-number]
+(defn run [dbhost db-port db port ip-to-register-on threads-number]
   (defonce automator-executor (Executors/newFixedThreadPool (or threads-number 20)))
   (let [conn (mongo/make-connection db :host dbhost :port db-port)
         tcp-server (server conn port)
@@ -248,7 +248,7 @@
       (mongo/with-mongo conn
         (mongo/add-index! :workers [:server-id])
         (mongo/set-write-concern conn :strict)
-        (if-let [ip (guess-external-local-ip)]
+        (if-let [ip (or ip-to-register-on (guess-external-local-ip))]
           (mongo/update! :workers
                          {:host ip :port port}
                          {:$set {:server-id server-id}})))
@@ -269,16 +269,17 @@
         :default "test"]
        ["-p" "--port" "The port this worker will listen to for requests" :default 40100 :parse-fn #(Integer. %)]
        ["--threads-number" :default 20 :parse-fn #(Integer. %)]
+       ["--ip-to-run-on" "The ip on which to register the worker" :default nil]
        ["-h" "--help" "Print this help" :flag true :default false]))
 
 (defn -main [& args]
-  (let [[{:keys [mongo-host mongo-port mongo-db port threads-number help]} _ help-banner] (parse-args args)]
+  (let [[{:keys [mongo-host mongo-port mongo-db port threads-number ip-to-run-on help]} _ help-banner] (parse-args args)]
     (cond
      help (println help-banner)
      :else
-     (run mongo-host mongo-port mongo-db port threads-number))))
+     (run mongo-host mongo-port mongo-db port ip-to-run-on threads-number))))
 
 (defn local-setup
   ([db port threads-number]
-     (run "127.0.0.1" 27017 db port threads-number))
+     (run "127.0.0.1" 27017 db port "127.0.0.1" threads-number))
   ([db port] (local-setup db port 10)))
