@@ -10,6 +10,31 @@
 \setdefaultlanguage{spanish}
 \setotherlanguage{english}
 
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  showstringspaces=false,
+  commentstyle=\color{gray}\upshape
+}
+
+\lstdefinelanguage{XML}
+{
+  morestring=[b]",
+  morestring=[s]{>}{<},
+  morecomment=[s]{<?}{?>},
+  stringstyle=\color{black},
+  identifierstyle=\color{darkblue},
+  keywordstyle=\color{cyan},
+  morekeywords={xmlns,version}% list your attributes here
+}
+
 \pagestyle{headings}
 
 \author{Óscar González Fernández}
@@ -27,10 +52,71 @@
 \begin{thebibliography}{1}
 
 \bibitem{aAUTOMATOR}
-  D. Glez-Peña; J.R. Méndez; F. Fdez-Riverola (2007)
+  D. Glez-Peña, J.R. Méndez, F. Fdez-Riverola (2007)
   \newblock \emph{aAUTOMATOR}: Herramienta Flexible Para La
   Extracción De Información En Sitios Web Bioinformáticos. Vila Real,
   Portugal. 07 - octubre
+\bibitem{DSL}
+  Martin Fowler
+  \newblock Domain-Specific Languages
+  \newblock ISBN 978-0-321-71294-3
+\bibitem{RUBY}
+  David Thomas, Andrew Hunt.
+  \newblock Programming Ruby: the pragmatic programmer's guide
+  \newblock ISBN 0201710897
+%meter referncia a pickaxe book
+\bibitem{REST}
+  Roy Fielding
+  \newblock Architectural Styles and
+  the Design of Network-based Software Architectures
+  \newblock
+  \url{http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm},
+  2012.
+\bibitem{JAXRS}
+  \newblock JSR 311: JAX-RS: The JavaTM API for RESTful Web Services
+  \newblock \url{http://jcp.org/en/jsr/detail?id=311}, 2012.
+\bibitem{JOY}
+  Michael Fogus, Chris Houser.
+  \newblock The Joy of Clojure: Thinking the Clojure Way
+  \newblock ISBN 1935182641
+\bibitem{FUNCTIONAL}
+  \newblock Functional programming
+  \newblock \url{http://en.wikipedia.org/wiki/Functional_programming}, 2012
+\bibitem{LISP}
+  \newblock Lisp programming language
+  \newblock \url{http://en.wikipedia.org/wiki/Lisp_(programming_language)}, 2012
+\bibitem{MONGO}
+  \newblock MongoDB
+  \newblock \url{http://www.mongodb.org/}, 2012
+\bibitem{NOSQL}
+  \newblock NoSQL
+  \newblock \url{http://www.mongodb.org/}, 2012
+\bibitem{DEVOPS}
+  \newblock DevOps
+  \url{http://en.wikipedia.org/wiki/Devops}, 2012
+\bibitem{JCLOUDS}
+  \newblock jclouds
+  \newblock \url{http://www.jclouds.org/}, 2012
+\bibitem{PALLET}
+  \newblock Pallet, DevOps for the JVM
+  \newblock \url{http://palletops.com/}, 2012
+\bibitem{JETTY}
+  \newblock Jetty
+  \newblock \url{http://www.eclipse.org/jetty/}, 2012
+\bibitem{SOUP}
+  \newblock Beatiful Soup
+  \newblock \url{http://www.crummy.com/software/BeautifulSoup/}, 2012
+\bibitem{MECHANIZE}
+  \newblock WWW::Mechanize
+  \newblock
+  \url{http://search.cpan.org/~jesse/WWW-Mechanize-1.72/lib/WWW/Mechanize.pm},
+  2012
+\bibitem{HPRICOT}
+  \newblock Hpricot
+  \newblock \url{http://hpricot.com/}, 2012
+\bibitem{MASHUP}
+  \newblock Mashup
+  \newblock \url{http://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)}, 2012
 
 \bibitem{DAG}
 \newblock Directed acyclic graph
