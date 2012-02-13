@@ -1,3 +1,17 @@
+Para comprender el presente proyecto y el lenguaje definido es
+necesario comprender la motivación y principios fundamentales de
+aAUTOMATOR.
+
+Luego proseguiremos con el análisis. En él se profundizará sobre las
+necesidades del proyecto y se definirán una serie de casos de uso que
+el sistema ha de cumplir.
+
+En el diseño describiremos la solución entregada así como razonaremos
+las decisiones tomadas en la construcción del sistema.
+
+Por último presentaremos las pruebas automatizadas presentes en el
+proyecto, más las pruebas de rendimiento realizadas.
+
 \subsection{¿Qué es aAUTOMATOR?}
 \emph{aAUTOMATOR} es una herramienta para el desarrollo fácil y rápido
 de agentes software a medida destinados a la extracción de información
@@ -83,6 +97,7 @@ Para entender el funcionamiento de DARE y su terminología vamos a
 necesitar adentrarnos en el funcionamiento de \emph{aAUTOMATOR}.
 
 \subsubsection{Estructura de un robot}
+\label{COMPORTAMIENTO_AUTOMATOR}
 
 Un robot está compuesto por elementos denominados
 \emph{transformadores}. Cada uno de ellos realizan una función simple y bien
@@ -180,7 +195,10 @@ devueltos en varias páginas.
 
 \subsubsection{Transformadores incluidos}
 
-aAUTOMATOR trae incorporados una serie de transformers predefinidos.
+aAUTOMATOR trae incorporados una serie de transformers
+predefinidos. Ver tabla~\ref{transformers_incluidos} en
+página~\pageref{transformers_incluidos}.
+
 \begin{table}[!hbp]
 \small{
 \begin{tabular}{l p{6cm} p{5cm}}
@@ -189,12 +207,90 @@ Clase Java & Descripción & Parámetros \\ \hline
 SimpleTransformer & La entrada es igual a la salida & \\ \hline
 URLRetriever & Cada cadena del vector de entrada se interpreta como
 una URL y se obtiene un vector con las líneas de texto de las que está
-compuesto el recurso & \\ \hline
-URLDownloader & Cada cadena del vector de entrada se interpreta como
-una URL y su contenido se guarda en un fichero & \emph{DownloadPath:}
-directorio donde guardar los ficheros \linebreak[4] \emph{overwrite:}
-sobreescribir ficheros ya existentes \\ \hline
+compuesto el recurso & \\ \hline URLDownloader & Cada cadena del
+vector de entrada se interpreta como una URL y su contenido se guarda
+en un fichero & \emph{DownloadPath:} directorio donde guardar los
+ficheros \linebreak[4] \emph{overwrite:} sobrescribir ficheros ya
+existentes \\ \hline PatternMatcher & Busca un patrón dado mediante
+una expresión regular Perl. Se usa una captura para indicar que parte
+del patrón se quiere extraer. & \emph{regexp:} expresión regular que
+debe contener una captura.\\ \hline
+Decorator & Concatena a cada cadena de
+texto de la entrada un texto antes y otro después. & \emph{head:}
+Texto a añadir antes. \linebreak[4] \emph{tail:} Texto a añadir
+después.\\ \hline
+Replacer & Reemplaza todas las apariciones de un texto por
+otro en todas las cadenas de texto de la entrada & \emph{search:}
+Texto a reemplazar.\linebreak[4] \emph{replace:} Texto reemplazo. \\
+\hline
+Merger & Se concatenan todas las cadenas de texto de la entrada en
+una sola. Este transformador sólo devuelve una posición en su vector
+de salida.
 \end{tabular}
 }
 \caption{Transformers incluidos}
+\label{transformers_incluidos}
 \end{table}
+
+\subsubsection{Formato almacenamiento}
+\label{formato_almacenamiento}
+Los robots construidos son almacenados en un formato XML. Como se ha
+podido observar los robots definidos por aAUTOMATOR tienen estructura
+de árbol y por tanto se pueden trasladar fácilmente a través de XML.
+En el listado \ref{robot_ejemplo}, página~\pageref{robot_ejemplo}, se
+puede apreciar el XML de un robot.
+
+\begin{table}[!hbp]
+  \lstset{language=XML}
+  \tiny{
+  \begin{lstlisting}
+<robot version="1.0">
+  <transformer class="SimpleTransformer" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+    <description>SimpleTransformer</description>
+    <param key="description">SimpleTransformer</param>
+    <transformer class="Decorator" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>Decorator</description>
+      <param key="description">Decorator</param>
+      <param key="head"><![CDATA[http://www.genecards.org/cgi-bin/listdiseasecards.pl?type=pattern&search=]]></param>
+      <param key="tail"></param>
+    </transformer>
+    <transformer class="URLRetriever" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>URLRetriever</description>
+      <param key="description">URLRetriever</param>
+    </transformer>
+    <transformer class="PatternMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>PatternMatcher</description>
+      <param key="description">PatternMatcher</param>
+      <param key="dotAll">false</param>
+      <param key="pattern"><![CDATA[<a href="carddisp.pl\?gene=(.*?)"]]></param>
+    </transformer>
+    <transformer class="Decorator" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>Decorator</description>
+      <param key="description">Decorator</param>
+      <param key="head">http://www.genecards.org/cgi-bin/carddisp.pl?gene=</param>
+      <param key="tail"></param>
+    </transformer>
+    <transformer class="URLRetriever" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>URLRetriever</description>
+      <param key="description">URLRetriever</param>
+    </transformer>
+    <transformer class="PatternMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+      <description>PatternMatcher</description>
+      <param key="description">PatternMatcher</param>
+      <param key="dotAll">false</param>
+      <param key="pattern"><![CDATA[></td><TD>(.+?)<sup><a class='suplink' href="http://genecards.weizmann.ac.il/cgi-
+      bin/geneannot/GA_search.pl\?keyword_type=probe_set_list]]></param>
+    </transformer>
+  </transformer>
+</robot>
+  \end{lstlisting}
+  }
+  \caption{Ejemplo Robot}
+  \label{robot_ejemplo}
+\end{table}
+
+Este formato es apto para ser consumido y producido por programas,
+pero no es adecuado para ser creado directamente por programadores. En
+este contexto surge la necesidad de crear un nuevo lenguaje que
+facilite la creación y edición directa de robots por parte de
+programadores o usuarios expertos.
