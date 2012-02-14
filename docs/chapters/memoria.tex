@@ -192,8 +192,9 @@ DARE está compuesto de los siguientes módulos.
     sistema. Está compuesto por una parte cliente que lanza peticiones
     de ejecución a aAUTOMATOR. La parte servidor, de ahora en adelante
     \emph{worker}, interpreta esas peticiones y hace el trabajo
-    correspondiente. Para lograr el objetivo de escabilidad y un nivel
-    de fiabilidad mayor se pueden lanzar numerosos workers.
+    correspondiente. Uno o varios de estos workers pueden estar
+    lanzados en función de las necesidades de escalabilidad y
+    fiabilidad necesarios.
 
     Los workers pueden estar en el nodo local o repartidos por todo el
     cluster. La parte cliente es capaz de descubrirlos y repartir la
@@ -206,10 +207,10 @@ DARE está compuesto de los siguientes módulos.
     Clojure.
 
   \item DARE-backend: Es el encargado de comunicarse con la base de
-    datos MongoDB tanto para leer como escribir los objetos definidos
-    en DARE-domain. Recibe también peticiones de ejecución para
-    aAUTOMATOR. Para llevarlas a acabo utiliza la parte cliente de
-    DARE-workers.
+    datos MongoDB tanto para leer como para escribir los objetos
+    definidos en DARE-domain. Recibe también peticiones de ejecución
+    para aAUTOMATOR. Para llevarlas a acabo utiliza la parte cliente
+    de DARE-workers.
 
     Está implementado en Clojure.
 
@@ -234,13 +235,13 @@ DARE está compuesto de los siguientes módulos.
   \item DARE-web: Este módulo se utiliza para facilitar el despliegue
     de la aplicación. Incluye el contenedor de servlets
     Jetty\cite{JETTY} embebido. Jetty es un contenedor de servlets
-    ligero, por lo que es especialmente indicado para lanzar numerosas
+    ligero, por lo que es especialmente adecuado para lanzar numerosas
     instancias de la aplicación. Está implementado en Clojure.
 
   \item DARE-python: Este módulo implemente la librería cliente para
     Python, así como la aplicación de línea de comandos. La aplicación
     de línea de comandos emplea la librería para llevar a cabo su
-    funcionalidad. Lógicamente está implementado en Python.
+    funcionalidad. Como es lógico está implementado en Python.
 
 \end{itemize}
 %TODO hacer diagrama
@@ -248,8 +249,9 @@ DARE está compuesto de los siguientes módulos.
 \subsection{Visión del sistema}
 \subsection{Organización de la documentación}
 
-La documentación del proyecto se presenta en único volumen que
-contiene tres capítulos:
+A lo largo de la documentación se emplearán distintos diagramas
+siguiendo la notación UML\cite{UML}. La documentación del proyecto se
+presenta en único volumen que contiene tres capítulos:
 
 \begin{description}
 
