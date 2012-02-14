@@ -1,0 +1,7 @@
+Consumidor:Actor "Consumidor Servicio"
+servicio:Servicio[r] "Servicio"
+almacenamiento:Almacenamiento[r] "Almacenamiento"
+
+Consumidor:servicio.crea_robot(especificacion_robot)
+servicio:xml_robot=servicio.transformaEnXML(especificacion_robot)
+servicio[1]:almacenamiento.almacena(xml_robot)

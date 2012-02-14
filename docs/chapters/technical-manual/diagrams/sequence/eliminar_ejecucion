@@ -1,0 +1,6 @@
+consumidor:Actor "Consumidor Servicio"
+servicio:Servicio[r] "Servicio"
+almacenamiento:Almacenamiento[r] "Almacenamiento"
+
+consumidor:servicio.eliminar_ejecucion(codigo_ejecucion)
+servicio:almacenamiento.eliminar_ejecucion(codigo_ejecucion)

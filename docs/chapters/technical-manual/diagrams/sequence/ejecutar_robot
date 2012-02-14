@@ -1,0 +1,8 @@
+consumidor:Actor "Consumidor Servicio"
+servicio:Servicio[r] "Servicio"
+almacenamiento:Almacenamiento[r] "Almacenamiento"
+
+consumidor:servicio.ejecutar(codigo_robot, vector_entradas)
+servicio:robot=almacenamiento.obtener_robot(codigo_robot)
+servicio[1]:resultado=servicio.ejecutar(robot, vector_entradas)
+servicio[1]:consumidor.mostrar_resultado(resultado)

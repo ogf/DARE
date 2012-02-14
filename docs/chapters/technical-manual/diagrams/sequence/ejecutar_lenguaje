@@ -1,0 +1,8 @@
+Programador:Actor
+sistema:Sistema[r] "Sistema"
+runtime:aAUTOMATOR[r] "aAUTOMATOR Runtime"
+
+Programador:sistema.ejecuta robot(lenguaje)
+sistema:xml_robot=sistema.transformaEnXML(lenguaje)
+sistema[1]:resultado=runtime.ejecuta(xml_robot)
+sistema:Programador.mostrar resultado(resultado)

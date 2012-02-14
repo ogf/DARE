@@ -1,0 +1,10 @@
+usuario:Actor "Usuario Experto"
+aplicacion:Aplicacion[r] "Aplicación"
+almacenamiento:Almacenamiento[r] "Almacenamiento Local"
+servicio:Actor "Servicio"
+
+usuario:aplicacion.crear_periodica(codigo_robot, periodo, vector_entradas)
+aplicacion:url_robot=almacenamiento.obtener_url(codigo_robot)
+aplicacion:servicio.ejecucion_periodica(url_robot, periodo, vector_entradas)
+servicio:aplicacion.ejecucion_periodica_creada(datos_ejecucion_periodica)
+aplicacion:almacenamiento.guardar_periodica(codigo_ejecucion, url_ejecucion)

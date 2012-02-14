@@ -1,0 +1,8 @@
+consumidor:Actor "Consumidor Servicio"
+servicio:Servicio[r] "Servicio"
+almacenamiento:Almacenamiento[r]
+
+consumidor:servicio.mostrar_ejecucion(url_ejecucion)
+servicio:codigo_ejecucion=servicio.obtener_codigo(url_ejecucion)
+servicio[1]:ejecucion=almacenamiento.obtener_ejecucion(codigo_ejecucion)
+servicio[1]:consumidor.mostrar_ejecucion(ejecucion)

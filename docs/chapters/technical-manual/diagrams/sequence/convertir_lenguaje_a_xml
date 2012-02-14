@@ -1,0 +1,7 @@
+Programador:Actor
+sistema:Sistema[r] "Sistema"
+
+
+Programador:sistema.convierte_a_robot_en_xml(lenguaje)
+sistema:xml_robot=sistema.transforma_en_XML(lenguaje)
+sistema[1]:Programador.mostrar_resultado(xml_robot)

@@ -1,0 +1,10 @@
+usuario:Actor "Usuario Experto"
+aplicacion:Aplicacion[r] "Aplicación"
+almacenamiento:Almacenamiento[r] "Almacenamiento Local"
+servicio:Actor "Servicio"
+
+usuario:aplicacion.mostrar_ejecucion(codigo_ejecucion)
+aplicacion:url_ejecucion=almacenamiento.obtener_url_ejecucion(codigo_ejecucion)
+aplicacion[1]:servicio.obtener_datos(url_ejecucion)
+servicio:aplicacion.devolver_resultado(datos_ejecucion)
+aplicacion:usuario.mostrar_ejecucion(resultado)

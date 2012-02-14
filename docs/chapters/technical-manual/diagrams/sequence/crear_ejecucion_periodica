@@ -1,0 +1,7 @@
+consumidor:Actor "Consumidor Servicio"
+servicio:Servicio[r] "Servicio"
+almacenamiento:Almacenamiento[r] "Almacenamiento"
+
+consumidor:servicio.crear_ejecucion_periodica(codigo_robot, periodo, vector_entradas)
+servicio:robot=almacenamiento.obtener_robot(codigo_robot)
+servicio[1]:almacenamiento.guardar_ejecucion_periodica(robot, periodo, vector_entradas)
