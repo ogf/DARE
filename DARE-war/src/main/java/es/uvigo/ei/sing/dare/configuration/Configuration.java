@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import javax.servlet.ServletContext;
 
 import es.uvigo.ei.sing.dare.domain.IBackend;
+import es.uvigo.ei.sing.dare.domain.MinilanguageProducer;
 
 public abstract class Configuration {
 

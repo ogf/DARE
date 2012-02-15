@@ -25,8 +25,8 @@ import javax.ws.rs.core.UriInfo;
 import org.w3c.dom.Document;
 
 import es.uvigo.ei.sing.dare.configuration.Configuration;
-import es.uvigo.ei.sing.dare.configuration.MinilanguageProducer;
 import es.uvigo.ei.sing.dare.domain.IBackend;
+import es.uvigo.ei.sing.dare.domain.MinilanguageProducer;
 import es.uvigo.ei.sing.dare.entities.ExecutionPeriod;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.entities.Robot;

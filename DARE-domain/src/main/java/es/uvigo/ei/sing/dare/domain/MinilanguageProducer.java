@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.configuration;
+package es.uvigo.ei.sing.dare.domain;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

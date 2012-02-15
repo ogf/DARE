@@ -23,6 +23,7 @@ import backend.core.BackendBuilder;
 import clojure.lang.RT;
 import es.uvigo.ei.sing.dare.domain.IBackend;
 import es.uvigo.ei.sing.dare.domain.IBackendBuilder;
+import es.uvigo.ei.sing.dare.domain.MinilanguageProducer;
 
 @WebListener
 public class ConfigurationBootstrapper implements ServletContextListener {
