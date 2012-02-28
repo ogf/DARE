@@ -522,13 +522,71 @@ http://en.wikipedia.org/wiki/Embarrassingly\_parallel
 \subsubsection{Mover partes aplicación a otros nodos}
 
 \subsection{Clojure como lenguaje de programación}
-Características, razón elección, \ldots{}
+
+Clojure es un lenguaje de programación que se ejecuta sobre la
+JVM\footnote{\emph{Java Virtual Machine}}, la
+CLR\cite{CLR}\footnote{\emph{Common Language Runtime}} y
+JavaScript. Para este proyecto nos interesa la implementación que se
+ejecuta sobre la JVM y nos referiremos a ella de ahora en adelante.
+
+Es un lenguaje de propósito general que combina la facilidad de uso de
+un lenguaje de scripting con una infraestructura robusta y eficiente
+para programación concurrente. Clojure es compilado a JVM bytecode
+pero aun así es completamente dinámico: cualquier característica es
+soportada en tiempo de ejecución.
+
+Clojure es un dialecto de Lisp\cite{LISP} y comparte con Lisp la
+filosofía de código como datos. Ofrece, pues, un poderoso sistema de
+macros. Su paradigma es eminentemente funcional ofreciendo unas
+estructuras de datos inmutables y
+persistentes\cite{PERSISTENT-DATA-STRUCTURES}. Cuando mutabilidad es
+necesaria, Clojure ofrece memoria transaccional y un sistema de
+agentes reactivos\footnote{Es similar a un Actor en Erlang}.
+
+Clojure ofrece facilidad de acceso a librerías Java, permitiendo
+reutilizar una gran cantidad de código existente. Esto le confiere ser
+práctico en gran medida.
+
+Hemos empleado Clojure en DARE-backend y DARE-workers. La razón es que
+intuíamos que Clojure nos ofrecería una productividad superior. Ha
+sido una experiencia muy positiva. Creemos que el código resultante es
+mucho más conciso y fácil de modificar que el equivalente en Java. El
+mayor problema a destacar fue la poca familiaridad con Clojure en un
+primer momento.
+
 \subsubsection{Librerías Empleadas}
 \begin{description}
-\item{CongoMongo} es \ldots{}
-\item{Lamina} es\ldots{}
-\item{Aleph} es\ldots{}
-\item{Gloss} es\ldots{}
+\item{CongoMongo}\cite{CONGO-MONGO} es un envoltario sobre el driver
+  oficial Java de MongoDB. Nos ofrece una API más adecuada para ser
+  usada desde Clojure.
+\item{Lamina} es una librería para trabajar con eventos como si fueran
+  secuencias. Se podría decir que sigue un paradigma funcional
+  reactivo\cite{FRP}. Es la base sobre la que Aleph y Gloss se
+  asientan. La abstracción clave es un \emph{channel}. Combina una
+  cola con el patrón publicar/subscribir.
+\item{Aleph} es una librería para realizar
+  I/O\footnote{Entrada/Salida} asíncrona con varios protocolos: HTTP,
+  WebSockets, TCP, UDP, etc. Representa la comunicación con un
+  \emph{channel} de Lamina. Aleph permite realizar una comunicación
+  asíncrona de manera sencilla.
+\item{Gloss} es una DSL para definir formatos de
+  comunicación. Convierte un flujo de bytes en estructuras de datos
+  Clojure. Esto nos facilita parsear las peticiones realizadas en vez
+  de tener que trabajar con el flujo de bytes proveniente de TCP. Por
+  ejemplo, para divir el flujo de bytes en peticiones de strings se
+  puede hacer definiendo un \emph{codec} en Gloss. En la
+  figura~\ref{gloss-example}, pág.~\pageref{gloss-example}, se define
+  que cada petición sera una String codificada en utf-8 con un entero
+  indicando el tamaño de la misma.
+  \begin{figure}[hb]
+    \begin{center}
+      \begin{lstlisting}[language=Lisp]
+      (defcodec protocol-frame
+        (finite-frame :int32 (string :utf-8)))
+        \end{lstlisting}
+    \end{center}
+  \caption{Ejemplo uso Gloss}\label{gloss-example}
+  \end{figure}
 \end{description}
 
 \subsection{DARE como procesos sin estado}
@@ -585,7 +643,7 @@ vamos a realizar una breve descripción de cada uno de ellos:
   definidos en DARE-domain. Recibe también las peticiones de ejecución
   para aAUTOMATOR. Luego utilizando la parte cliente de DARE-workers
   las reparte entre los procesos \emph{worker} que se están
-  ejecutando.
+  ejecutando. Está implementado en Clojure.
 
 \item[DARE-workers:] Este componente está compuesto por una parte
   cliente que lanza peticiones de ejecución a aAUTOMATOR. La parte
