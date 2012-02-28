@@ -457,6 +457,7 @@ facilidad de uso, asi que emplear un RDBMS sigue siendo una opción.
 \end{description}
 
 \subsubsection{MongoDB}
+\label{ELECCION-MONGO}
 
 Finalmente hemos optado por utilizar \emph{MongoDB}. Su modelo de
 datos orientado a documentos nos ofrece una gran velocidad de
@@ -515,11 +516,88 @@ junto a una gran facilidad de uso. Podemos empezar a usar un único
 servidor MongoDB y luego emplear \emph{replica sets} más
 \emph{sharding}. Por eso, finalmente hemos elegido esta base de datos.
 
-\subsection{Arquitectura Backend}
-\subsubsection{Embarrassingly parallel}
-http://en.wikipedia.org/wiki/Embarrassingly\_parallel
-\subsubsection{Descripción Arquitectura}
-\subsubsection{Mover partes aplicación a otros nodos}
+\subsection{DARE como procesos sin estado}
+
+En el diseño de DARE hemos tratado de utilizar procesos sin estado y
+una arquitectura en la que no se comparta el estado, \emph{shared
+  nothing architecture}. Esto permite poder añadir procesos con
+facilidad. También es una arquitectura más fiable, si un proceso falla
+la siguiente petición puede ir a otro proceso del mismo tipo. La
+escalabilidad de DARE por tanto se basa en un modelo basado en
+procesos. Idealmente será responsabilidad del Sistema Operativo
+relanzar los procesos que hayan terminado inesperadamente su
+operación. La gran ventaja de este modelo es que para escalar
+simplemente hay que lanzar más procesos ya sea en el mismo u otros
+nodos.
+
+Para ofrecer una mayor facilidad de administración los procesos Web
+DARE son auto-contenidos. En vez de desplegar a un contenedor de
+servlets existente, el artefacto
+\emph{DARE-web<version>-standalone.jar} contiene todo lo necesario
+para ejecutar un servidor web. Para ello se utiliza Jetty, que está
+especialmente pensado para ser usado en modo embebido.
+
+Hemos dicho que DARE utiliza procesos sin estado para llevar a cabo
+sus actividades. Más concretamente habría dos tipos de procesos:
+\begin{description}
+  \item[Proceso Web:] Es fruto de ejecutar
+    \emph{DARE-web<version>-standalone.jar}. Contiene Jetty, la
+    aplicación web y la parte cliente de DARE-workers. Su número
+    dependerá de las necesidades de escalabilidad.
+  \item[Proceso Worker:] Es el fruto de ejecutar
+    \emph{DARE-workers-<version>-standalone.jar}. Es responsable de
+    realizar las ejecuciones de robots demandadas. Su número dependerá
+    del número de ejecuciones necesarias a realizar.
+\end{description}
+
+\subsubsection{Arquitectura Backend}
+
+En DARE llamamos \emph{Backend} a la parte responsable de almacenar
+los datos y mandar las ejecuciones a aAUTOMATOR. La implementación de
+esta parte se ha dividido en dos componentes: DARE-backend y
+DARE-workers. Ver \ref{COMPONENTES-DARE},
+pág.~\pageref{COMPONENTES-DARE}. Pero antes veamos la problemática a
+afrontar y los principios por los que se guiará su implementación.
+
+La base de datos elegida, MongoDB\ref{ELECCION-MONGO}, se encarga de
+almacenar los datos. La única dificultad se presenta en convertir los
+datos del dominio definidos en Java a documentos JSON y viceversa.
+%TODO añadir referencia a DARE-domain
+
+Por otro lado hay que distribuir la carga de las ejecuciones
+solicitadas. Éste es un problema \emph{embarrassingly
+  parallel}\cite{EMBARRASSINGLY-PARALLEL}. Cada ejecución es
+completamente independiente de las otras, por lo que no hace falta
+mantener una comunicación entre ellas. Esto nos permite tener un
+modelo de escalabilidad muy sencillo. Simplemente hay que añadir más
+threads o procesos. Finalmente nos hemos decantado por está última
+opción ya que nos permite recargar la carga entre varios equipos.
+
+El problema de utilizar procesos es que la comunicación es más
+compleja. Una buena opción es utilizar el patrón
+\emph{master-worker}\cite{MASTER-WORKER}. Básicamente hay procesos que
+pondrían en una cola peticiones de trabajo a realizar y los
+trabajadores tomarían esas peticiones de trabajo de la cola una vez
+estuvieran listos. En el caso que nos ocupa hemos utilizado una ligera
+variante de este patrón. En vez de introducir una nueva dependencia
+usando una cola, el proceso \emph{master}\footnote{Proceso Web en este
+  caso} se comunica directamente con uno de los workers. Para ello
+escoge el worker que tenga una menor carga.
+
+Aquí surge una nueva problemática: el proceso web necesita saber que
+workers están disponibles. Se podrían utilizar muchas tecnologías,
+pero como queríamos evitar introducir más dependencias optamos por
+utilizar el sistema de almacenamiento. Así pues, cuando un worker
+arranca registra su dirección IP y el puerto en el que está
+escuchando. Los procesos web comprueban periódicamente que los
+procesos worker gozan de buena salud y mandan las peticiones a los que
+están menos ocupados.
+
+Lo bueno de utilizar procesos sin estado es que podemos aumentar y
+disminuir el número de procesos web y procesos worker según el tipo de
+la carga de trabajo y la demanda del momento. La ventaja fundamental
+de que sean procesos en vez de threads\footnote{hilos de ejecución} es
+que podemos añadir también nuevos nodos.
 
 \subsection{Clojure como lenguaje de programación}
 
@@ -589,18 +667,13 @@ primer momento.
   \end{figure}
 \end{description}
 
-\subsection{DARE como procesos sin estado}
-http://www.12factor.net/port-binding
-http://www.12factor.net/processes
-Hablar de por qué se eligió Jetty en vez de Glassfish. Por qué modo
-embebido.
-
 \subsection{Librería para Python}
 \subsubsection{httplib2}
 % rest.py a fondo?
 \subsection{Interfaz Línea Comandos en Python}
 
 \subsection{Componentes}
+\label{COMPONENTES-DARE}
 A continuación veamos una visión general del proyecto desde el punto
 de vista de un diagrama de componentes UML. En el se muestran los
 componentes presentes y las relaciones entre los mismos. A mayores
