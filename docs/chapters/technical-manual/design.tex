@@ -3,7 +3,7 @@ descripción y justificación de las grandes decisiones arquitéctonicas
 tomadas, para luego hacer una descripción más detallada del sistema
 entregado.
 
-\subsection{Minilanguage como DSL interna}
+\subsection{Minilenguaje como DSL interna}
 Finalmente la DSL se ha implementado por medio de una DSL~interna en
 JRuby. Discutiremos las características de las DSL~internas y las
 DSL~externas, así como la razón para elegir JRuby.
@@ -318,9 +318,202 @@ Existen varias implementaciones de esta API. Nos hemos decantado por
 la implementación por defecto, Jersey\cite{JERSEY}.
 
 \subsection{MongoDB como Sistema Almacenamiento}
+\subsubsection{Bases de datos relacionales y NoSQL}
+
+NoSQL es un conjunto de tipos de bases de datos que difieren del
+modelo clásico de RDBMS\footnote{\emph{Relational Database Management
+    System}}. La característica más común es que no utilizan SQL como
+su lenguaje de consulta. Estos sistemas de almacenamiento de datos no
+siempre requieren esquemas de datos fijos, no suelen soportar
+operaciones join, no suelen cumplir todas las características
+ACID\footnote{\emph{atomiticy, consistency, isolation, durability}} y
+suelen estar especialmente pensadas para escalar horizontalmente.
+
+Como se puede observar NoSQL es un término muy amplio, más
+caracterizado por lo que no es, que por lo que es. Es más útil hablar
+de una categoría en concreto de bases de datos NoSQL. Así podemos
+hablar de bases de datos clave-valor, bases de datos orientadas a
+documentos y bases de datos orientadas a grafos.
+
+\begin{description}
+\item[Clave-valor:] Este tipo tiene un modelo de datos muy
+  sencillo. No requieren un esquema fijo como las RDBMS. Gracias a
+  este modelo sencillo de datos suelen escalar muy bien
+  horizontalmente. Sólo permiten hacer consultas a traves de las
+  claves.
+
+\item[Documental:] Están basadas en la noción de
+  documento. Generalmente asumen que todos los documentos almacenados
+  están en un mismo formato: XML, JSON, BSON, etc. Cada documento
+  sería similar a una fila en una base de datos relacional, pero su
+  estructura es mucho menos rígida, no han de seguir un esquema
+  fijo. La diferencia fundamental con respecto a las bases de datos
+  clave-valor es que proporcionan un mecamismo de consulta basado en
+  los contenidos de los documentos.
+
+\item[Orientada a Grafos:] Utilizan nodos, aristas y propiedades para
+  representar y almacenar datos. Sus estructuras de datos son
+  similares a las presentes en lenguajes OOP\footnote{emph{Object
+      Oriented Programming}}, permitiendo un mapeo más
+  directo. Permiten realizar de manera sencilla consultas basadas en
+  grafos, como, por ejemplo, calcular la distancia mínima entre dos
+  nodos. El acceso a los datos y nodos asociados a un nodo en concreto
+  es más rapido que en una RDBMS. Por contra las bases de datos
+  relacionales son más rapidas realizando la misma operación contra
+  una gran cantidad de datos.
+
+\item[Orientada a Objetos:] La información es representada como
+  objetos, en el sentido de OOP. Suelen integrarse en el lenguaje OOP
+  usado, utilizando el lenguaje y la base de datos las mismas
+  definiciones de tipos. Permiten almacenar los objetos usados
+  directamente. Obtener un objeto con muchos datos asociados es
+  generalmente más rapido que en un RDBMS.
+
+\item[Orientadas a columnas:] En vez de almacenar los datos de una
+  fila de manera contigua, almancena los datos de cada columna o un
+  conjunto pequeño de columnas de manera contigua. Esto permite
+  aplicar algoritmos de comprensión en los datos de cada columna. Las
+  bases de datos de este tipo que siguen el modelo
+  \emph{BigTable}\cite{BIG-TABLE} de Google se pueden considerar como un mapa
+  ordenado multidimensional y distribuido. Están orientadas a
+  almacenar cantidades masivas de datos de manera distribuida. Este
+  tipo de base de datos suelen estar pensadas para realizar consultas
+  y ser modificadas mediante trabajos Map-Reduce\cite{MAP-REDUCE}.
+
+\end{description}
+
+Aunque DARE se podría haber desarrollado en cualquier categoría,
+creemos que el tipo de base de datos más adecuado es una base de datos
+orientada a documentos. Una base de datos relacional podría haber
+servido, pero el esquema de datos habría supuesto una definición muy
+rigida de los datos. Esto nos dificultaría la evolución de los datos
+en tiempo de desarrollo y en un futuro. Una base de datos orientada a
+documentos nos ofrece la posibilidad de guardar los Robots, los
+resultados de ejecuciones, las ejecuciones periódicas y los datos
+necesarios de manera directa y sencilla. La operación más típica sera
+obtener una de estas entidades por clave, con lo cual una base de
+datos clave-valor parece ser una buena opción. El problema es que otro
+tipo de consultas podrían ser necesarias, por lo que preferimos la
+flexibilidad extra que nos proporcionan las bases de datos orientadas
+a documentos.
+
+Aun así, hay muchos factores a considerar, como escalabilidad y
+facilidad de uso, asi que emplear un RDBMS sigue siendo una opción.
+
 \subsubsection{Opciones valoradas}
+\begin{description}
+
+\item[MySQL:] MySQL es un RDBMS ampliamente usado en aplicaciones
+  web. Ha demostrado una gran madurez. Ha demostrado ser escalable
+  utilizando técnicas como sharding\cite{SHARDING} y replicación
+  \emph{master-slave}\cite{MASTER-SLAVE}. Aunque inicialmente MySQL
+  carecía de numerosas características propias de un RDBMS (integridad
+  referencial, transacciones, triggers, etc.), con el paso del tiempo
+  las ha incorporado. Otra ventaja es la madurez y familiaridad con el
+  modelo relacional (emplea SQL).
+\item[PostgreSQL:] Prácticamente lo mismo dicho sobre MySQL se puede
+  aplicar a PostgreSQL. Ambas serían soluciones completamente válidas
+  para el problema. PostgreSQL tradicionalmente ha soportado más
+  características típicas de un RDBMS pero hoy en dia tienen unas
+  características bastante parejas. Por otro lado PostgreSQL no
+  soportaba replicación, pero las últimas versiones si la soportan. Se
+  podría decir que la elección entre PostgreSQL y MySQL es altamente
+  subjetiva. En mi caso me decantaría por PostgreSQL por tener, a mi
+  juicio, una mayor calidad interna y por su modelo de
+  desarrollo. Ambos productos son Software Libre, pero MySQL está
+  esponsorizado por una única compañía (Oracle). Por contra,
+  PostgreSQL no está controlado por una única compañía.
+\item[BerkeleyDB:] Se trata de una base de datos embebida
+  clave-valor. Soporta bases de datos de gran tamaño y los valores
+  almacenados no tienen un esquema fijo. Soporta algunas
+  características avanzadas como transacciones, locking y
+  replicación. Se trata de una opción valida aunque su modelo de datos
+  no sea tan conveniente como un RDBMS o una base de datos orientada a
+  documentos.
+\item[Voldemort:] Es una base de datos clave-valor y se puede
+  considerar una tabla hash persistente, grande, distribuida y
+  tolerante a fallos. Su modelo de datos es muy sencillo, pero es muy
+  fácil de escalar entre numerosos nodos. Tanto las lecturas y las
+  escrituras se pueden escalar horizontalmente. Utiliza una técnica
+  mixta de particionamiento y replicación. Cada nodo es independiente,
+  es decir, no existe un único punto de error\footnote{Más conocido
+    como \emph{single point of failure}.}.
+\item[HBase:] Es una base de datos inicialmente basada en la
+  arquitectura de \emph{BigTable} de Google. Tiene un modelo de datos
+  basado en agrupación de columnas. Se suele utilizar conjuntamente
+  con Hadoop\cite{HADOOP} y no directamente, pero en las últimas
+  versiones su rendimiento en cuanto a acceso directo ha mejorado. Un
+  problema con HBase es que no se adapta bien a ser ejecutado en un
+  único nodo. Esto es un problema ya que DARE ha de tener requisitos
+  de hardware modestos cuando el número de usuarios es escaso.
+\item[Cassandra:] Es una base de datos que aglutina características
+  tanto de Voldermort, como HBase. Su modelo de datos es similar al de
+  HBase, pero sus características en cuanto a escalabilidad son
+  similares a Voldemort. Carece de un único punto de error. Como
+  característica a destacar ofrece la posibilidad de ajustar la
+  consistencia requerida en cada operación. Sobre Cassandra podemos
+  decir que ofrecería una gran escalabilidad pero su administración y
+  concepetos son relativamente complejos.
+\end{description}
+
 \subsubsection{MongoDB}
-\subsubsection{Razón elección}
+
+Finalmente hemos optado por utilizar \emph{MongoDB}. Su modelo de
+datos orientado a documentos nos ofrece una gran velocidad de
+desarrollo. Los documentos son guardados y obtenidos como JSON, lo que
+facilita el desarrollo web. Podríamos decir que de todas las bases de
+datos mencionadas anteriormente es la que nos ofrece una mayor
+velocidad de desarrollo. Una característica que hemos valorado
+especialmente es que nos permite hacer consultas arbitrarias
+optimizadas por índices.
+
+En cuanto a la administración es relativamente sencilla, aunque aquí
+podríamos echar algo en falta la madurez de MySQL y PostgreSQL. Además
+cuenta con mecanismos necesarios para escalar la base de datos en el
+caso de que fuera necesario. En cuanto a escalabilidad no consta de
+las facilidades de Cassandra y Voldemort, pero ofrece mecanismos como
+\emph{replica sets} y \emph{sharding}.
+
+\begin{description}
+\item[Replica Sets:] Son una forma de replicación asíncrona. Un
+  \emph{replica set} contiene dos o más nodos que son copias de cada
+  uno. De este conjunto se elige un nodo que se considera el
+  primario. Las escrituras se dirigen a este nodo primario. Las
+  lecturas se pueden dirigir a cualquier nodo del \emph{replica
+    set}. Este diseño nos permite obtener redundancia de datos,
+  obteniendo una alta disponibilidad. En el caso de que un nodo
+  fallase los restantes nodos pueden seguir funcionando. La carga de
+  lecturas es distribuida entre todos los nodos, lo que puede ayudar
+  mucho en la escalabilidad del sistema. Ver~\ref{replica-sets}
+  en pág.~\pageref{replica-sets}.
+  \begin{figure}[hbp]
+    \begin{center}
+      \includegraphics[]{chapters/technical-manual/replset.png}
+    \end{center}
+  \caption{MongoDB replica sets}\label{replica-sets}
+  \end{figure}
+\item[Sharding:] También conocido como particionamiento horizontal. En
+  aplicaciones cuyas demandas desbordan a un único nodo, MongoDB puede
+  utilizar \emph{sharding}. Basicamente consiste en particionar los
+  datos por el valor de algún campo común a todos los documentos. Por
+  ejemplo, en el caso de una \emph{collection}\footnote{Viene a ser
+    una tabla en jerga MongoDB} conteniendo clientes se podría
+  particionar por el DNI\footnote{Documento Nacional Identidad}. Así
+  cada nodo tendría parte de los clientes y no todos. Como el
+  particionamiento se hace manteniendo el orden es posible optimizar
+  ciertas consultas de modo que solo se dirijan a un nodo. Además las
+  escrituras se repartirían entre todos los nodos. Ver~\ref{sharding}
+  en pág.~\pageref{sharding}.
+  \begin{figure}[hbtp]
+    \includegraphics[width=1\textwidth]{chapters/technical-manual/sharding.png}
+    \caption{MongoDB sharding}\label{sharding}
+  \end{figure}
+\end{description}
+
+Vemos, pues, que MongoDB nos ofrece un buen balance de características
+junto a una gran facilidad de uso. Podemos empezar a usar un único
+servidor MongoDB y luego emplear \emph{replica sets} más
+\emph{sharding}. Por eso, finalmente hemos elegido esta base de datos.
 
 \subsection{Arquitectura Backend}
 \subsubsection{Embarrassingly parallel}
