@@ -165,7 +165,7 @@
         retrieve-periodical (fn [] (.findPeriodicalExecution *backend* code))
         erase-previous-periodical-result
         (fn [] (mongo/update! :periodical-executions {:_id code}
-                             {:$set {:last-execution nil
+                             {:$set {:lastExecution nil
                                      :next-execution-ms (now-ms)}}
                              :upsert false))
         assert-an-execution-eventually-exists
