@@ -44,6 +44,15 @@
 
 (def ^{:dynamic true} *time-allowed-for-execution-ms* (* 1 60 1000))
 
+(def current-petitions (agent 0 :error-mode :continue))
+
+(defn with-decrease-petitions-number [f]
+  (fn [& args]
+    (try
+      (apply f args)
+      (finally
+       (send current-petitions dec)))))
+
 (defn with-timeout-handling [f on-timeout]
   (fn [& args]
     (let [start (System/currentTimeMillis)
@@ -144,7 +153,8 @@
                                      :realExecutionTime real-execution-time)
             (log/info (str "execution completed for: " name)))))
       (with-timeout-handling (partial on-error :timeout))
-      (with-error-handling on-exception))]))
+      (with-error-handling on-exception)
+      (with-decrease-petitions-number))]))
 
 (def automator-executor)
 
@@ -159,11 +169,14 @@
   (try
     (let [request (json/read-json (.toString raw-request))]
       (when-not (= request query-alive-str)
-        (executor request))
-      (enqueue response "ACCEPTED"))
+        (executor request)
+        (send current-petitions inc))
+      (enqueue response (pr-str {:accepted true
+                                 :current-petitions @current-petitions})))
     (catch Throwable e
       (log/error (str "Error processing: " raw-request) e)
-      (enqueue response "ERROR"))))
+      (enqueue response (pr-str {:accepted false
+                                 :error (stacktrace/pst-str e)})))))
 
 (defn wrap-execution-with [mongo-connection f]
   (fn [& args]
