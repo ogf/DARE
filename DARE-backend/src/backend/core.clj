@@ -195,18 +195,23 @@
 (defn submit-execution-for-periodical-execution!
   [workers-handler
    {:keys [periodical-code robot-code inputs execution-period next-execution-ms] :as request}]
-  (l/run-pipeline (find-robot robot-code)
-    :error-handler (fn [ex]
-                     (log/error
-                      (str "Error submitting execution for periodical with code "
-                           periodical-code) ex))
-    (l/wait-stage (- next-execution-ms (now-ms)))
-    (fn [robot]
-      (log/info (str "sending execution for periodical with code: " periodical-code))
-      (workers/send-request! workers-handler
-                             (assoc (common-request-part robot (ArrayList. inputs))
-                               :periodical-code periodical-code
-                               :next-execution-ms (next-execution execution-period))))))
+  (let [robot (find-robot robot-code)]
+    (when-not robot (throw (RuntimeException.
+                            (str "Robot with code " robot-code " not found "
+                                 "for periodical with code " periodical-code))))
+    (l/run-pipeline robot
+      :error-handler (fn [ex]
+                       (log/error
+                        (str "Error submitting execution for periodical with code: "
+                                           periodical-code) ex))
+      (l/wait-stage (- next-execution-ms (now-ms)))
+      (fn [robot]
+        (log/info (str "sending execution for periodical with code: "
+                       periodical-code))
+        (workers/send-request! workers-handler
+                               (assoc (common-request-part robot (ArrayList. inputs))
+                                 :periodical-code periodical-code
+                                 :next-execution-ms (next-execution execution-period)))))))
 
 (defn mark-as-scheduled [periodical-code]
   (mongo/update! :periodical-executions

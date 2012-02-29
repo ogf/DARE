@@ -63,7 +63,8 @@
           (erase-all-data!))
         (on *backend*
             (f)
-            (.close *backend*))))))
+            (.close *backend*)
+            (println "backend closed!"))))))
 
 (use-fixtures :once backend-fixture)
 
