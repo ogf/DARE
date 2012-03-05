@@ -668,9 +668,77 @@ primer momento.
 \end{description}
 
 \subsection{Librería para Python}
+
+Hemos decidido hacer una librería para Python aparte de una en
+Java. La idea es poder ofrecer una alternativa más sencilla que
+Java. Python nos permite que el programador tenga un ejemplo
+funcionando en menor tiempo. Además sus tiempos de arranque son
+pequeños, lo que nos permite que sea la base para crear una aplicación
+de línea de comandos.
+
+Python es un lenguaje muy legible. Soporta varios paradigmas,
+imperativo, OOP\footnote{\emph{Object Oriented Programming}}, y
+funcional. Además cuenta con numerosas librerías de gran calidad lo
+que siempre lo hace una opción interesante.
+
+Una duda que nos asaltó fue si utilizar la versión 3 de Python. Es la
+última versión del lenguaje y cuenta con ciertas mejoras pero su
+presencia no es tan ubicua. Finalmente este último aspecto nos ha
+decantado a favor de Python 2.
+
 \subsubsection{httplib2}
-% rest.py a fondo?
+
+Para realizar la librería hemos empleado httplib2. Esta librería
+cliente HTTP nos ofrece ventajas con respecto a las librerías
+incluidas por defecto en la distribución de Python. Las librerías
+incluidas httplib y urllib son de nivel más bajo. Tendríamos, por
+ejemplo, que manejar ciertos aspectos de HTTP como caching
+manualmente.
+
+Más concretamente httplib2 nos ofrece:
+\begin{description}
+  \item[Soporte Keep-Alive]: Permite mantener el mismo socket abierto
+    y reutilizarlo para hacer varias peticiones.
+  \item[Soporte Autenticación]: Soporta varios tipos de
+    autenticación HTTP como Digest, Basic y WSSE.
+  \item[Soporte cacheado]: Tiene una caché privada que se conserva
+    entre requests. Entiende la cabecera Cache-Control y los
+    validadores ETag y Last-Modified.
+  \item[Soporte métodos HTTP]: Soporta todos los métodos HTTP, no solo
+    GET y POST.
+  \item[Soporte Redirects]: Procesa automáticamente los redirects
+    devueltos por el servidor web.
+  \item[Soporte Comprensión]: Puede recibir respuestas comprimidas ya
+    sea con comprensión deflate o gzip.
+\end{description}
+
 \subsection{Interfaz Línea Comandos en Python}
+
+La idea es poder ofrecer una aplicación que permita emplear DARE de
+una manera sencilla y directa. Además nos permitía probar la librería
+en un caso de uso real. Hemos empleado la librería en Python DARE para
+realizarla. Python dispone además de librerías muy completas para el
+manejo y parseado de argumentos como argparse. Por brevedad, nos
+referiremos de ahora en adelante a esta aplicación \emph{dare.py}.
+
+Una característica que queríamos añadir a esta aplicación es la
+posibilidad de recordar los robots y los resultados que has tenido
+anteriormente. Creemos que esto facilitaría en gran medida el trabajo
+al usuario, podría ver los robos que ha creado y los resultados
+obtenidos. Para ello necesitamos un sistema de almacenamiento que
+conserve esos datos entre diferentes invocaciones a \emph{dare.py}.
+
+\subsubsection{SQLite}
+
+Para realizar esta labor de almacenamiento nos hemos decantado por
+SQLite\cite{SQLite}. SQLite nos ofrece una base de datos relacional en
+la forma de una librería de tamaño reducido, permitiéndonos usarla en
+modo embebido. Es muy fácil de usar, no requiere configuración para
+empezar a ser usada y su rendimiento es de sobra adecuado para nuestra
+necesidad concreta.
+
+Es muy usada como sistema de almacenamiento local, justo el caso que
+nos ocupa.
 
 \subsection{Componentes}
 \label{COMPONENTES-DARE}
