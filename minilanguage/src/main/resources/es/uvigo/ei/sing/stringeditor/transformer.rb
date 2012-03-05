@@ -50,16 +50,16 @@ class Language
     hash = {}
     hash[:branchtype] = params[0] if params[0]
     hash[:branchmergemode] = params[1] if params[1]
-    @parent = SimpleTransformer.new(hash)
+    @transformer = SimpleTransformer.new(hash)
     instance_eval(&block) if block
   end
 
   def transformer
-    @parent
+    @transformer
   end
 
   def transformer_added_action transformer
-    @parent.add_child transformer
+    @transformer.add_child transformer
   end
   protected :transformer_added_action
 
@@ -69,12 +69,12 @@ class Language
       raise ArgumentError, "branchtype and branchmerge mode required"
     end
     l = Language.new *params, &block
-    @parent.add_child l.transformer
+    @transformer.add_child l.transformer
   end
 
   def pipe &block
     pipe = Language.new &block
-    @parent.add_child pipe.transformer
+    @transformer.add_child pipe.transformer
     pipe
   end
 
@@ -83,7 +83,7 @@ class Language
   end
 
   def | other
-    if @parent.branchtype != :CASCADE
+    if @transformer.branchtype != :CASCADE
       raise "| can't be used in a pipe branch"
     end
     self
@@ -92,7 +92,7 @@ class Language
   def repeat? *params, &block
     clause = RepeatClause.new *params, &block
     if clause.transformer
-      @parent.do_loop_with clause.transformer
+      @transformer.do_loop_with clause.transformer
     end
   end
 
