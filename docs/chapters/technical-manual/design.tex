@@ -1,5 +1,5 @@
-En esta seccion se detalla el diseño del sistema. Primero haremos una
-descripción y justificación de las grandes decisiones arquitéctonicas
+En esta sección se detalla el diseño del sistema. Primero haremos una
+descripción y justificación de las grandes decisiones arquitectónicas
 tomadas, para luego hacer una descripción más detallada del sistema
 entregado.
 
@@ -8,9 +8,9 @@ Finalmente la DSL se ha implementado por medio de una DSL~interna en
 JRuby. Discutiremos las características de las DSL~internas y las
 DSL~externas, así como la razón para elegir JRuby.
 \subsubsection{DSL internas}
-Definición, ventajas, incovenientes, \ldots{}
+Definición, ventajas, inconvenientes, \ldots{}
 \subsubsection{DSL externas}
-Definición, ventajas, incovenientes, \ldots{}
+Definición, ventajas, inconvenientes, \ldots{}
 % JavaCC, ANTLR
 \subsubsection{¿Por qué DSL interna?}
 \subsubsection{Ruby y JRuby}
@@ -34,16 +34,16 @@ adecuados para la transferencia de representación.
 
 El objetivo de la WWW era constituir un espacio común de información
 en el que máquinas y usuarios se puedan comunicar.  Los usuarios de
-este sistema estarían por todo el mundo, en verias universidades e
+este sistema estarían por todo el mundo, en varias universidades e
 institutos de investigación conectados a través de Internet. Las
 máquinas así conectadas serían de carácter heterogéneo, haciendo
 necesario, con una gran variedad de sistemas operativos y formatos. La
 información a distribuir iba desde datos de investigación hasta
-listados teléfonicos. El reto era proporcionar un un sistema que
+listados telefónicos. El reto era proporcionar un un sistema que
 proporcionase una interfaz consistente y universal a todo esta
 información estructurada, disponible en el mayor número de plataformas
 posibles y capaz de ser aumentada según nuevos usuarios y
-organizaciones se uniearan al proyecto.
+organizaciones se unieran al proyecto.
 
 Como la publicación de información en la WWW era de carácter
 voluntario era necesario que las barreras de entrada fueran bajas. Se
@@ -53,7 +53,7 @@ independientemente de la fuente de información. La flexibilidad de los
 enlaces permite estructurar sin límites y la manipulación directa de
 estos enlaces permite guiar al usuario dentro de la aplicación. Como a
 menudo la información dentro de grandes bases de datos es más fácil de
-acceder a traves de una búsqueda, WWW también ofrecía la posibilidad
+acceder a través de una búsqueda, WWW también ofrecía la posibilidad
 de realizar consultas, respondiendo con hypermedia a los datos
 introducidos por el usuario.
 
@@ -61,12 +61,12 @@ Hypermedia distribuida implica que la información pueda estar
 almacenada en máquinas remotas. Esto conlleva la transferencia de
 grandes cantidades de datos desde el lugar de almacenamiento al lugar
 de uso. Para la usabilidad de la hypermedia es básico que la latencia
-percibida por parte del usuario sea mímima. Por tanto hay que
+percibida por parte del usuario sea mínima. Por tanto hay que
 minimizar las interacciones con la red.
 
 También es importante que la no disponibilidad de parte del sistema,
 no impida a los autores crear contenido de manera local. El lenguaje
-de \emph{hypertexto} creado debe de ser sencillo y fácil de crear con
+de \emph{hipertexto} creado debe de ser sencillo y fácil de crear con
 las herramientas existentes.
 
 Otro factor importante es que el protocolo está basado en texto. Esto
@@ -82,7 +82,7 @@ modificado.
 Así mismo, el sistema esta orientado a ser desplegado en
 Internet. Esto significa que el sistema va a ser usado por diferentes
 organizaciones con diferentes objetivos. Normalmente los sistemas de
-información son controlados por una única organizacion. Pero en el
+información son controlados por una única organización. Pero en el
 caso de la WWW los componentes deben funcionar a pesar de cargas no
 anticipadas, datos incorrectos o intencionadamente dañinos, etc. La
 escala global conlleva que los clientes no pueden tener conocimiento
@@ -92,7 +92,7 @@ páginas que apuntan a un elemento, ya que el número de enlaces puede
 ser muy elevado e impredecible.
 
 Dado que la WWW no va a ser controlado por una única organización,
-nuevas versiones no se desplegarán homogeneamente. Por tanto,
+nuevas versiones no se desplegarán homogéneamente. Por tanto,
 diferentes versiones de los elementos deben de poder coexistir. Cada
 componente debe suponer que nuevas versiones se van a añadir.
 Versiones antiguas de un componente deben de ser identificadas de modo
@@ -117,9 +117,9 @@ especial énfasis en la escalabilidad de la interacción entre
 componentes, generalidad de las interfaces, despliegue independiente
 de componentes y componentes intermedios para reducir latencia.
 
-REST se define a traves de una serie sucesiva de restricciones que los
+REST se define a través de una serie sucesiva de restricciones que los
 elementos de la arquitectura deben seguir. REST es, además, un sistema
-híbrido derivado de varios estilos arquitétonicos existentes:
+híbrido derivado de varios estilos arquitectónicos existentes:
 
 \begin{description}
 
@@ -128,7 +128,7 @@ híbrido derivado de varios estilos arquitétonicos existentes:
   detrás de la separación cliente servidor. Separando los
   requerimientos de la interfaz de usuario de los de almacenamiento de
   datos se mejora la portabilidad de la interfaz de usuario y se
-  mejora la escabilidad al simplicar los componentes de servidor. En
+  mejora la escabilidad al simplificar los componentes de servidor. En
   el caso de la WwW, esto permite a los diferentes componentes
   evolucionar independientemente.
 
@@ -140,10 +140,10 @@ híbrido derivado de varios estilos arquitétonicos existentes:
 
   Esta restricción induce las propiedades de visibiliad, fiabilidad y
   escalabilidad. La visibilidad es mejorada porque un sistema de
-  monitorización no tiene que mirar más alla de una única petición
+  monitorización no tiene que mirar más allá de una única petición
   para determinar la naturaleza de la petición. La fiabilidad mejora
   porque facilita el proceso de recuperarse de fallos transitorios. La
-  escalabilidad mejora porque no tener que almancenar estado entre
+  escalabilidad mejora porque no tener que almacenar estado entre
   peticiones, permite al servidor liberar recursos de manera rápida y
   simplifica la implementación.
 
@@ -182,7 +182,7 @@ híbrido derivado de varios estilos arquitétonicos existentes:
   en un formato estandarizado en vez de uno específico para la
   aplicación. La interfaz uniforme definida por REST esta diseñada
   para ser eficiente en el caso de transferencias de Hypermedia de
-  grano grueso, el caso más tipico en la WWW.
+  grano grueso, el caso más típico en la WWW.
 
   Cuando un enlace es seleccionado, la información necesita ser
   llevada desde el lugar de almacenamiento hasta la localización donde
@@ -194,7 +194,7 @@ híbrido derivado de varios estilos arquitétonicos existentes:
   selecciona dinámicamente basado en las características y los deseos
   del cliente y la naturaleza del recurso. Si la representación es el
   mismo formato que el recurso o es derivada de la original, permanece
-  oculto tras la interfaz. El formato de la represeentación es
+  oculto tras la interfaz. El formato de la representación es
   conocido como tipo MIME\cite{MIME}. Una representación puede ser
   incluida y procesada por el destinatario en acorde a los datos de
   control del mensaje y la naturaleza del tipo de datos.
@@ -230,7 +230,7 @@ híbrido derivado de varios estilos arquitétonicos existentes:
 \item[Sistema en Capas.] Esta restricción mejora el comportamiento para
   requisitos de escalabilidad a nivel de Internet. Esta restricción
   permite a una arquitectura estar compuesta por capas jerárquicas de
-  modo que cada capa solo pueda ver más alla de la capa con la que
+  modo que cada capa solo pueda ver más allá de la capa con la que
   están interaccionando. Limitando la visibilidad a la capa inmediata,
   reducimos la complejidad global y promovemos independencia con
   respecto a las otras capas. Las capas se pueden usar para encapsular
@@ -339,7 +339,7 @@ documentos y bases de datos orientadas a grafos.
 \item[Clave-valor:] Este tipo tiene un modelo de datos muy
   sencillo. No requieren un esquema fijo como las RDBMS. Gracias a
   este modelo sencillo de datos suelen escalar muy bien
-  horizontalmente. Sólo permiten hacer consultas a traves de las
+  horizontalmente. Sólo permiten hacer consultas a través de las
   claves.
 
 \item[Documental:] Están basadas en la noción de
@@ -348,18 +348,18 @@ documentos y bases de datos orientadas a grafos.
   sería similar a una fila en una base de datos relacional, pero su
   estructura es mucho menos rígida, no han de seguir un esquema
   fijo. La diferencia fundamental con respecto a las bases de datos
-  clave-valor es que proporcionan un mecamismo de consulta basado en
+  clave-valor es que proporcionan un mecanismo de consulta basado en
   los contenidos de los documentos.
 
 \item[Orientada a Grafos:] Utilizan nodos, aristas y propiedades para
   representar y almacenar datos. Sus estructuras de datos son
-  similares a las presentes en lenguajes OOP\footnote{emph{Object
+  similares a las presentes en lenguajes OOP\footnote{\emph{Object
       Oriented Programming}}, permitiendo un mapeo más
   directo. Permiten realizar de manera sencilla consultas basadas en
   grafos, como, por ejemplo, calcular la distancia mínima entre dos
   nodos. El acceso a los datos y nodos asociados a un nodo en concreto
-  es más rapido que en una RDBMS. Por contra las bases de datos
-  relacionales son más rapidas realizando la misma operación contra
+  es más rápido que en una RDBMS. Por contra las bases de datos
+  relacionales son más rápidas realizando la misma operación contra
   una gran cantidad de datos.
 
 \item[Orientada a Objetos:] La información es representada como
@@ -367,10 +367,10 @@ documentos y bases de datos orientadas a grafos.
   usado, utilizando el lenguaje y la base de datos las mismas
   definiciones de tipos. Permiten almacenar los objetos usados
   directamente. Obtener un objeto con muchos datos asociados es
-  generalmente más rapido que en un RDBMS.
+  generalmente más rápido que en un RDBMS.
 
 \item[Orientadas a columnas:] En vez de almacenar los datos de una
-  fila de manera contigua, almancena los datos de cada columna o un
+  fila de manera contigua, almacena los datos de cada columna o un
   conjunto pequeño de columnas de manera contigua. Esto permite
   aplicar algoritmos de comprensión en los datos de cada columna. Las
   bases de datos de este tipo que siguen el modelo
@@ -386,7 +386,7 @@ Aunque DARE se podría haber desarrollado en cualquier categoría,
 creemos que el tipo de base de datos más adecuado es una base de datos
 orientada a documentos. Una base de datos relacional podría haber
 servido, pero el esquema de datos habría supuesto una definición muy
-rigida de los datos. Esto nos dificultaría la evolución de los datos
+rígida de los datos. Esto nos dificultaría la evolución de los datos
 en tiempo de desarrollo y en un futuro. Una base de datos orientada a
 documentos nos ofrece la posibilidad de guardar los Robots, los
 resultados de ejecuciones, las ejecuciones periódicas y los datos
@@ -414,7 +414,7 @@ facilidad de uso, asi que emplear un RDBMS sigue siendo una opción.
 \item[PostgreSQL:] Prácticamente lo mismo dicho sobre MySQL se puede
   aplicar a PostgreSQL. Ambas serían soluciones completamente válidas
   para el problema. PostgreSQL tradicionalmente ha soportado más
-  características típicas de un RDBMS pero hoy en dia tienen unas
+  características típicas de un RDBMS pero hoy en día tienen unas
   características bastante parejas. Por otro lado PostgreSQL no
   soportaba replicación, pero las últimas versiones si la soportan. Se
   podría decir que la elección entre PostgreSQL y MySQL es altamente
@@ -453,7 +453,7 @@ facilidad de uso, asi que emplear un RDBMS sigue siendo una opción.
   característica a destacar ofrece la posibilidad de ajustar la
   consistencia requerida en cada operación. Sobre Cassandra podemos
   decir que ofrecería una gran escalabilidad pero su administración y
-  concepetos son relativamente complejos.
+  conceptos son relativamente complejos.
 \end{description}
 
 \subsubsection{MongoDB}
@@ -495,7 +495,7 @@ las facilidades de Cassandra y Voldemort, pero ofrece mecanismos como
   \end{figure}
 \item[Sharding:] También conocido como particionamiento horizontal. En
   aplicaciones cuyas demandas desbordan a un único nodo, MongoDB puede
-  utilizar \emph{sharding}. Basicamente consiste en particionar los
+  utilizar \emph{sharding}. Básicamente consiste en particionar los
   datos por el valor de algún campo común a todos los documentos. Por
   ejemplo, en el caso de una \emph{collection}\footnote{Viene a ser
     una tabla en jerga MongoDB} conteniendo clientes se podría
@@ -634,7 +634,7 @@ primer momento.
 
 \subsubsection{Librerías Empleadas}
 \begin{description}
-\item{CongoMongo}\cite{CONGO-MONGO} es un envoltario sobre el driver
+\item{CongoMongo}\cite{CONGO-MONGO} es un envoltorio sobre el driver
   oficial Java de MongoDB. Nos ofrece una API más adecuada para ser
   usada desde Clojure.
 \item{Lamina} es una librería para trabajar con eventos como si fueran
@@ -651,7 +651,7 @@ primer momento.
   comunicación. Convierte un flujo de bytes en estructuras de datos
   Clojure. Esto nos facilita parsear las peticiones realizadas en vez
   de tener que trabajar con el flujo de bytes proveniente de TCP. Por
-  ejemplo, para divir el flujo de bytes en peticiones de strings se
+  ejemplo, para dividir el flujo de bytes en peticiones de strings se
   puede hacer definiendo un \emph{codec} en Gloss. En la
   figura~\ref{gloss-example}, pág.~\pageref{gloss-example}, se define
   que cada petición sera una String codificada en utf-8 con un entero
@@ -685,7 +685,7 @@ vamos a realizar una breve descripción de cada uno de ellos:
   por el proyecto. Este lenguaje se ha denominado minilenguaje. Es
   responsable de transformar la DSL en el formato XML entendido por
   \emph{aAUTOMATOR Runtime}\footnote{Está contenido dentro del
-    artefacto \emph{StringEditor}}. Está implmentado en JRuby y
+    artefacto \emph{StringEditor}}. Está implementado en JRuby y
   Java. La parte en JRuby se encarga de definir una DSL interna y la
   parte Java ofrece una API a la misma.
 \item[DARE-domain:] Define un modelo de dominio del sistema. Facilita
@@ -700,7 +700,7 @@ vamos a realizar una breve descripción de cada uno de ellos:
 
   Siguiendo el patrón MVC\footnote{Modelo Vista Controlador} este
   modelo es el responsable de la parte de vista y controlador. Utiliza
-  la api JAX-RS para lleva a cabo esta labor. Utiliza a DARE-domain
+  la API JAX-RS para lleva a cabo esta labor. Utiliza a DARE-domain
   como modelo y DARE-backend ofrecería servicios de persistencia y
   ejecución.
 
@@ -728,7 +728,7 @@ vamos a realizar una breve descripción de cada uno de ellos:
   Cada worker es un proceso por lo que alguno de ellos podría dejar de
   funcionar y DARE podría seguir ofreciendo su servicio. Además al ser
   cada uno un proceso se pueden ejecutar localmente en el mismo nodo o
-  repartirlo a traves de varios nodos del cluster. La parte cliente es
+  repartirlo a través de varios nodos del cluster. La parte cliente es
   capaz de descubrirlos y repartir la carga de peticiones entre los
   workers. Aparte comprueba continuamente el estado de salud de los
   workers para que el servicio continúe funcionando aun en la
