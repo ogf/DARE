@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.3">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>700</x>
+      <y>230</y>
+      <w>310</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>PeriodicalExecution
+--
++code: String
++creationTime: DateTime
++robotCode: String
++executionPeriod: ExecutionPeriod
++inputs: String&lt;List&gt;
++lastExecution: ExecutionResult
+--
++receiveLastResult(last:ExecutionResult)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>370</x>
+      <y>0</y>
+      <w>190</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>MiniLanguage
+--
+--
++eval
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>590</x>
+      <y>570</y>
+      <w>310</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>ExecutionResult
+--
++code: String
++optionalRobotCode: String
++creationTime: DateTime
++inputs: List&lt;String&gt;
++executionTimeMilliseconds: long
++resultLines: List&lt;String&gt;
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>1200</x>
+      <y>270</y>
+      <w>310</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>ExecutionPeriod
+--
+-amount: int
+-unit:Unit
+--
++calculateNextExecution(DateTime)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>980</x>
+      <y>300</y>
+      <w>240</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+m2=1
+r2=executionPeriod</panel_attributes>
+    <additional_attributes>30;30;220;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>220</x>
+      <y>230</y>
+      <w>330</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>Robot
+--
++code: String
++transformerInMinilanguage: String
++transformerInXML: String
++description: String
++creationTime: DateTime
+
+--
+_+createFromMinilanguage(minilanguage)_
+_+createFromXML(robotXML)_
++createPeriodical(period, inputs)
++execute(inputs)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>740</x>
+      <y>370</y>
+      <w>116</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-&gt;
+m2=0..1
+r2=lastExecution</panel_attributes>
+    <additional_attributes>60;30;60;200</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>520</x>
+      <y>290</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes>
+    <additional_attributes>180;30;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>390</x>
+      <y>400</y>
+      <w>220</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes>
+    <additional_attributes>200;230;30;230;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>300</x>
+      <y>30</y>
+      <w>190</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>170;30;30;200</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>110</x>
+      <y>130</y>
+      <w>1440</w>
+      <h>720</h>
+    </coordinates>
+    <panel_attributes>es.uvigo.ei.sing.dare.entities</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

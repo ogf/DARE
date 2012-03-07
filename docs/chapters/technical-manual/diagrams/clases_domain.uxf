@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.3">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>580</x>
+      <y>620</y>
+      <w>310</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>PeriodicalExecution
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>520</x>
+      <y>790</y>
+      <w>250</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>ExecutionResult</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>1070</x>
+      <y>620</y>
+      <w>310</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>ExecutionPeriod</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>860</x>
+      <y>610</y>
+      <w>230</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+m2=1
+r2=executionPeriod</panel_attributes>
+    <additional_attributes>30;30;210;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>100</x>
+      <y>620</y>
+      <w>330</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Robot
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>620</x>
+      <y>630</y>
+      <w>116</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-&gt;
+m2=0..1
+r2=lastExecution</panel_attributes>
+    <additional_attributes>60;30;60;160</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>400</x>
+      <y>610</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes>
+    <additional_attributes>180;30;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>270</x>
+      <y>630</y>
+      <w>270</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes>
+    <additional_attributes>250;180;30;180;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>20</x>
+      <y>560</y>
+      <w>1380</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>es.uvigo.ei.sing.dare.entities</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>930</x>
+      <y>350</y>
+      <w>310</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Error&gt;&gt;
+ExecutionTimeExceededException
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>930</x>
+      <y>440</y>
+      <w>310</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Error&gt;&gt;
+ExecutionFailedException
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Interface</type>
+    <coordinates>
+      <x>0</x>
+      <y>290</y>
+      <w>440</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>IBackendBuilder
+--
++build(parameters): IBackend 
++getParametersNeeded(): Collection
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Interface</type>
+    <coordinates>
+      <x>350</x>
+      <y>290</y>
+      <w>440</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>IBackend
+--
+save(Robot)
+find(String):Robot
+submitExecution(Robot, List&lt;String&gt;):String
+submitExecutionForExistentRobot(String, List&lt;String&gt;):String
+retrieveExecution(String):Maybe&lt;ExecutionResult&gt;
+save(PeriodicalExecution)
+findPeriodicalExecution(String):PeriodicalExecution
+deleteExecution(String)
+deleteRobot(String)
+deletePeriodical(String)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>770</x>
+      <y>220</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Maybe</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>1010</x>
+      <y>210</y>
+      <w>200</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>bt=*
+MiniLanguageProducer</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>200</x>
+      <y>250</y>
+      <w>380</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+produces&gt;</panel_attributes>
+    <additional_attributes>360;50;30;50</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Package</type>
+    <coordinates>
+      <x>20</x>
+      <y>160</y>
+      <w>1380</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>es.uvigo.ei.sing.dare</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>610</x>
+      <y>220</y>
+      <w>230</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>210;30;30;110</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>730</x>
+      <y>380</y>
+      <w>220</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+throws&gt;</panel_attributes>
+    <additional_attributes>200;80;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>750</x>
+      <y>340</y>
+      <w>200</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+throws&gt;</panel_attributes>
+    <additional_attributes>180;30;30;70</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>1060</x>
+      <y>70</y>
+      <w>190</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>MiniLanguage
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>1070</x>
+      <y>70</y>
+      <w>150</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+produces&gt;</panel_attributes>
+    <additional_attributes>130;30;30;140</additional_attributes>
+  </element>
+</diagram>
