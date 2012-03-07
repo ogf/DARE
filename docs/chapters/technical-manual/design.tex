@@ -835,6 +835,58 @@ vamos a realizar una breve descripción de cada uno de ellos:
 
 \subsubsection{Diagrama clases minilenguaje}
 
+En este diagrama mostramos las clases con las que se implementa la DSL
+interna propuesta.
+
+Por un lado tenemos la clase \emph{Transformer}. Un objeto de esta
+clase se corresponde a uno de los transformadores de los que está
+compuesto un robot. Ver~\ref{COMPORTAMIENTO_AUTOMATOR},
+pág.~\pageref{COMPORTAMIENTO_AUTOMATOR}. Sigue el patrón
+Composite\cite{COMPOSITE_PATTERN}, es decir, cada \emph{Transformer}
+puede a su vez tener \emph{Transformers} hijos. Cada
+\emph{Transformer} es capaz de convertirse al XML que necesita
+aAUTOMATOR. Cada subclase de \emph{Transformer} se corresponde a una
+clase \emph{Transformer} de aAUTOMATOR. Cada \emph{Transformer} va a
+necesitar una serie de parámetros requeridos y opcionales. Cada
+subclase de \emph{Transformer} define pues, los parametros que va a
+necesitar de una manera declarativa. \emph{Transformer} mantiene una
+lista de los hijos que contiene y permite que se le añadan más. Además
+puede recibir un XML de aAUTOMATOR y convertirlo a una \emph{string}
+de minilenguaje que produciría ese XML.
+
+La clase \emph{Language} es la encargada de procesar el
+lenguaje. Basicamente el lenguaje se evalúa contra una instancia de
+\emph{Language}. Por ejemplo, el minilenguaje definido por
+\emph{xpath('//a/@href')} implica que el método xpath de
+\emph{Language} es llamado. ¿Implica ésto que habría que definir
+métodos por cada \emph{Transformer} que se defina? No, empleando
+metaprogramación\cite{METAPROGRAMMING} cada vez que se define una
+subclase de \emph{Transformer} se crea dinámicamente un nuevo método
+en \emph{Language}. Llamar a este método implica crear el
+\emph{Transformer} de la subclase adecuada con los parámetros
+indicados. En este momento el \emph{Transformer} creado se añade al
+que está ligado al de \emph{Language}. Es decir, según se van llamando
+a los métodos que crean los transformers estos se van añadiendo al
+transformer de primer nivel en el \emph{Language}. Por ejemplo,
+\emph{url | xpath('//a/@href') | patternMatcher('(http://.*)')} añade
+tres \emph{Transformers} al \emph{Transformer} padre, que por defecto
+está en modo cascade. Como se puede ver se emplea el operador \emph{|}
+para separar cada \emph{Transformer}. Esto no es más que azúcar
+sintático. El siguiente ejemplo sería equivalente: \emph{url;
+  xpath('//a/@href'); patternMatcher('(http://.*)')}, pero con el
+operador \emph{|} queda más clara la intención.
+
+\emph{Language} tiene los métodos \emph{pipe} y \emph{branch}. Estos
+métodos definen un nuevo \emph{Transformer} con semánticas de CASCADE
+o de BRANCH. Por tanto, para \emph{branch} se requiere indicar el
+BRANCH~TYPE y el MERGE~MODE. Estas llamadas crear un nuevo
+\emph{Language} con su correspondiente \emph{Transformer}. Estos
+métodos reciben un bloque de código que se interpretará en el contexto
+de la nueva instancia de \emph{Language}.
+
+\emph{DocumentWrapper} y \emph{AttributesWrapper} se encargan de
+facilitar la generación del XML.
+
 \begin{landscape}
 \begin{figure}[hp]
 \includegraphics[width=1.4\textwidth]{chapters/technical-manual/diagrams/clases_minilenguaje.png}
