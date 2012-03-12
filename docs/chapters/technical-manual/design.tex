@@ -21,6 +21,7 @@ Definición, ventajas, inconvenientes, \ldots{}
 Se ha empleado una sandbox, Java Security Architecture, \ldots{}
 \subsubsection{Timeouts}
 \subsubsection{Manipulación estado intérprete}
+\label{interpreter_state_manipulation}
 
 \subsection{Servicio sigue estilo arquitectónico REST}
 REST\footnote{\emph{Representational state transfer}} es un estilo de
@@ -900,6 +901,46 @@ Descripción general \ldots{}
 
 \subsubsection{Diagrama clases DARE-domain}
 
+En el diagrama de clases de entidades,
+\ref{diagrama_clases_entidades_domain}
+pág.~\pageref{diagrama_clases_entidades_domain}, se muestran las
+entidades por las que está formada la aplicación. Por cada
+\emph{Robot} puede haber cero, uno o varios
+\emph{ExecutionResult}. Por cada \emph{ExecutionResult} hay un
+\emph{Robot}. Por cada \emph{Robot} puede haber cero, uno o varios
+\emph{PeriodicalExecution}. Por cada \emph{PeriodicalExecution} hay un
+\emph{Robot}. Una \emph{PeriodicalExecution} no contiene un
+\emph{ExecutionResult} si todavía no se ha completado la
+ejecución. Una vez se ha completao el \emph{PeriodicalExecution}
+contiene el \emph{ExecutionResult} de su última ejecución.
+
+\emph{Robot} llama a MiniLanguage para generar el XML de aAUTOMATOR a
+partir del minilenguaje que haya sido creado. Contiene métodos para
+crear tanto un nuevo \emph{ExecutionResult} como una nueva
+\emph{PeriodicalExecution}. Un \emph{Robot} no contiene directamente
+las \emph{PeriodicalExecution} y los \emph{ExecutionResult}
+asociados. Las asociaciones solo indican la cardinalidad existente. El
+\emph{ExecutionResult} no contiene una referencia al \emph{Robot}
+asociado, solo guardan el código del \emph{Robot}
+asociado. \emph{PeriodicalExecution} si que contiene su
+\emph{ExecutionResult} asociada.
+
+Por lo demás DARE-Domain define una serie de interfaces y clases de
+utilidad usadas por DARE-war. La interfaz clave es \emph{IBackend}. La
+implementación de esta interfaz debe ser capaz de eliminar y guardar
+las entidades definidas por DARE-Domain. Se definen dos excepciones
+que se pueden producir relacionadas con el manejo de
+ejecuciones. \emph{IBackendBuilder} define una interfaz para el objeto
+que debe de crear el \emph{IBackend} a ser usado. Define y acepta una
+serie de parámetros necesarios para la operativa concreta del backend
+selecionado.
+
+La clase \emph{Maybe} sirve para indicar que un resultado es
+opcional. Por otra parte \emph{MinilanguageProducer} sirve para mantener una
+lista de instancias de \emph{Minilanguage} preparadas para ser
+usadas. Ver~\ref{interpreter_state_manipulation},
+pág.~\pageref{interpreter_state_manipulation}.
+
 \begin{landscape}
 
 \begin{figure}[hp]
@@ -915,6 +956,29 @@ Descripción general \ldots{}
 \end{landscape}
 
 \subsubsection{Diagrama clases DARE-war}
+
+Se muestran las clases de este componente agrupadas en paquetes junto
+a clases de otros componentes que son de interés.
+
+\emph{ConfigurationBootstrapper} es una clase que a partir del
+contexto web crea un objeto \emph{Configuration}. Este objeto se
+guarda en el contexto de la aplicación web y está disponible para los
+recursos. El objeto \emph{Configuration} tiene referencias a la
+implementación de \emph{IBackend} que se va a usar y el
+\emph{MinilanguageProducer}.
+
+En el paquete resources están definidas varias clases que definirán
+los recursos REST de los que se compone la aplicación web. Vienen a
+cumplir la función de controladores y utilizan la librería
+JAX-RS. Estos controladores utilizan \emph{IBackend} para guardar y
+obtener las entidades. Además le piden a \emph{IBackend} que se
+realicen ejecuciones. Como resultados de algunas operaciones de
+lectura se crean objetos del paquete views.
+
+En el paquete views están definidos varios objetos con escasa lógica
+que definen estructuras de datos que se van a traducir a XML y
+JSON. La estructura de estas clases y del JSON o XML generado es la
+misma. Para hacer la traducción JAX-RS utiliza JAXB\cite{JAXB}.
 
 \begin{landscape}
 \begin{figure}[hp]
