@@ -102,7 +102,7 @@ describe "Transformers" do
 
     it "should traverse tranformer" do
       mock = mock("top serializer")
-      @transformer.export mock_children(@transformer, mock)
+      @transformer.fill_transformer_element mock_children(@transformer, mock)
     end
   end
 
@@ -112,7 +112,7 @@ describe "Transformers" do
       child = PatternMatcher.new :pattern => %q{<li><a href="noticia.asp\?idnoticia=.*?">(.*?)</a>},
                                  :dotAll => true
       @transformer.add_child child
-      doc = @transformer.export_to_xml
+      doc = @transformer.convert_to_xml
       doc.should_not be_nil
       # doc.write($stdout,4)
     end
@@ -157,11 +157,13 @@ describe "Transformers" do
 
   describe Language do
     it "should let put transformers in cascade" do
-      result = Language.execute { url > patternMatcher(:pattern =>"bla") >
+      result = Language.interpret { url > patternMatcher(:pattern =>"bla") >
         replacer(:sourceRE =>"e", :dest => "a")}
     end
 
-    def check result
+    it "should let the language be supplied as a string" do
+      result = Language.language_eval %q{url > patternMatcher(:pattern =>"bla") >
+        replacer(:sourceRE =>"e", :dest => "a")}
       result.should_not be_nil
       result.transformer_class.should == :SimpleTransformer
       result.branchtype.should be_equal(:CASCADE)
@@ -175,14 +177,35 @@ describe "Transformers" do
       replacer.class.should == Replacer
     end
 
-    it "should let the language be supplied as a string" do
-      result = Language.language_eval %q{url > patternMatcher(:pattern =>"bla") >
-        replacer(:sourceRE =>"e", :dest => "a")}
-      check result
+    it "should let put transformers as children of other transformer in cascade" do
+      result = Language.interpret { url {patternMatcher(:pattern =>"bla") >
+        replacer(:sourceRE =>"e", :dest => "a")}}
+      result.should_not be_nil
+      result.transformer_class.should == :SimpleTransformer
+      result.branchtype.should be_equal(:CASCADE)
+      result.branchmergemode.should be_equal(:SCATTERED)
+      result.children.size.should == 1
+      url = result.children[0]
+      url.children.size.should == 2
+      url.children[0].class.should == PatternMatcher
+      url.children[1].class.should == Replacer
+    end
+
+    it "should let put several consecutive pipes" do
+      result = Language.interpret{ pipe {url > patternMatcher(:pattern =>"bla")} |
+        pipe {url > patternMatcher(:pattern =>"bla")}}
+      result.should_not be_nil
+      result.children.size.should == 2
+      first_pipe = result.children[0]
+      first_pipe.transformer_class.should == :SimpleTransformer
+      first_pipe.children.size.should == 2
+      second_pipe = result.children[1]
+      second_pipe.transformer_class.should == :SimpleTransformer
+      second_pipe.children.size.should == 2
     end
 
     it "should let put transformers in branch" do
-      result = Language.execute { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
+      result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
           patternMatcher(:pattern =>"bla")
           patternMatcher(:pattern =>"eoo") } > appender(:append => "bla")}
       result.should_not be_nil
@@ -196,18 +219,36 @@ describe "Transformers" do
       branch.children[0].pattern.should == "bla"
       branch.children[1].should respond_to(:pattern)
       branch.children[1].pattern.should == "eoo"
-      # result.export_to_xml.write($stdout,4)
+    end
+
+    it "should let put transformers in branch as children of other transformer" do
+      result = Language.interpret { url(:BRANCH_DUPLICATED,:SCATTERED) {
+          patternMatcher(:pattern =>"bla")
+          patternMatcher(:pattern =>"eoo") } > appender(:append => "bla")}
+      result.should_not be_nil
+      result.children.size.should == 2
+      url = result.children[0]
+      url.transformer_class.should == :URLRetriever
+      url.branchtype.should == :BRANCH_DUPLICATED
+      url.branchmergemode.should == :SCATTERED
+      url.children.size.should == 2
+      url.children[0].should respond_to(:pattern)
+      url.children[0].pattern.should == "bla"
+      url.children[1].should respond_to(:pattern)
+      url.children[1].pattern.should == "eoo"
+      appender = result.children[1]
+      appender.transformer_class.should == :Appender
     end
 
     it "should not let use | inside a branch" do
-      lambda do Language.execute { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
+      lambda do Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
           patternMatcher(:pattern =>"bla") | patternMatcher(:pattern =>"eoo") }
       }
       end.should raise_error(RuntimeError, "| can't be used in a pipe branch")
     end
 
     it "should let put transformers in cascade inside branch" do
-      result = Language.execute { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
+      result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
           patternMatcher(:pattern =>"bla")
           patternMatcher(:pattern =>"eoo")
           pipe{url > patternMatcher(:pattern =>"bla")}
@@ -220,7 +261,7 @@ describe "Transformers" do
     end
 
     it "should let do a loop" do
-      result = Language.execute { url |
+      result = Language.interpret { url |
         pipe{ patternMatcher(:pattern =>"bla") | url}.repeat?{
           patternMatcher(:pattern => "prueba")
         } | appender(:append => "bla")
@@ -235,7 +276,7 @@ describe "Transformers" do
     end
 
     it "should let put several transformer serially connected in the repeat clause" do
-      result = Language.execute { url |
+      result = Language.interpret { url |
         pipe{ patternMatcher(:pattern => "bla") | url}.repeat?{
           patternMatcher(:pattern => "prueba") > url
         } | appender(:append => "bla")
@@ -248,7 +289,7 @@ describe "Transformers" do
     end
 
     it "should let put several transformers paralelly connected in the repeat clause" do
-      result = Language.execute { url |
+      result = Language.interpret { url |
         pipe{ patternMatcher(:pattern => "bla") | url}.repeat?(:BRANCH_DUPLICATED,
                                                                :SCATTERED){
           patternMatcher(:pattern => "prueba")

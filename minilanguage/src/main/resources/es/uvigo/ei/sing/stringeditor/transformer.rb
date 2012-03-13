@@ -1,83 +1,406 @@
+# ### Introduction
+
+# We can create a new *aAUTOMATOR* robot by feeding a minilanguage
+# string to *Language*. *Language* class interprets it and creates a
+# tree of *Transformer* objects. This *Transformer*'s tree resembles
+# *aAUTOMATOR* XML format so the latter is easy to generate.
+#
+# *Language* interprets the language by using the `eval` capabilities
+# of Ruby. In order to not have to define manually a method for each
+# type of Transformer in *Language* we generate each one dinamically.
+
+# We include java packages for generating the XML.
 require 'java'
 module XML
   include_package 'javax.xml.parsers'
   include_package 'org.w3c.dom'
 end
-class NodeList
-  include Enumerable
 
-  def initialize node_list
-    @node_list = node_list
+# ### *Transformer* as template for new sublcasses
+
+# We define methods to ease the definition of new *Transformer*
+# subclasses . These methods are called when the class is being
+# constructed and parametrize the behavior of the generated
+# subclass. Each generated *Transformer* subclass receives the values
+# for the parameters it requires when being instantiated.
+class Transformer
+
+# The `@variables` used inside of class methods(`self.method_name`)
+# are local to each subclass. They are instance variables of each
+# class metaclass.
+
+# This method is intended to be used inside the body of subclasses
+# from Transformer. It stores the value of the class as a symbol.
+  def self.transformer_class value
+    @transformer_class = value.to_sym
   end
 
-  attr_reader :node_list
-
-  def each
-    (0...node_list.getLength()).each do |i|
-      yield node_list.item(i)
-    end
+  def self.transformer_class_symbol
+    @transformer_class
   end
 
-  def select_with_name name
-    select{|n| n.java_kind_of?(XML::Element) && name == n.nodeName}
+# It stores a new param definition. This method is intended to be used
+# inside the body of subclasses from Transformer.
+  def self.param(name, hash)
+    params_definitions << ParamDefinition.new(name, hash)
   end
 
+  def self.params_definitions
+    (@params_definitions||=[])
+  end
 end
 
+# It stores a param definition. It has a name, if it's required and a
+# default value. Each *Transformer* subclass has some different
+# *ParamDefinition*.
+class ParamDefinition
+
+  def self.default_value paramDefinition
+    paramDefinition && paramDefinition.default_value
+  end
+
+  attr_accessor :name
+  attr_accessor :required
+  attr_accessor :default_value
+
+  def initialize(name, params)
+    self.name = name.to_sym
+    self.required = params[:required] && true
+    self.default_value = params[:default_value]
+  end
+end
+
+# We reopen *Transformer* class to add a hook: `self.inherited` is
+# called each time a new subclass of *Transformer* is defined.
+#
+# This is a partial definition. *Transformer* class will be reopened.
+class Transformer
+# Whenever a new subclass of *Transformer* is created, we tell
+# Language. We also keep track of the subclasses added.
+  def self.inherited subclass
+    Language.new_type_of_transformer(subclass)
+    (@@subclasses||=[]) << subclass
+  end
+
+# The name of the method to be added to *Language*. It's created from
+# the name of the class with the first letter in lowercase, unless
+# it's present in the custom names map.
+  def self.language_method_name
+    @@custom_names[self.to_s] || self.lowercase_first(self.to_s)
+  end
+
+  @@custom_names = {"URLRetriever" => "url"}
+
+  def self.lowercase_first word
+    word[0, 1].downcase + word[1, word.length - 1]
+  end
+end
+
+# In *Language* class an instance method is created for each of the
+# subclasses of *Transformer*. This is a partial
+# definition. *Language* class will be reopened.
 class Language
 
-  def self.add_transformer transformer_klass
-    define_method(transformer_klass.name) do |*args|
-      params = args[0]
-      transformer_added_action(transformer_klass.new(params || Hash.new))
+# One a trannsformer class is created it's added as a method to
+# Language. A new method is generated that will call
+# `transformer_added_action` with the provided parameters.
+
+#  For example after defining the class `PatternMatcher` a new method
+# `patternMatcher` is defined on *Language* class. The methods
+# generate receive some arguments that will be passed directly to the
+# class constructor. If a block is provided it's evaluated in a new
+# *Language* instance.
+  def self.new_type_of_transformer transformer_klass
+    define_method(transformer_klass.language_method_name) do |*args, &block|
+      transformer = transformer_klass.new(*args)
+      transformer_added_action(transformer)
+      if block
+        Language.new transformer, &block
+      end
       self
     end
   end
 
-  def self.execute &block
-    l = Language.new &block
+end
+
+# Now let's define some *Transformer* subclasses that will cause
+# methods to be added to the minilanguage. Notice how we use
+# transformer_class and param methods defined before to simplify he
+# definition of *Transformer* classes.
+
+# It defines the `patternMatcher` call on *Language*. It can be used as
+# `patternMatcher('regexHere')` or
+# `patternMatcher(:pattern=>'regexHere')`
+class PatternMatcher < Transformer
+  transformer_class :PatternMatcher
+  param :pattern, :required => true
+  param :dotAll, :default_value => false
+end
+
+# It defines the `xpath` call on *Language*. It can be used as
+# `xpath('//a/@href')` or `xpath(:Xpath->'//a/@href')`
+class Xpath < Transformer
+  transformer_class :HTMLMatcher
+  param :XPath, :required => true
+end
+# This is not intended to be used as a direct call on *Language*. It
+# acts as a container of other transformers. For that you should use
+# the special calls `pipe` and `branch` that accept blocks.
+class SimpleTransformer < Transformer
+  transformer_class :SimpleTransformer
+end
+# It defines the `appender` call on *Language*. It can be used as
+# `appender('<br />')` or `xpath(:append->'<br />')`
+class Appender < Transformer
+  transformer_class :Appender
+  param :append, :required => true
+end
+# It defines the `url` call on *Language*. `@@custom_names` on
+# transformer class is used to customize the name. It's used as `url`
+# or `url(:description=>'whatever')`
+class URLRetriever < Transformer
+  transformer_class :URLRetriever
+end
+# It defines the `replacer` call on *Language*. It's used as
+# `replacer(:sourceRE=> '', :dest=>'')`
+class Replacer < Transformer
+  transformer_class :Replacer
+  param :sourceRE, :required => true
+  param :dest, :required => true
+end
+# It defines the `decorator` call on *Language*. It's used as
+# `decorator(:head=> '<p>', :dest=>'</p>')`.
+class Decorator < Transformer
+  transformer_class :Decorator
+  param :head, :default_value => ''
+  param :tail, :default_value => ''
+end
+# It defines the `merger` call on *Language*. It's used as
+# `merger`. It has no required parameters.
+class Merger < Transformer
+  transformer_class :Merger
+end
+
+# ### *Transformer* instantiation.
+
+# We reopen the *Transformer* class to show how it's instantiated. The
+# initialize constructor is called when calling the method dinamically
+# generated on *Language* class with the provided values.
+
+class Transformer
+
+# As you can see `arguments` it's a variable list or arguments. It can
+# have zero, one, two or three arguments. If branch parameters are
+# provided they are the first two. The params is the last one, but
+# it's optional.
+  def self.split_parameters arguments
+    params = (arguments.length == 1 || arguments.length == 3) && arguments.last
+    # branch parameters provided
+    if arguments.length >= 2
+      [arguments[0, 2], params]
+    # no branch parameters
+    else
+      [[], params]
+    end
+  end
+
+# A transformer constructor. It's called from *Language* when the
+# concrete method associated to this class is called. Examples of
+# calls on *Language* that can trigger this:
+#
+#    patternMatcher('(http://.*)')
+#    decorator(:head=>"<h1>", :tail=>"</h1>", :description=>"wrapping")
+  def initialize *arguments
+    klass = self.class
+# Check that `transformer_class` has been defined
+    unless klass.transformer_class_symbol
+      raise ArgumentError, "transformer_class must be defined in #{klass}"
+    end
+
+    branch_parameters, params = klass.split_parameters arguments
+# We ensure the params is in a Hash form, that the branch parameters
+# are added, and that if a key is not found the value in
+# default_values is returned.
+    params = klass.ensure_params_hash(params)
+    params = klass.with_branch_params(params, branch_parameters)
+    params = klass.with_defaults params
+# We set instance attributes from the params. Notice that if the value
+# is not present, the default values are used.
+    @description = params[:description]
+    @branchtype = params[:branchtype].to_sym
+    @branchmergemode = params[:branchmergemode].to_sym
+    @loop = params[:loop]
+# We extract the values from the params for the param definitions and
+# we generate the accessors
+    @params = (klass.values_for_param_definitions params).freeze
+    klass.generate_named_accessors_for_parameters("params")
+  end
+
+# The default values used for the standard parameters. If the value
+# are equal to these they don't have to be provided.
+  @@default_values = {:branchtype => :CASCADE, :branchmergemode => :SCATTERED,
+    :loop => false}
+
+# Create a new hash with the contents of `hash` and that fallbacks to
+# `@@defaults_values` and the param definition if some key is not
+# found.
+  def self.with_defaults hash
+    result = Hash.new {|hash, key|
+      if key == :description
+        transformer_class_symbol.to_s
+      else
+        if @@default_values[key]
+          @@default_values[key]
+        else
+          ParamDefinition.default_value(find_param_definition(key))
+        end
+      end
+    }
+    result.merge! hash
+    result
+  end
+
+  def self.find_param_definition name
+    params_definitions.find{|p| p.name.to_sym == name.to_sym}
+  end
+
+# Add to the params hash the branch params
+  def self.with_branch_params(hash, branch_params)
+    hash[:branchtype] = branch_params[0] if branch_params[0]
+    hash[:branchmergemode] = branch_params[1] if branch_params[1]
+    hash
+  end
+
+# If params is a Hash we return early
+  def self.ensure_params_hash provided_params_values
+    return provided_params_values if Hash === provided_params_values
+# Otherwise we create a new Hash and if there is only one required
+# param we set the value of that param for the single value provided.
+    single_argument = provided_params_values
+    result = {}
+    required = params_definitions.find_all {|x| x.required}
+    if required.size == 1
+      result[required[0].name] = single_argument
+    end
+    result
+  end
+
+# Extracts from the provided params hash, the actual values taking
+# into account the default values. It also checks that all the
+# required parameters without default values are set.
+  def self.values_for_param_definitions provided_params_values
+    result = provided_params_values.clone
+    params_definitions.each do |p|
+      if !result[p.name] && p.required && !p.default_value
+        raise ArgumentError, "#{p.name} parameter is required"
+      end
+      result[p.name] = result[p.name] || p.default_value
+    end
+    result
+  end
+
+# It generates dinamically accessors for the parameters definitions in
+# this instance, the values are the ones stored in
+# `instance_variable_name`. For example for `PatternMatcher` we
+# generate `pattern` and `dotAll` accessors.
+  def self.generate_named_accessors_for_parameters instance_variable_name
+    params_definitions.each do |param_definition|
+      module_eval <<-END
+        def #{param_definition.name}
+          @#{instance_variable_name}[:#{param_definition.name}]
+        end
+      END
+    end
+  end
+
+# Some accessors for properties common for all transformers.
+
+  attr_reader :branchtype
+  attr_reader :branchmergemode
+  attr_reader :description
+
+  def transformer_class
+    self.class.transformer_class_symbol
+  end
+
+  def children
+    Array.new(@children || [])
+  end
+
+  def loop?
+    @loop
+  end
+
+  def params
+    @params
+  end
+end
+
+# ### *Language* interpretation
+
+
+# We reopen *Transformer* to add the methods needed by *Language* to
+# manipulate each generate transformer.
+class Transformer
+
+# *aAUTOMATOR* expects that the loop control is the first element.
+  def do_loop_with loop_control_transformer
+    (@children ||= []).insert(0, loop_control_transformer)
+    @loop = true
+  end
+# Append a child to this transformer
+  def add_child child
+    (@children ||= []) << child
+  end
+
+end
+
+# Besides the methods presented here this class contains all the
+# methods generated with the *Transformer* subclasses. The Language
+# uses Ruby blocks to create nested scopes.
+class Language
+
+# This is the entering point for *Language*. A new *Language* instance
+# is created against which the `language_str` is evaluated. For
+# example if `language_str` is `url | xpath('//a/@href')` the methods
+# `url`, `|` and `xpath`, `|` are executed on the new *Language*
+# instance.
+  def self.language_eval language_str, filename=nil, lineno=nil
+    language = create_top_level
+    args = [language_str, filename, lineno].reject{|x| x.nil?}
+    language.instance_eval *args
+# We return the top level generated transformer
+    language.transformer
+  end
+
+# The root transformer is a *SimpleTransformer* that works in cascade
+# mode.
+  def self.create_top_level &block
+    Language.new SimpleTransformer.new({}), &block
+  end
+
+# Method used in the tests. It's mostly the same as language_eval but
+# instead of a string to be evaled it receives a Ruby block of
+# code.
+  def self.interpret &block
+    l = create_top_level &block
     l.transformer
   end
 
-  def self.language_eval str, filename=nil, lineno=nil
-    l = Language.new
-    args = [str,filename,lineno].reject{|x| x.nil?}
-    l.instance_eval *args
-    l.transformer
-  end
-
-  def initialize *params, &block
-    hash = {}
-    hash[:branchtype] = params[0] if params[0]
-    hash[:branchmergemode] = params[1] if params[1]
-    @transformer = SimpleTransformer.new(hash)
-    instance_eval(&block) if block
-  end
-
-  def transformer
-    @transformer
-  end
-
+# Method called when a new transformer is created using one of the
+# dinamically defined methods. It adds the created transformer
+# instance to the current transformer. For example, calling
+# `patternMatcher('regexHere')` on some *Language* scope adds it as a
+# child to `@transformer`.
   def transformer_added_action transformer
     @transformer.add_child transformer
   end
   protected :transformer_added_action
 
-
-  def branch *params, &block
-    unless params[0] && params[1]
-      raise ArgumentError, "branchtype and branchmerge mode required"
-    end
-    l = Language.new *params, &block
-    @transformer.add_child l.transformer
-  end
-
-  def pipe &block
-    pipe = Language.new &block
-    @transformer.add_child pipe.transformer
-    pipe
-  end
-
+# This is syntactic sugar. Inside the top level scope or a pipe scope
+# the | separator can be used to separate several transformer
+# instantiations. The Ruby statement separator `;` can be used too,
+# but this gives it a 'flowing' look.
   def > other
     self | other
   end
@@ -89,31 +412,113 @@ class Language
     self
   end
 
+# Constructor for a *Language*. Both params and block are optional. It
+# creates a `SimpleTransformer` as container. It interprets the
+# optionally provided block in the context of the *Language* being created.
+  def initialize transformer, &block
+    @transformer = transformer
+    instance_eval(&block) if block
+  end
+
+# The transformer that is being modified in this `Language` instance.
+  def transformer
+    @transformer
+  end
+
+# With what we have shown so far we only could create transformers
+# that don't have other nested transformers. Now we define some
+# methods that let us create nested scopes inside a Language. Each
+# scope is a *Language* instance so more nested scopes can be created
+# recursively. This scope methods receive Ruby blocks. Ruby blocks can
+# be delimited with braces which is a very readable nesting construct.
+
+# It creates a new minilanguage scope with pipe semantics. For example
+# a pipe could be:
+#
+#     url | pipe {xpath('//a/@href') |
+#                 patternMatcher('(http://.*)')}
+#
+# A transformer with two children would be created: url and a
+# SimpleTransformer with xpath and patternMatcher as children:
+#
+#     SimpleTransformer :branchtype => :CASCADE
+#       - url
+#       - SimpleTransformer :branchtype => :CASCADE
+#         - xpath
+#         - patternMatcher
+#
+  def pipe &block
+    pipe = Language.new SimpleTransformer.new, &block
+    @transformer.add_child pipe.transformer
+    pipe
+  end
+
+# It creates a new minilanguage scope with branch semantics. A branch
+# requires that its type and merge mode are specified as params. The
+# provided block is interpreted with the newly created instance. The
+# children of a branch must be separed by newlines, never by `|`. An
+# example of branch is:
+#
+#     branch(:BRANCH_DUPLICATED, :COLLAPSED) {
+#       decorator(:head=>"<h1>", :tail => "</h1>")
+#       url
+#     }
+# It would generate:
+#
+#     SimpleTransformer :branchtype => :BRANCH_DUPLICATED
+#                       :branchmergemode => :SCATTERED
+#       - decorator :head => "<h1>", :tail => "</h1>"
+#       - url
+#
+  def branch *params, &block
+    unless params[0] && params[1]
+      raise ArgumentError, "branchtype and branchmerge mode required"
+    end
+    branch = Language.new(SimpleTransformer.new(*params), &block)
+    @transformer.add_child branch.transformer
+    branch
+  end
+
+# It tells that the current transformer is executed in a loop. The
+# provided block is used as the loop control. For example:
+#
+#     url { patternMatcher(:pattern=>"somePattern")}.repeat? {
+#                 patternMatcher(:pattern=>"somePattern") |
+#                 decorator(:head=>"someURL")}
+#  
+# Notice how a transformer can receive other as children. By default
+# they are in cascade mode (the same as `pipe`). This is specially
+# useful with `repeat?` blocks.
   def repeat? *params, &block
-    clause = RepeatClause.new *params, &block
+    clause = RepeatClause.new(SimpleTransformer.new(*params), &block)
     if clause.transformer
       @transformer.do_loop_with clause.transformer
     end
+    self
   end
-
 end
 
+# It interprets the parts inside a *Language* class.
 class RepeatClause < Language
-  def initialize *params, &block
-    super *params, &block
-  end
 
   alias_method :standard_added_action, :transformer_added_action
 
+# Instead of adding the created transformer to the container the
+# children of the repeat clase are stored.
   def transformer_added_action transformer
     (@transformers||=[]) << transformer
   end
 
+# When we want to retrieve the transformer we look at the transformers
+# that have been added.
   def transformer
+# We add them to the implicit container first.
     (@transformers || []).each do |t|
       standard_added_action t
     end
     @transformers.clear if @transformers
+# If only one transformer instantiated on the repeat clause we return
+# it. Otherwise we return the implicit container.
     if super.children.size == 1
       super.children[0]
     else
@@ -122,59 +527,50 @@ class RepeatClause < Language
   end
 end
 
-class Param
+# ### *aAUTOMATOR* XML building
 
-  attr_accessor :name
-  attr_accessor :required
-  attr_accessor :default_value
+# It exposes methods to ease the creation of the XML for an
+# *aAUTOMATOR* *robot*. New *XMLBuilder* instances are created for
+# each transformer node.
+class XMLBuilder
 
-  def initialize(name, params)
-    self.name = name.to_sym
-    self.required = if params[:required] then true; else false end
-    self.default_value = params[:default_value]
-  end
-
-end
-
-
-class AttributesWrapper
-  def initialize(element)
-    @element = element
-  end
-  def []=(name,value)
-    @element.setAttribute(name.to_s,value)
-  end
-end
-
-class DocumentWrapper
-
+# It creates a new XML Document
   def self.create
     factory = XML::DocumentBuilderFactory.newInstance
     factory.setNamespaceAware false
-    DocumentWrapper.new(factory.newDocumentBuilder.newDocument)
+    XMLBuilder.new(factory.newDocumentBuilder.newDocument)
   end
 
+# A *XMLExporter* must have a reference to the document and the node
+# it's acting on. At the start that's the root document.
   def initialize(doc, node=doc)
     @doc = doc
     @node = node
   end
 
+# When adding a new element a new *XMLExporter* is created so that
+# element can be subsequently modified.
   def add_element name
     element = @doc.createElement(name)
     @node.appendChild(element)
-    DocumentWrapper.new(@doc,element)
+    XMLBuilder.new(@doc,element)
   end
 
+# Using *AttributesWrapper* to simplify attribute modification
   def attributes
     @attributes_wrapper ||= AttributesWrapper.new(@node)
   end
 
-  def wrapped
+  def document
     @doc
   end
+
   def node
     @node
   end
+  protected :node
+
+# Add param element to transformer element with the provided value
   def add_param(key, value)
     param_element = self.add_element 'param'
     param_element.attributes['key']= key.to_s
@@ -184,276 +580,275 @@ class DocumentWrapper
   end
 end
 
+# It eases the way of setting attributes to an XML Element
+class AttributesWrapper
+  def initialize(element)
+    @element = element
+  end
 
+  def []=(name,value)
+    @element.setAttribute(name.to_s,value)
+  end
+end
+
+# Method to be called from the Java side with the language
+# string. It's interpreted by *Language* and the transformer generated
+# along its children is converted to XML.
+def get_xml str, filename=nil, lineno=nil
+  transformer = Language.language_eval(str, filename, lineno)
+  transformer.convert_to_xml
+end
+
+# We reopen the *Transformer* class to define the methods needed to
+# convert to xml.
 class Transformer
 
-  @@rewrite = {"URLRetriever" => "url"}
-
-  def self.lowercase_first word
-    word[0,1].downcase+word[1,word.length-1]
+  def convert_to_xml
+    builder = XMLBuilder.create
+    robot = builder.add_element 'robot'
+    robot.attributes['version'] = '1.0'
+    self.fill_transformer_element(robot.add_element('transformer'))
+    builder.document
   end
 
-  def self.inherited subclass
-    Language.add_transformer(subclass)
-    (@subclasses||=[]) << subclass
+# It fills the properties needed for an *aAUTOMATOR* transformer
+  def fill_transformer_element builder
+# We set the attributes.
+    builder.attributes['class'] = self.class.transformer_class_symbol.to_s
+    builder.attributes['branchtype'] = branchtype.to_s
+    builder.attributes['branchmergemode'] = branchmergemode.to_s
+    builder.attributes['loop'] = loop?.to_s
+# We add the params as elements.
+    params.each_pair do |key, value|
+      builder.add_param(key, value)
+    end
+# We apply this same method recursively to the children
+    children.each do |child|
+      child.fill_transformer_element(builder.add_element("transformer"))
+    end
+    builder
   end
+end
 
-  def self.name
-    @@rewrite[self.to_s] || self.lowercase_first(self.to_s)
+# ### From *aAUTOMATOR* XML to minilanguage
+
+# It takes an XML in *aAUTOMATOR* format and generates a minilanguage
+# string that would generate it.
+def to_minilanguage xml
+# The document element is robot and its children are the top level transformers
+  children_to_minilanguage(xml.getDocumentElement, " | ")
+end
+
+# It converts the transformer children of an element to minilanguage.
+def children_to_minilanguage parent, separator
+  result = ""
+
+# Lambda that converts an element to minilanguate taking into account
+# its position.
+  generate_element = lambda do |element, index|
+    # We retrieve the Transformer class associated to the element.
+    transformer_class = Transformer.get_class_for(element.getAttribute("class"))
+    unless transformer_class
+      raise "not found class for #{element.getAttribute('class')}"
+    end
+
+    result << separator if index > 0
+# The retrieved transformer_class knows how to convert itself to
+# minilanguage. We provide a block that knows how to generate the
+# children. It basically calls this method recursively.
+    result << transformer_class.to_minilanguage(element) {|sep|
+      children_to_minilanguage(element, sep)
+    }
+    loop_control = get_loop_control(element)
+    unless loop_control.empty?
+      result << ".repeat?{\n"
+      loop_control.each_with_index &generate_element
+      result << "}"
+    end
+  end
+  get_transformers(parent).each_with_index &generate_element
+  result
+end
+
+# If the transformer has the loop property the first transformer will
+# work as loop control. Otherwise all work as standard transformers.
+def partition_transformers parent
+  all = children_list(parent).select_with_name("transformer").to_a
+  is_loop = parent.getAttribute('loop') =~ /true/
+  if is_loop
+    [all[0, 1], all[1, all.length - 1]]
+  else
+     [[], all]
+  end
+end
+
+def get_transformers parent
+  partition_transformers(parent)[1]
+end
+
+def get_loop_control parent
+  partition_transformers(parent)[0]
+end
+
+# We reopen *Transformer* class to add the parts for converting XML to
+# minilanguage.
+class Transformer
+
+# For a given transformer class name (the one without the package) and
+# present in the class attribute of the transformer element in
+# *aAUTOMATOR's* XML. It returns the appropriate subclass of
+# *Transformer*
+  def self.get_class_for simple_java_class_name
+    subclasses_by_name[simple_java_class_name.to_sym]
   end
 
   def self.subclasses_by_name
-    return @subclasses_by_name if @subclasses_by_name
-    @subclasses_by_name = @subclasses.inject(Hash.new) {|acc, subclass|
-      acc[subclass._transformer_class] = subclass
+    @@subclasses.inject(Hash.new) {|acc, subclass|
+      acc[subclass.transformer_class_symbol] = subclass
       acc
     }
   end
 
-  def self.get_transformer_class_for name
-    subclasses_by_name[name.to_sym]
+# It converts the provided transformer element to a subpart of the
+# resulting minilanguage. For generating the children we use
+# `children_content`.
+  def self.to_minilanguage element, &children_content
+# We extract the params to use.
+    params = with_defaults(extract_params_from_element(element))
+# If no further transformer children we generate the call.
+    loop_control, children = partition_transformers(element)
+    if children.empty?
+      as_call(params)
+# If both branch parameters are equal to the default values it's a pipe.
+    else
+      is_pipe = [:branchtype, :branchmergemode].all?{|key|
+        params[key] == @@default_values[key]
+      }
+      if is_pipe
+        generate_pipe params, children_content
+      else
+        branch_parameters = [:branchtype, :branchmergemode].map {|key|
+          params[key].to_sym
+        }
+        generate_branch branch_parameters, params, children_content
+      end
+    end
   end
-
-  @@default_values = {:branchtype => :CASCADE, :branchmergemode => :SCATTERED,
-    :loop => false}
-
-  def self.are_equal?(value, dom_value)
-    dom_value == value || dom_value == value.to_s
+# It generates the string for a pipe. If the type is a
+# *SimpleTransformer* a `pipe` call is generated. Otherwise we use the
+# *Language* method name for the class.
+  def self.generate_pipe params, children_content
+    result = ""
+    result << ((self != SimpleTransformer) && language_method_name || "pipe")
+    unless params.empty? || self == SimpleTransformer
+      result << "(" << as_named_arguments(params) << ")"
+    end
+    result << " {"
+    result  << children_content.call(" | ") << "}"
+    result
+  end
+# It generates the string for a branch. If the type is a
+# *SimpleTransformer* a `branch` call is generated. Otherwise we use
+# the *Language* method name for the class.
+  def self.generate_branch branch_parameters, params, children_content
+    result = ""
+    result << ((self != SimpleTransformer) && language_method_name || "branch")
+    result << "(#{branch_parameters[0].inspect}, #{branch_parameters[1].inspect}"
+    unless params.empty? || self == SimpleTransformer
+      result << "," << as_named_arguments(params)
+    end
+    result << ") {\n  "
+    result << children_content.call("\n  ")
+    result << "\n}"
+    result
   end
 
   def self.extract_params_from_element element
-    params = {}
-    @@default_values.each_pair do |key, default_value|
-      attrValue = element.getAttribute(key.to_s)
-      unless are_equal?(default_value, attrValue)
-        params[key] = attrValue
-      end
-    end
-    NodeList.new(element.getChildNodes).select_with_name("param").each do |param_element|
-      key = param_element.getAttribute('key')
-      value = param_element.getTextContent
-      unless key.to_sym == :description &&
-          value == self._transformer_class.to_s ||
-          are_equal?(find_param_definition_default_value(key),value)
-        params[key.to_sym] = value
+# We extract the params that come from the transformer element attributes.
+    params = params_from_xml_attributes element
+# Each child param element have a key attribute and its value as text content.
+    children_list(element).select_with_name("param").each do |param_element|
+      key = param_element.getAttribute('key').to_sym
+      value = param_element.getTextContent.to_s.strip
+# If the parameter element value is different than the default we
+# assign it to the params.
+      unless omitting_would_produce_same_value?(key, value)
+        params[key] = value
       end
     end
     params
   end
 
-  def self.find_param_definition name
-    (@params_definitions||=[]).find{|p| p.name.to_sym == name.to_sym}
+# The parameters that come from the attributes are the ones defined in
+# `@@default_values`: `:branchtype` and `:branchmergemode`.
+  def self.params_from_xml_attributes element
+    params = {}
+    @@default_values.each_pair do |key, default_value|
+      attrValue = element.getAttribute(key.to_s)
+# Only if the attribute value is different than the default value we
+# assign it to the params. The loop attribute is ignored here too.
+      unless are_equal?(default_value, attrValue)
+        params[key] = attrValue if key != :loop
+      end
+    end
+    params
+  end
+# It produces the same value if it has the same value as the default
+# value for the key.
+  def self.omitting_would_produce_same_value? key, value
+    default_value = with_defaults({})[key]
+    are_equal?(default_value, value)
   end
 
-  def self.find_param_definition_default_value name
-    p = find_param_definition(name)
-    p.default_value if p
+  def self.are_equal?(value, dom_value)
+    dom_value == value || dom_value == value.to_s
   end
 
+# We strip the braces from the params hash. As the call only has one
+# argument, we can provide the hash as named parameters. If params are
+# empty only the method name is needed.
   def self.as_call params
-    result = "#{name}("
-    result << /{(.*)}/.match(params.inspect)[1]
-    result << ")"
-  end
-
-  def self.to_language element, &block
-    result = ""
-    params = extract_params_from_element element
-    if NodeList.new(element.getChildNodes).select_with_name("transformer").empty?
-      result << as_call(params)
-    else
-      if [:branchtype, :branchmergemode].all?{ |key|
-          ! params[key]
-        }
-        result = "pipe { "
-        if self != SimpleTransformer
-          result << as_call(params) << " | "
-        end
-        result << block.call(element, " | ")
-        result << " }"
-      else
-        branch_parameters = [:branchtype, :branchmergemode].map { |key|
-          (params[key] || @@default_values[key]).to_sym.inspect
-        }
-        result = "branch(#{branch_parameters[0]},#{branch_parameters[1]}) {\n  "
-        result << block.call(element,"\n  ")
-        result << "\n}"
-      end
+    result = "#{language_method_name}"
+    unless params.empty?
+      result << "("
+      result << as_named_arguments(params)
+      result << ")"
     end
     result
   end
 
-  def self.transformer_class value
-    @transformer_class = value.to_sym
+  def self.as_named_arguments params
+    /{(.*)}/.match(params.inspect)[1]
+  end
+end
+
+# Factory method for easily generating the *NodeList* for an element.
+def children_list element
+  NodeList.new(element.getChildNodes)
+end
+
+# *NodeList* is a wrapper around a java NodeList that makes some
+# operations less verbose.
+class NodeList
+# We enrich this class with a lot of useful methods by including
+# Enumerable.
+  include Enumerable
+
+  def initialize node_list
+    @node_list = node_list
   end
 
-  def self._transformer_class
-    @transformer_class
-  end
+# We expose the wrapped object.
+  attr_reader :node_list
 
-  def self.param(name, hash)
-    (@params_definitions||=[]) << Param.new(name, hash)
-  end
-
-  def self.extract_transformer_class value_from_params
-    @transformer_class || value_from_params
-  end
-
-  def self.extract_params(instance_variable_name, params)
-    if ! (Hash === params)
-      required = @params_definitions.find_all {|x| x.required}
-      if required.size == 1
-        value, params = params, {}
-        params[required[0].name] = value
-      end
+# Needed method for supporting Enumerable module.
+  def each
+    (0...node_list.getLength()).each do |i|
+      yield node_list.item(i)
     end
-    result = Hash.new
-    (@params_definitions || []).each do |param_definition|
-      if ! params[param_definition.name] && param_definition.required &&
-          ! param_definition.default_value
-        raise ArgumentError, "#{param_definition.name} parameter is required"
-      end
-      result[param_definition.name] = params[param_definition.name] ||
-        param_definition.default_value
-      module_eval <<-END
-        def #{param_definition.name}
-          @#{instance_variable_name}[:#{param_definition.name}]
-        end
-      END
-    end
-    params.merge(result)
   end
-
-  def initialize params
-    @description = params[:description]
-    @transformer_class = self.class.
-      extract_transformer_class(params[:transformer_class])
-    @branchtype = (params[:branchtype]||@@default_values[:branchtype]).to_sym
-    @branchmergemode = (params[:branchmergemode] ||@@default_values[:branchmergemode]).to_sym
-    @loop = if params[:loop] then true; else @@default_values[:loop] end;
-    raise ArgumentError, "transformer_class is required" unless @transformer_class
-    @params = (self.class.extract_params "params", params).freeze
+# Return all children with the provided name.
+  def select_with_name name
+    select{|n| n.java_kind_of?(XML::Element) && name == n.nodeName}
   end
-
-  private
-  def description= desc
-      @description = desc
-  end
-
-  public
-  attr_reader :transformer_class
-  attr_reader :branchtype
-  attr_reader :branchmergemode
-
-  def export exporter
-    exporter.attributes['class'] = transformer_class.to_s
-    exporter.attributes['branchtype'] = branchtype.to_s
-    exporter.attributes['branchmergemode'] = branchmergemode.to_s
-    exporter.attributes['loop'] = loop?.to_s
-    params.each_pair do |key, value|
-      exporter.add_param(key, value)
-    end
-
-    children.each do |child|
-      child.export(exporter.add_element("transformer"))
-    end
-    exporter
-  end
-
-  def do_loop_with transformer
-    (@children ||= []).insert(0,transformer)
-    @loop = true
-  end
-
-  def export_to_xml
-    doc = DocumentWrapper.create
-    robot = doc.add_element 'robot'
-    robot.attributes['version'] = '1.0'
-    self.export(robot.add_element('transformer'))
-    doc.wrapped
-  end
-
-  def add_child child
-    (@children ||= []) << child
-  end
-
-  def children
-    Array.new(@children || [])
-  end
-
-  def params
-    @params
-  end
-
-  def loop?
-    @loop
-  end
-
-  def description
-    @description || transformer_class
-  end
-
-end
-
-class PatternMatcher < Transformer
-
-  transformer_class :PatternMatcher
-  param :pattern, :required => true
-  param :dotAll, :default_value => false
-end
-class Xpath < Transformer
-  transformer_class :HTMLMatcher
-  param :XPath, :required => true
-end
-
-class SimpleTransformer < Transformer
-  transformer_class :SimpleTransformer
-end
-
-class Appender < Transformer
-  transformer_class :Appender
-  param :append, :required => true
-end
-
-class URLRetriever < Transformer
-  transformer_class :URLRetriever
-end
-
-class Replacer < Transformer
-  transformer_class :Replacer
-  param :sourceRE, :required => true
-  param :dest, :required => true
-end
-
-class Decorator < Transformer
-  transformer_class :Decorator
-  param :head, :default_value => ''
-  param :tail, :default_value => ''
-end
-
-class Merger < Transformer
-  transformer_class :Merger
-end
-
-def get_xml str, filename=nil, lineno=nil
-  transformer = Language.language_eval(str,filename,lineno)
-  transformer.export_to_xml
-end
-
-def to_minilanguage xml
-  transformer_visitor = lambda do |element, separator|
-    result = ""
-    NodeList.new(element.getChildNodes).select_with_name("transformer").
-       each_with_index do |element, index|
-      transformer_class = Transformer.get_transformer_class_for(
-                                           element.getAttribute("class"))
-      unless transformer_class
-        raise "not found class for #{element.getAttribute('class')}"
-      end
-      result << separator if index > 0
-      result << transformer_class.to_language(element, &transformer_visitor)
-    end
-    result
-  end
-  transformer_visitor.call(xml.getDocumentElement," | ")
 end

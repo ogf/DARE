@@ -659,10 +659,10 @@ primer momento.
   indicando el tamaño de la misma.
   \begin{figure}[hb]
     \begin{center}
-      \begin{lstlisting}[language=Lisp]
+      \begin{minted}{clojure}
       (defcodec protocol-frame
         (finite-frame :int32 (string :utf-8)))
-        \end{lstlisting}
+        \end{minted}
     \end{center}
   \caption{Ejemplo uso Gloss}\label{gloss-example}
   \end{figure}
@@ -895,9 +895,13 @@ facilitar la generación del XML.
 \end{figure}
 \end{landscape}
 
+\begin{landscape}
 \subsubsection{Descripción Implementación transformer.rb}
-Descripción general \ldots{}
-% transformer.rb en modo literario
+\begingroup
+    \fontsize{9pt}{11pt}\selectfont
+    \input{../minilanguage/src/main/resources/es/uvigo/ei/sing/stringeditor/docs/transformer.tex}
+\endgroup
+\end{landscape}
 
 \subsubsection{Diagrama clases DARE-domain}
 
