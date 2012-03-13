@@ -2,82 +2,66 @@ require 'transformer'
 
 describe "Transformers" do
 
-  it "should require transformer_class" do
-    lambda {
-      Transformer.new :description=> "bla"
-    }.should raise_error(ArgumentError, "transformer_class is required")
-  end
-
-  it "shouldn't description be changed" do
-    t = Transformer.new :description =>  "blabla",
-                        :transformer_class =>'SimpleTransformer'
+  it "description shouldn't be changed" do
+    t = SimpleTransformer.new :description =>  "blabla"
     lambda{t.description = "blabla"}.should raise_error
   end
 
   it "should accept description" do
-    t = Transformer.new :description=>"blabla",
-                        :transformer_class =>'SimpleTransformer'
+    t = SimpleTransformer.new :description=>"blabla"
     t.description.should == "blabla"
   end
 
   it "should have transformer_class name as default value for description" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer'
+    t = SimpleTransformer.new({})
     t.description.should == "SimpleTransformer"
   end
 
   it "should accept branchtype parameter" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :branchtype => "BRANCH_DUPLICATED"
+    t = SimpleTransformer.new :branchtype => "BRANCH_DUPLICATED"
     t.branchtype.should == :BRANCH_DUPLICATED
   end
 
   it "should have branchtype CASCADE as default" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer'
+    t = SimpleTransformer.new({})
     t.branchtype.should == :CASCADE
   end
 
   it "should accept parameter branchmergemode" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :branchmergemode =>:ORDERED
+    t = SimpleTransformer.new :branchmergemode =>:ORDERED
     t.branchmergemode.should == :ORDERED
   end
 
   it "should have branchmergemode SCATTERED as default" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer'
+    t = SimpleTransformer.new({})
     t.branchmergemode.should == :SCATTERED
   end
 
   it "should accept parameter loop" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :loop => true
+    t = SimpleTransformer.new :loop => true
     t.loop?.should be_true
   end
 
   it "should keep parameters" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer', :other =>"bla"
+    t = SimpleTransformer.new :other =>"bla"
     t.params[:other].should_not be_nil
   end
 
   it "should let add children" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :loop => true
-    child = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :loop => true
+    t = SimpleTransformer.new :loop => true
+    child = SimpleTransformer.new :loop => true
     t.add_child child
     t.children.should == [child]
   end
 
   it "must have an empty list as children initially" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :loop => true
+    t = SimpleTransformer.new :loop => true
     t.children.should_not be_nil
   end
 
   it "should not let modify original children collection" do
-    t = Transformer.new :transformer_class =>'SimpleTransformer',
-                        :loop => true
-    t.add_child(Transformer.new(:transformer_class =>'SimpleTransformer',
-                        :loop => true))
+    t = SimpleTransformer.new :loop => true
+    t.add_child(SimpleTransformer.new( :loop => true))
     t.children.clear
     t.children.length.should == 1
   end
