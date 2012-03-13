@@ -180,7 +180,6 @@ class DocumentWrapper
     param_element.attributes['key']= key.to_s
     text = @doc.createTextNode(value.to_s)
     param_element.node.appendChild(text)
-    param_element.attributes['value'] = value.to_s
     param_element
   end
 end
