@@ -10,7 +10,7 @@
     <property name="spec-file-dir" location="src/main/resources/es/uvigo/ei/sing/stringeditor/" />
 
     <target name="unit-test" depends="common.unit-test">
-        <java jar="lib/runtime/jar/jruby-complete-1.6.5.jar" failonerror="true" fork="true">
+        <java jar="lib/runtime/jar/jruby-complete-1.6.7.jar" failonerror="true" fork="true">
             <classpath refid="runtime-classpath"></classpath>
             <arg value="-S" />
             <arg value="gems/bin/rspec" />

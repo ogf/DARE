@@ -18,8 +18,6 @@
     <dependencies>
         <dependency org="es.uvigo.ei.sing" name="stringeditor" rev="1.0" conf="compile->default"/>
 
-        <!-- jruby-complete dependencies are declared using scope "provided" -->
-        <dependency org="org.jruby" name="jruby-complete" rev="1.6.5" conf="compile->master;runtime->provided"/>
-        <dependency org="bsf" name="bsf" rev="2.3.0" conf="compile->master" />
+        <dependency org="org.jruby" name="jruby-complete" rev="1.6.7" conf="compile->master"/>
     </dependencies>
 </ivy-module>

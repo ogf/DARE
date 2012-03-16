@@ -21,9 +21,8 @@ import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.PropertyPermission;
 
-import org.apache.bsf.BSFEngine;
-import org.apache.bsf.BSFException;
-import org.apache.bsf.BSFManager;
+import org.jruby.CompatVersion;
+import org.jruby.embed.ScriptingContainer;
 import org.w3c.dom.Document;
 
 public class Minilanguage {
@@ -55,17 +54,12 @@ public class Minilanguage {
 
     private static final String TRANSFORMER_RB = extractString(loadFile("transformer.rb"));
 
-    private final BSFEngine engine;
+    private final ScriptingContainer engine;
 
     public Minilanguage() {
-        BSFManager.registerScriptingEngine("ruby",
-                "org.jruby.javasupport.bsf.JRubyEngine", new String[] { "rb" });
-        try {
-            engine = new BSFManager().loadScriptingEngine("ruby");
-            engine.exec("ruby", 1, 1, TRANSFORMER_RB);
-        } catch (BSFException e) {
-            throw new RuntimeException(e);
-        }
+        engine = new ScriptingContainer();
+        engine.setCompatVersion(CompatVersion.RUBY1_9);
+        engine.runScriptlet(TRANSFORMER_RB);
     }
 
     public Transformer eval(File file) {
@@ -140,15 +134,12 @@ public class Minilanguage {
 
     private <T> T callScriptFunction(final Class<T> klass,
             final String function, final Object... parameters) {
+
         return AccessController.doPrivileged(new PrivilegedAction<T>() {
 
             @Override
             public T run() {
-                try {
-                    return klass.cast(engine.call(null, function, parameters));
-                } catch (BSFException e) {
-                    throw new RuntimeException(e);
-                }
+                return engine.callMethod(null, function, parameters, klass);
             }
         }, sandboxContext());
     }
