@@ -272,8 +272,8 @@ public class RobotResourceExecutionTest {
                 linesElements.getLength(), equalTo(1));
 
         NodeList inputsElement = root.getElementsByTagName(inputsPropertyName);
-        assertThat("there is one inputs elementin the response",
-                linesElements.getLength(), equalTo(1));
+        assertThat("there is one inputs element in the response",
+                inputsElement.getLength(), equalTo(1));
 
         NodeList dateElements = root.getElementsByTagName(datePropertyName);
         assertThat("there is one date element", dateElements.getLength(),
