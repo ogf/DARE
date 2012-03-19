@@ -1,4 +1,4 @@
-package es.uvigo.ei.sing.dare.resources;
+package es.uvigo.ei.sing.dare.client;
 
 import java.net.URI;
 import java.util.concurrent.Callable;
@@ -76,11 +76,11 @@ public class URIPoller {
         });
     }
 
-    public <T> T retrieve(Class<T> resultType, URI uriToExecution) {
-        return retrieve(resultType, uriToExecution, this.requestedType);
+    public <T> T retrieve(URI uriToExecution, Class<T> resultType) {
+        return retrieve(uriToExecution, resultType, this.requestedType);
     }
 
-    public <T> T retrieve(Class<T> resultType, URI uriToExecution,
+    public <T> T retrieve(URI uriToExecution, Class<T> resultType,
             MediaType requestedType) {
         Future<T> async = async(resultType, uriToExecution, requestedType);
         try {

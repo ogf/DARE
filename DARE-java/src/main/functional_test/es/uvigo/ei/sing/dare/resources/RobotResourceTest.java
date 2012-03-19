@@ -9,10 +9,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -21,15 +21,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.w3c.dom.Document;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.client.DARE;
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.entities.RobotTest;
+import es.uvigo.ei.sing.dare.resources.views.PeriodicalExecutionView;
 import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
@@ -38,35 +36,29 @@ import es.uvigo.ei.sing.dare.util.XMLUtil;
 @RunWith(JUnit4.class)
 public class RobotResourceTest {
 
-    private WebResource robotResource;
-
-    private Client client;
-
-    private URIPoller poller;
+    private DARE dare;
 
     public RobotResourceTest() {
-        client = RobotResourceExecutionTest.buildClientWithLoggingAndCaching();
-        robotResource = client.resource(
-                RobotResourceExecutionTest.APPLICATION_URI).path(
-                Configuration.ROBOT_BASE_PATH);
-        poller = new URIPoller(client, MediaType.APPLICATION_JSON_TYPE);
+        dare = RobotResourceExecutionTest
+                .buildClientWithLoggingAndCaching(MediaType.APPLICATION_JSON_TYPE);
     }
 
     @Test
     public void aRobotCanBeCreatedFromAMinilanguage() {
-        postRobotCreation("url");
+        RobotJSONView robot = dare.createRobot("url");
+        assertNotNull(robot);
     }
 
     @Test
     public void ifTheMinilanguageIsWrongABadRequestErrorStatusIsReturned() {
-        ClientResponse response = postRobotCreationReturningResponse("wrong");
+        ClientResponse response = dare.createRobotAndReturnLocation("wrong");
         assertThat(response.getStatus(),
                 equalTo(Status.BAD_REQUEST.getStatusCode()));
     }
 
     @Test
     public void ifTheEvaluationOfMinilanguageTakesMoreThanOneSecondAnErrorIsReturned() {
-        ClientResponse response = postRobotCreationReturningResponse("sleep(2); url");
+        ClientResponse response = dare.createRobotAndReturnLocation("sleep(2); url");
         assertThat(response.getStatus(),
                 equalTo(Status.INTERNAL_SERVER_ERROR.getStatusCode()));
         String errorMessage = response.getEntity(String.class);
@@ -77,14 +69,14 @@ public class RobotResourceTest {
     @Test
     public void aRobotCanBeCreatedFromAXML() {
         Document robot = RobotTest.buildValidRobot();
-        postRobotCreation(robot);
+        URI uri = URI.create(dare.createRobotAndReturnLocation(robot).getEntity(String.class));
+        assertThat(uri, notNullValue());
     }
 
     @Test
     public void ifTheRobotHasAnInvalidXMLAnErrorStatusIsReturned() {
         Document invalidRobot = RobotTest.buildInvalidRobot();
-        ClientResponse response = postRobotCreation(ClientResponse.class,
-                invalidRobot);
+        ClientResponse response = dare.createRobotAndReturnLocation(invalidRobot);
         assertThat(response.getStatus(),
                 equalTo(Status.BAD_REQUEST.getStatusCode()));
     }
@@ -92,8 +84,7 @@ public class RobotResourceTest {
     @Test
     public void afterCreatingARobotItCanBeViewedUsingTheReturnedURI() {
         URI uri = postRobotCreation("url");
-        RobotXMLView robot = getRobot(MediaType.TEXT_XML_TYPE,
-                RobotXMLView.class, uri);
+        RobotXMLView robot = dare.doGet(uri, RobotXMLView.class, MediaType.TEXT_XML_TYPE);
         assertThat(robot.getCode(), notNullValue());
         assertThat(robot.getCreationDate(), notNullValue());
         Document fromRootDocumentElement = XMLUtil
@@ -107,9 +98,7 @@ public class RobotResourceTest {
 
     @Test
     public void afterCreatingARobotItCanBeRetrievedASJSON() {
-        URI uri = postRobotCreation("url");
-        RobotJSONView robot = getRobot(MediaType.APPLICATION_JSON_TYPE,
-                RobotJSONView.class, uri);
+        RobotJSONView robot = dare.createRobot("url");
         assertThat(robot.getCode(), notNullValue());
         assertThat(robot.getCreationDate(), notNullValue());
         Robot recreated = Robot.createFromMinilanguage(robot
@@ -122,27 +111,16 @@ public class RobotResourceTest {
     @Test
     public void theCreationDateIsReturnedAsALong() throws JSONException {
         URI uri = postRobotCreation("url");
-        JSONObject jsonResponse = getRobot(MediaType.APPLICATION_JSON_TYPE,
-                JSONObject.class, uri);
+        JSONObject jsonResponse = dare.doGet(uri, JSONObject.class, MediaType.APPLICATION_JSON_TYPE);
         jsonResponse.getLong("creationDateMillis");
     }
 
     @Test
     public void aCreatedRobotCanBeExecuted() {
-        URI uri = postRobotCreation("url");
-        RobotJSONView robot = getRobot(MediaType.APPLICATION_JSON_TYPE,
-                RobotJSONView.class, uri);
+        RobotJSONView robot = dare.createRobot("url");
         String robotCode = robot.getCode();
-
-        MultivaluedMap<String, String> map = new MultivaluedMapImpl();
-        map.add("input", "http://www.google.com");
-        map.add("input", "http://www.twitter.com");
-        ClientResponse response = robotResource.path(robotCode).path("execute")
-                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .post(ClientResponse.class, map);
-        RobotExecutionResultView result = RobotExecutionResultView.fromJSON(poller
-                .retrieve(JSONObject.class, response.getLocation()));
-
+        RobotExecutionResultView result = dare.executeRobot(robotCode,
+                "http://www.google.com", "http://www.twitter.com");
         assertNotNull(result);
         assertThat(result.getExecutionTime(), greaterThan(0l));
         assertThat(result.getResultLines().isEmpty(), is(false));
@@ -151,78 +129,39 @@ public class RobotResourceTest {
     @Test
     public void executingANotCreatedRobotReturnsNotFound() {
         String robotCode = UUID.randomUUID().toString();
-        MultivaluedMap<String, String> map = new MultivaluedMapImpl();
-        map.add("input", "http://www.google.com");
-        map.add("input", "http://www.twitter.com");
-        ClientResponse response = robotResource.path(robotCode).path("execute")
-                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .post(ClientResponse.class, map);
+        ClientResponse response = dare.executeRobot(robotCode,
+                ClientResponse.class, "http://www.google.com",
+                "http://www.twitter.com");
         assertThat(response.getStatus(),
                 equalTo(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
     public void fromARobotAPeriodicalExecutionCanBeCreated() {
-        URI uri = postRobotCreation("url");
-        WebResource periodicalCreationResource = client.resource(uri).path(
-                "periodical");
-        ClientResponse response = periodicalCreationResource.post(
-                ClientResponse.class,
-                new MultivaluedMapImpl() {
-                    {
-                        add("period", "12h");
-                        add("input", "http://www.google.com");
-                    }
-                });
-
-        ClientResponse periodicalExecutionCreated = client.resource(
-                response.getLocation()).get(ClientResponse.class);
-
-        assertThat(periodicalExecutionCreated.getStatus(),
-                equalTo(Status.OK.getStatusCode()));
+        RobotJSONView robot = dare.createRobot("url");
+        PeriodicalExecutionView response = dare.createPeriodicalExecution(
+                robot, "12h",
+                "http://www.google.com");
+        assertNotNull(response);
+        assertThat(response.getInputs(),
+                equalTo(Arrays.asList("http://www.google.com")));
+        RobotJSONView robotRetrieved = dare.doGet(response.getRobot(),
+                RobotJSONView.class);
+        assertThat(robot.getCode(), equalTo(robotRetrieved.getCode()));
     }
 
     @Test
     public void aWrongPeriodImpliesABadRequestResponse() {
-        URI uri = postRobotCreation("url");
-        WebResource periodicalCreationResource = client.resource(uri).path(
-                "periodical");
-        ClientResponse response = periodicalCreationResource.post(
-                ClientResponse.class, new MultivaluedMapImpl() {
-                    {
-                        add("period", "foo");
-                        add("input", "http://www.google.com");
-                    }
-                });
+        RobotJSONView robot = dare.createRobot("url");
+        ClientResponse response = dare.createPeriodicalExecutionAndReturnLocation(robot, "foo",
+                "http://www.google.com");
         assertThat(response.getStatus(),
                 equalTo(Status.BAD_REQUEST.getStatusCode()));
     }
 
     private URI postRobotCreation(String robotInMinilanguage) {
-        return postRobotCreationReturningResponse(robotInMinilanguage)
+        return dare.createRobotAndReturnLocation(robotInMinilanguage)
                 .getLocation();
-    }
-
-    private ClientResponse postRobotCreationReturningResponse(
-            String robotInMinilanguage) {
-        MultivaluedMap<String, String> map = new MultivaluedMapImpl();
-        map.add("minilanguage", robotInMinilanguage);
-        return robotResource.path("create")
-                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .post(ClientResponse.class, map);
-    }
-
-    private URI postRobotCreation(Document robot) {
-        return URI.create(postRobotCreation(String.class, robot));
-    }
-
-    private <T> T postRobotCreation(Class<T> type, Document robot) {
-        return robotResource.path("create")
-                .type(MediaType.APPLICATION_XML_TYPE).post(type, robot);
-    }
-
-    private <T> T getRobot(MediaType mediaType, Class<T> type, URI uriToRobot) {
-        return client.resource(uriToRobot).accept(mediaType).get(type);
     }
 
 }

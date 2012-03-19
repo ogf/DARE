@@ -18,12 +18,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
-import com.sun.jersey.api.client.WebResource;
 
-import es.uvigo.ei.sing.dare.configuration.Configuration;
+import es.uvigo.ei.sing.dare.client.DARE;
 import es.uvigo.ei.sing.dare.configuration.ConfigurationStub;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
@@ -33,33 +31,26 @@ import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 @RunWith(JUnit4.class)
 public class PeriodicalExecutionResourceTest {
 
-    private Client client;
-
-    private WebResource periodicalExecution;
-
-    private WebResource periodicalExecutionResult;
+    private DARE dare;
 
     public PeriodicalExecutionResourceTest() {
-        client = RobotResourceExecutionTest.buildClientWithLoggingAndCaching();
-        periodicalExecution = client.resource(
-                RobotResourceExecutionTest.APPLICATION_URI).path(
-                Configuration.PERIODICAL_EXECUTION_BASE_PATH);
-        periodicalExecutionResult = periodicalExecution.path("result");
+        dare = RobotResourceExecutionTest
+                .buildClientWithLoggingAndCaching(MediaType.APPLICATION_JSON_TYPE);
     }
 
     @Test
     public void ifNotAssociatedPeriodicalResultReturn404() {
-        ClientResponse clientResponse = periodicalExecution.path("" + 2000)
-                .get(ClientResponse.class);
+        ClientResponse clientResponse = dare.getPeriodicalExecution(
+                "" + 2000, ClientResponse.class);
         assertThat(clientResponse.getStatus(),
                 equalTo(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
     public void ifPeriodicalResultExistsMustReturn200Code() {
-        ClientResponse response = periodicalExecutionResult
-                .path(ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION.getCode())
-                .get(ClientResponse.class);
+        ClientResponse response = dare.getPeriodicalExecution(
+                ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION.getCode(),
+                ClientResponse.class);
         assertThat(response.getStatus(), equalTo(Status.OK.getStatusCode()));
     }
 
@@ -81,9 +72,8 @@ public class PeriodicalExecutionResourceTest {
         final PeriodicalExecution existent = ConfigurationStub.EXISTENT_PERIODICAL_EXECUTION;
         PeriodicalExecutionView response = retrievePeriodicalFromServer(existent);
         URI robot = response.getRobot();
-        RobotXMLView robotXMLView = client.resource(robot)
-                .accept(MediaType.APPLICATION_XML_TYPE)
-                .get(RobotXMLView.class);
+        RobotXMLView robotXMLView = dare.doGet(robot, RobotXMLView.class,
+                MediaType.APPLICATION_XML_TYPE);
         assertThat(robotXMLView, notNullValue());
     }
 
@@ -102,8 +92,8 @@ public class PeriodicalExecutionResourceTest {
     @Test
     public void theJSONMappingIsIdiomatic() throws JSONException {
         final PeriodicalExecution existent = ConfigurationStub.PERIODICAL_EXECUTION_WITH_RESULT;
-        JSONObject result = periodicalExecutionResult.path(existent.getCode())
-                .accept(MediaType.APPLICATION_JSON_TYPE).get(JSONObject.class);
+        JSONObject result = dare.getPeriodicalExecution(existent.getCode(),
+                JSONObject.class);
 
         assertThat(result.get("creationDateMillis"), is(Number.class));
         assertThat(result.get("periodAmount"), is(Number.class));
@@ -127,9 +117,7 @@ public class PeriodicalExecutionResourceTest {
 
     private PeriodicalExecutionView retrievePeriodicalFromServer(
             final String code) {
-        return periodicalExecutionResult.path(code)
-                .accept(MediaType.APPLICATION_XML)
-                .get(PeriodicalExecutionView.class);
+        return dare.getPeriodicalExecution(code, PeriodicalExecutionView.class);
     }
 
 }
