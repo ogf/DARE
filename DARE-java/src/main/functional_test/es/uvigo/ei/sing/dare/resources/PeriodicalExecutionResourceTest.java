@@ -23,6 +23,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 
+import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.configuration.ConfigurationStub;
 import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
@@ -42,7 +43,7 @@ public class PeriodicalExecutionResourceTest {
         client = RobotResourceExecutionTest.buildClientWithLoggingAndCaching();
         periodicalExecution = client.resource(
                 RobotResourceExecutionTest.APPLICATION_URI).path(
-                PeriodicalExecutionResource.BASE_PATH);
+                Configuration.PERIODICAL_EXECUTION_BASE_PATH);
         periodicalExecutionResult = periodicalExecution.path("result");
     }
 

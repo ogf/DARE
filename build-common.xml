@@ -177,7 +177,7 @@
         </junit>
     </target>
 
-    <target name="jar" depends="unit-test">
+    <target name="jar" depends="unit-test, functional-test">
       <jar destfile="${dist}/jars/${ivy.module}.jar">
         <fileset dir="${classes_dir}" includes="**" />
       </jar>

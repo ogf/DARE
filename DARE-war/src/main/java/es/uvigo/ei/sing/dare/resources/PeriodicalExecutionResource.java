@@ -29,7 +29,7 @@ import es.uvigo.ei.sing.dare.entities.PeriodicalExecution;
 import es.uvigo.ei.sing.dare.resources.views.ExecutionResultView;
 import es.uvigo.ei.sing.dare.resources.views.PeriodicalExecutionView;
 
-@Path(PeriodicalExecutionResource.BASE_PATH)
+@Path(Configuration.PERIODICAL_EXECUTION_BASE_PATH)
 public class PeriodicalExecutionResource {
 
     public static ExecutionPeriod parsePeriod(String periodString) {
@@ -51,8 +51,6 @@ public class PeriodicalExecutionResource {
                 .path("periodical/result/{code}")
                 .build(code);
     }
-
-    public static final String BASE_PATH = "/periodical";
 
     @Context
     private ServletContext servletContext;

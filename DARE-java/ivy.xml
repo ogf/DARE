@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ivy-module version="2.0">
-    <info organisation="es.uvigo.ei.sing" module="DARE-war"/>
+    <info organisation="es.uvigo.ei.sing" module="DARE-java"/>
     <configurations>
         <conf name="default" extends="runtime, master"/>
         <conf name="master"/>
-        <conf name="client" />
         <conf name="compile" />
-        <conf name="provided" visibility="private"/>
         <conf name="runtime" extends="compile"/>
         <conf name="sources" visibility="private" />
         <conf name="test" visibility="private" extends="runtime"/>
     </configurations>
 
     <publications>
-      <artifact name="DARE-war" type="jar" conf="client"/>
+      <artifact name="DARE-java" type="jar" conf="default"></artifact>
     </publications>
 
     <dependencies>
-        <dependency org="es.uvigo.ei.sing" name="minilanguage" changing="true" rev="latest.integration" conf="compile"/>
-        <dependency org="es.uvigo.ei.sing" name="DARE-util" changing="true" rev="latest.integration" conf="compile->default(*)"/>
-        <dependency org="es.uvigo.ei.sing" name="DARE-domain" changing="true" rev="latest.integration" conf="compile->default(*)"/>
-        <dependency org="DARE-backend" name="DARE-backend" changing="true"
-                    rev="latest.integration" conf="compile->default(*)" transitive="true"/>
         <dependency org="joda-time" name="joda-time" rev="1.6.2" conf="compile->default; sources" />
         <dependency org="commons-lang" name="commons-lang" rev="2.5" conf="compile->default; sources" />
 
-        <dependency org="org.apache.tomcat" name="tomcat-servlet-api" rev="7.0.5" conf="provided->default; sources"/>
-        <dependency org="com.sun.jersey" name="jersey-server" rev="1.1.5" conf="compile->default; sources"/>
         <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="compile->default; sources"/>
 
-        <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="test->default; sources"/>
+        <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="compile->default; sources"/>
+        <dependency org="es.uvigo.ei.sing" name="DARE-domain" changing="true" rev="latest.integration" conf="compile->default(*); test"/>
         <dependency org="DARE-web" name="DARE-web" rev="latest.integration" changing="true" conf="test->default; sources"/>
+        <dependency org="es.uvigo.ei.sing" name="DARE-war" rev="latest.integration" changing="true" conf="*->client"/>
+
         <dependency org="org.hamcrest" name="hamcrest-all" rev="1.1" conf="test->default; sources"/>
         <dependency org="junit" name="junit-dep" rev="4.8.2" transitive="false" conf="test->default; sources"/>
     </dependencies>

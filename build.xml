@@ -22,6 +22,7 @@
     <lein dir="DARE-workers" target="clean" />
     <lein dir="DARE-backend" target="clean" />
     <lein dir="DARE-web" target="clean" />
+    <lein dir="DARE-java" target="clean" />
   </target>
 
   <target name="build">
@@ -38,7 +39,7 @@
     <lein dir="DARE-web" target="install" />
     <lein dir="DARE-workers" target="uberjar" />
     <lein dir="DARE-web" target="uberjar" />
-    <ant dir="DARE-war" target="functional-test" inheritAll="false"/>
+    <ant dir="DARE-java" target="publish" inheritAll="false"/>
     <antcall target="dist" />
   </target>
 

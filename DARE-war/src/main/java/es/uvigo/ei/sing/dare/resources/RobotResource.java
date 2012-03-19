@@ -34,7 +34,7 @@ import es.uvigo.ei.sing.dare.resources.views.RobotJSONView;
 import es.uvigo.ei.sing.dare.resources.views.RobotXMLView;
 import es.uvigo.ei.sing.dare.util.XMLUtil;
 
-@Path("robot")
+@Path(Configuration.ROBOT_BASE_PATH)
 public class RobotResource {
 
     public static URI buildURIFor(UriInfo uriInfo, Robot robot) {
@@ -43,7 +43,8 @@ public class RobotResource {
 
     public static URI buildURIFor(UriInfo uriInfo, String robotCode) {
         URI baseUri = uriInfo.getBaseUri();
-        return UriBuilder.fromUri(baseUri).path("robot/{code}")
+        return UriBuilder.fromUri(baseUri)
+                .path(Configuration.ROBOT_BASE_PATH + "/{code}")
                 .build(robotCode);
     }
 

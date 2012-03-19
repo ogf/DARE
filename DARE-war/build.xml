@@ -4,6 +4,9 @@
 
 	<property file="build.properties" />
 
+    <!-- This is the base version. Ivy will append a build number. -->
+    <property name="project-version" value="0.1"/>
+
 	<property name="webapp" location="src/main/webapp" />
 
     <property environment="env"/>
@@ -38,40 +41,6 @@
 		</copy>
 	</target>
 
-	<target name="start">
-		<parallel>
-			<daemons>
-				<java classname="DARE_web.web" classpathref="test-classpath"
-					inputstring="" fork="true">
-					<arg value="-p"/>
-					<arg value="8080"/>
-					<arg value="-w"/>
-					<arg value="${dist}/${ant.project.name}.war"/>
-					<arg value="--stub"/>
-				</java>
-			</daemons>
-			<sequential>
-				<waitfor maxwait="30" maxwaitunit="second"
-					checkevery="1" checkeveryunit="second">
-					<socket server="localhost" port="8080"/>
-				</waitfor>
-			</sequential>
-		</parallel>
-	</target>
-
-    <target name="run-stub-mode">
-        <java classname="DARE_web.web" classpathref="test-classpath" inputstring="" fork="true">
-			<arg value="-p"/>
-			<arg value="8080"/>
-			<arg value="-w"/>
-			<arg value="${dist}/${ant.project.name}.war"/>
-			<arg value="--stub"/>
-		</java>
-    </target>
-
-	<target name="functional-test" depends="war, start, common.functional-test">
-	</target>
-
 	<target name="war" depends="compile, unit-test, copy-libs" description="web application archive">
 		<war destfile="${dist}/${ant.project.name}.war" webxml="${WEB-INF}/web.xml">
 			<classes dir="${classes_dir}" />
@@ -80,5 +49,21 @@
 			<fileset dir="src/main/webapp" excludes="WEB-INF" />
 		</war>
 	</target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="${dist}/jars/DARE-war.jar">
+          <fileset dir="${classes_dir}" includes="**/resources/views/*" />
+          <fileset dir="${classes_dir}" includes="**/configuration/Configuration*" />
+        </jar>
+    </target>
+
+    <target name="publish" depends="jar">
+      <ivy:resolve resolveMode="dynamic" />
+      <ivy:publish resolver="local" overwrite="true" update="true"
+                   forcedeliver="true"
+                   pubrevision="${project-version}">
+        <artifacts pattern="${dist}/[type]s/[artifact].[ext]" />
+      </ivy:publish>
+    </target>
 
 </project>

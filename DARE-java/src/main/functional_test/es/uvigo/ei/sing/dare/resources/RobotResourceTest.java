@@ -27,6 +27,7 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import es.uvigo.ei.sing.dare.configuration.Configuration;
 import es.uvigo.ei.sing.dare.entities.Robot;
 import es.uvigo.ei.sing.dare.entities.RobotTest;
 import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
@@ -46,7 +47,8 @@ public class RobotResourceTest {
     public RobotResourceTest() {
         client = RobotResourceExecutionTest.buildClientWithLoggingAndCaching();
         robotResource = client.resource(
-                RobotResourceExecutionTest.APPLICATION_URI).path("robot");
+                RobotResourceExecutionTest.APPLICATION_URI).path(
+                Configuration.ROBOT_BASE_PATH);
         poller = new URIPoller(client, MediaType.APPLICATION_JSON_TYPE);
     }
 

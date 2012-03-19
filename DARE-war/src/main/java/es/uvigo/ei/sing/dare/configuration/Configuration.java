@@ -9,6 +9,12 @@ import es.uvigo.ei.sing.dare.domain.MinilanguageProducer;
 
 public abstract class Configuration {
 
+    public static final String PERIODICAL_EXECUTION_BASE_PATH = "periodical";
+
+    public static final String ROBOT_BASE_PATH = "robot";
+
+    public static final String EXECUTION_RESULT_BASE_URL = "result";
+
     public static void associate(ServletContext context,
             Configuration configuration) {
         if (getFromAttribute(context) != null) {

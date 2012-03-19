@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="DARE" default="publish">
+
+    <property environment="env"/>
+
+    <import file="../build-common.xml"/>
+
+	<target name="start">
+		<parallel>
+			<daemons>
+				<java classname="DARE_web.web" classpathref="test-classpath"
+					inputstring="" fork="true">
+					<arg value="-p"/>
+					<arg value="8080"/>
+					<arg value="-w"/>
+					<arg value="../target/DARE.war"/>
+					<arg value="--stub"/>
+				</java>
+			</daemons>
+			<sequential>
+				<waitfor maxwait="30" maxwaitunit="second"
+					checkevery="1" checkeveryunit="second">
+					<socket server="localhost" port="8080"/>
+				</waitfor>
+			</sequential>
+		</parallel>
+	</target>
+
+    <target name="run-stub-mode">
+        <java classname="DARE_web.web" classpathref="test-classpath" inputstring="" fork="true">
+			<arg value="-p"/>
+			<arg value="8080"/>
+			<arg value="-w"/>
+            <arg value="../target/DARE.war"/>
+			<arg value="--stub"/>
+		</java>
+    </target>
+
+	<target name="functional-test" depends="dependencies, start, common.functional-test">
+	</target>
+
+</project>

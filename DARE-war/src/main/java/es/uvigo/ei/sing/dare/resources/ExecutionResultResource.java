@@ -1,5 +1,7 @@
 package es.uvigo.ei.sing.dare.resources;
 
+import static es.uvigo.ei.sing.dare.configuration.Configuration.EXECUTION_RESULT_BASE_URL;
+
 import java.net.URI;
 
 import javax.servlet.ServletContext;
@@ -25,7 +27,7 @@ import es.uvigo.ei.sing.dare.domain.Maybe;
 import es.uvigo.ei.sing.dare.entities.ExecutionResult;
 import es.uvigo.ei.sing.dare.resources.views.RobotExecutionResultView;
 
-@Path("result")
+@Path(EXECUTION_RESULT_BASE_URL)
 public class ExecutionResultResource {
 
     public static URI buildURIFor(UriInfo uriInfo,
@@ -35,7 +37,8 @@ public class ExecutionResultResource {
 
     public static URI buildURIFor(UriInfo uriInfo, String resultCode) {
         return UriBuilder.fromUri(uriInfo.getBaseUri())
-                .path("result/{executionResultCode}").build(resultCode);
+                .path(EXECUTION_RESULT_BASE_URL + "/{executionResultCode}")
+                .build(resultCode);
     }
 
     @Context
