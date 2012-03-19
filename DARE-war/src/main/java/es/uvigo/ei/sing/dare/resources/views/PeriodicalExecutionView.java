@@ -1,6 +1,8 @@
 package es.uvigo.ei.sing.dare.resources.views;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -78,6 +80,40 @@ public class PeriodicalExecutionView {
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    public static PeriodicalExecutionView fromJSON(JSONObject object) {
+        try {
+            String code = object.getString("code");
+            DateTime creationTime = new DateTime(
+                    object.getLong("creationDateMillis"));
+            URI robot = new URI(object.getString("robot"));
+            ExecutionPeriod period = ExecutionPeriod
+                    .parse(object.getString("periodAmount")
+                            + object.getString("periodUnit"));
+            List<String> inputs = asList(object.getJSONArray("inputs"));
+            ExecutionResultView lastExecution = ExecutionResultView
+                    .fromJSON(object.isNull("lastExecutionResult") ? null
+                            : object.getJSONObject("lastExecutionResult"));
+            return PeriodicalExecutionView.create(code, creationTime, robot,
+                    period, inputs, lastExecution);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static List<String> asList(JSONArray jsonArray) {
+        try {
+            List<String> result = new ArrayList<String>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                result.add(jsonArray.getString(i));
+            }
+            return result;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getCode() {

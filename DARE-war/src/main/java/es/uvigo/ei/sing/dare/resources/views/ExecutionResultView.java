@@ -55,6 +55,9 @@ public class ExecutionResultView {
     }
 
     public static ExecutionResultView fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
         try {
             return new ExecutionResultView(new DateTime(
                     object.getLong("creationDateMillis")),
