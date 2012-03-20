@@ -41,12 +41,12 @@ public class URIPoller {
         this.pollingIntervalMilliseconds = pollingIntervalMilliseconds;
     }
 
-    public <T> Future<T> async(Class<T> resultType, URI uriToExecution) {
-        return async(resultType, uriToExecution, requestedType);
+    public <T> Future<T> async(URI uriToExecution, Class<T> resultType) {
+        return async(uriToExecution, resultType, requestedType);
     }
 
-    public <T> Future<T> async(final Class<T> resultType,
-            final URI uriToExecution,
+    public <T> Future<T> async(final URI uriToExecution,
+            final Class<T> resultType,
             final MediaType acceptedType) {
         Validate.notNull(resultType);
         Validate.notNull(uriToExecution);
@@ -82,7 +82,7 @@ public class URIPoller {
 
     public <T> T retrieve(URI uriToExecution, Class<T> resultType,
             MediaType requestedType) {
-        Future<T> async = async(resultType, uriToExecution, requestedType);
+        Future<T> async = async(uriToExecution, resultType, requestedType);
         try {
             return async.get();
         } catch (InterruptedException e) {

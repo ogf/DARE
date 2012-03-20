@@ -22,7 +22,7 @@
         <dependency org="com.sun.jersey" name="jersey-json" rev="1.1.5" conf="compile->default; sources"/>
 
         <dependency org="com.sun.jersey" name="jersey-client" rev="1.1.5" conf="compile->default; sources"/>
-        <dependency org="es.uvigo.ei.sing" name="DARE-domain" changing="true" rev="latest.integration" conf="compile->default(*); test"/>
+        <dependency org="es.uvigo.ei.sing" name="DARE-domain" changing="true" rev="latest.integration" conf="test"/>
         <dependency org="DARE-web" name="DARE-web" rev="latest.integration" changing="true" conf="test->default; sources"/>
         <dependency org="es.uvigo.ei.sing" name="DARE-war" rev="latest.integration" changing="true" conf="*->client"/>
 
