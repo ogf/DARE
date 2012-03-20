@@ -67,7 +67,6 @@ class Server(object):
     def do_delete(self, url, headers = None):
         return self._http.request(url, "DELETE",  headers = None)
 
-
 class Resource(object):
 
     def __init__(self, url, server = Server()):
@@ -110,7 +109,6 @@ class DARE(Resource):
         params = {'robot': robot_in_minilanguage, 'input': inputs_list}
         url = self.server.do_post_form__location(self.path('robot/execute'), params)
         return Execution(url, self.server)
-
 
     def robot(self, url_robot):
         return Robot(url_robot, self.server)

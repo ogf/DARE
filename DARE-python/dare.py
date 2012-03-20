@@ -7,11 +7,10 @@ import re
 import rest
 import argparse
 
-#hack to set the encoding when the stdout is piped
+# hack to set the encoding when the stdout is piped
 if not sys.stdout.encoding:
     reload(sys)
     sys.setdefaultencoding('utf-8')
-
 
 class Store(object):
 
