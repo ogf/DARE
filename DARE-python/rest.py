@@ -160,9 +160,3 @@ class Periodical(Resource):
 
     def delete(self):
         return self.server.do_delete(self.url)
-
-def ping(self, string):
-    request = urlencode({'echo': string})
-    resp, content = self._http.request(self.path("robot/ping"), "POST", request,
-                                       headers = {'Accept': 'application/json'})
-    return content
