@@ -316,7 +316,7 @@ buena opción. Además tiene una parte de cliente lo que facilitaría la
 creación de la librería para la parte Java.
 
 Existen varias implementaciones de esta API. Nos hemos decantado por
-la implementación por defecto, Jersey\cite{JERSEY}.
+la implementación de referencia, Jersey\cite{JERSEY}.
 
 \subsection{MongoDB como Sistema Almacenamiento}
 \subsubsection{Bases de datos relacionales y NoSQL}
@@ -359,7 +359,7 @@ documentos y bases de datos orientadas a grafos.
   directo. Permiten realizar de manera sencilla consultas basadas en
   grafos, como, por ejemplo, calcular la distancia mínima entre dos
   nodos. El acceso a los datos y nodos asociados a un nodo en concreto
-  es más rápido que en una RDBMS. Por contra las bases de datos
+  es más rápidoe que en una RDBMS. Por contra, las bases de datos
   relacionales son más rápidas realizando la misma operación contra
   una gran cantidad de datos.
 
@@ -582,8 +582,9 @@ trabajadores tomarían esas peticiones de trabajo de la cola una vez
 estuvieran listos. En el caso que nos ocupa hemos utilizado una ligera
 variante de este patrón. En vez de introducir una nueva dependencia
 usando una cola, el proceso \emph{master}\footnote{Proceso Web en este
-  caso} se comunica directamente con uno de los workers. Para ello
-escoge el worker que tenga una menor carga.
+  caso} proporciona directamente a uno de los workers la petición a
+realizar. En cada momento se escoge el worker que tenga una menor
+carga.
 
 Aquí surge una nueva problemática: el proceso web necesita saber que
 workers están disponibles. Se podrían utilizar muchas tecnologías,
@@ -598,12 +599,13 @@ Lo bueno de utilizar procesos sin estado es que podemos aumentar y
 disminuir el número de procesos web y procesos worker según el tipo de
 la carga de trabajo y la demanda del momento. La ventaja fundamental
 de que sean procesos en vez de threads\footnote{hilos de ejecución} es
-que podemos añadir también nuevos nodos.
+que podemos añadir también nuevos nodos físicos sin perturbar los que
+ya están lanzados.
 
 \subsection{Clojure como lenguaje de programación}
 
 Clojure es un lenguaje de programación que se ejecuta sobre la
-JVM\footnote{\emph{Java Virtual Machine}}, la
+JVM\footnote{\emph{Java Virtual Machine}}, el
 CLR\cite{CLR}\footnote{\emph{Common Language Runtime}} y
 JavaScript. Para este proyecto nos interesa la implementación que se
 ejecuta sobre la JVM y nos referiremos a ella de ahora en adelante.
@@ -635,27 +637,27 @@ primer momento.
 
 \subsubsection{Librerías Empleadas}
 \begin{description}
-\item{CongoMongo}\cite{CONGO-MONGO} es un envoltorio sobre el driver
+\item[CongoMongo]\cite{CONGO-MONGO} es un envoltorio sobre el driver
   oficial Java de MongoDB. Nos ofrece una API más adecuada para ser
   usada desde Clojure.
-\item{Lamina} es una librería para trabajar con eventos como si fueran
+\item[Lamina] es una librería para trabajar con eventos como si fueran
   secuencias. Se podría decir que sigue un paradigma funcional
   reactivo\cite{FRP}. Es la base sobre la que Aleph y Gloss se
   asientan. La abstracción clave es un \emph{channel}. Combina una
   cola con el patrón publicar/subscribir.
-\item{Aleph} es una librería para realizar
+\item[Aleph] es una librería para realizar
   I/O\footnote{Entrada/Salida} asíncrona con varios protocolos: HTTP,
   WebSockets, TCP, UDP, etc. Representa la comunicación con un
   \emph{channel} de Lamina. Aleph permite realizar una comunicación
   asíncrona de manera sencilla.
-\item{Gloss} es una DSL para definir formatos de
+\item[Gloss] es una DSL para definir formatos de
   comunicación. Convierte un flujo de bytes en estructuras de datos
   Clojure. Esto nos facilita parsear las peticiones realizadas en vez
   de tener que trabajar con el flujo de bytes proveniente de TCP. Por
   ejemplo, para dividir el flujo de bytes en peticiones de strings se
   puede hacer definiendo un \emph{codec} en Gloss. En la
   figura~\ref{gloss-example}, pág.~\pageref{gloss-example}, se define
-  que cada petición sera una String codificada en utf-8 con un entero
+  que cada petición sera una String codificada en UTF-8 con un entero
   indicando el tamaño de la misma.
   \begin{figure}[hb]
     \begin{center}
@@ -794,19 +796,19 @@ vamos a realizar una breve descripción de cada uno de ellos:
   workers pueden estar lanzados en función de las necesidades de
   escalabilidad y fiabilidad necesarios.
 
-  Cada worker es un proceso por lo que alguno de ellos podría dejar de
-  funcionar y DARE podría seguir ofreciendo su servicio. Además al ser
-  cada uno un proceso se pueden ejecutar localmente en el mismo nodo o
-  repartirlo a través de varios nodos del cluster. La parte cliente es
-  capaz de descubrirlos y repartir la carga de peticiones entre los
-  workers. Aparte comprueba continuamente el estado de salud de los
-  workers para que el servicio continúe funcionando aun en la
+  Cada worker es un proceso, por lo que alguno de ellos podría dejar
+  de funcionar y DARE podría seguir ofreciendo su servicio. Además al
+  ser cada uno un proceso se pueden ejecutar localmente en el mismo
+  nodo o repartirlo a través de varios nodos del cluster. La parte
+  cliente es capaz de descubrirlos y repartir la carga de peticiones
+  entre los workers. Aparte comprueba continuamente el estado de salud
+  de los workers para que el servicio continúe funcionando aun en la
   presencia de errores en los workers.
 
  Tanto la parte servidor como cliente están implementados en Clojure.
 
 \item[DARE-util:] Es un cajón de sastre donde se encuentran diversas
-  funciones de utilidad usadas por varios otros módulos.
+  funciones de utilidad usadas por otros módulos.
 
 \item[DARE-web:] Este módulo se utiliza para facilitar el despliegue
   de la aplicación. Toma el fichero \emph{war} con la aplicación y lo
