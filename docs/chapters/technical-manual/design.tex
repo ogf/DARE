@@ -818,7 +818,15 @@ vamos a realizar una breve descripción de cada uno de ellos:
   numerosas instancias de la aplicación. Este componente está
   implementado en Clojure.
 
-\item[DARE-java:] %TODO extract
+\item[DARE-java:] Este módulo implementa la librería cliente para
+  Java. Utiliza JAX-RS para implementar su funcionalidad. Para
+  facilitar su implementación se han incluido algunas clases de
+  DARE-war, más concretamente las clases de la parte de vista. Al
+  compartir estas clases con DARE-web se facilita el mapeado de las
+  respuestas por parte de JAX-RS.
+
+  Aparte está librería se utiliza para realizar los tests funcionales
+  de DARE-war.
 \item[DARE-python:] Este módulo implemente la librería cliente para
   Python, así como la aplicación de línea de comandos. Como se ha
   descrito anteriormente usa httplib2 para llevar a cabo la
@@ -1037,5 +1045,52 @@ misma. Para hacer la traducción JAX-RS utiliza JAXB\cite{JAXB}.
 % a fondo backend/core.clj?
 \subsubsection{Diagrama clases DARE-workers}
 % a fondo workers/client.clj, workers/server.clj?
+
+\subsubsection{Diagrama clases DARE-java}
+A continuación~\ref{diagrama_clases_dare_java} mostramos un diagrama
+de clases de la librería para acceder a DARE desde Java. La clase DARE
+contiene metodos para crear nuevas entidades y para acceder a las
+mismas. Internamente se usa JAX-RS, más concretamente a través de una
+instancia de Client. Se reutiliza el paquete de vistas de DARE-war. La
+clase DARE puede devolver instancias de las mismas para ser consumidas
+por los clientes de la librería. Como se puede observar en el diagrama
+la clase DARE utiliza la clase URIPoller. Esta clase facilita se
+encarga de hacer el \emph{polling} necesario para obtener ejecuciones
+todavía en curso.
+
+\begin{figure}[hp]
+\includegraphics[width=\textwidth]{chapters/technical-manual/diagrams/clases_dare_java.png}
+\caption{Diagrama clases DARE-java}\label{diagrama_clases_dare_java}
+\end{figure}
+
+\subsubsection{Diagrama clases DARE-python}
+
+La clase Server contiene varios metodos para realizar acciones en el
+servidor. Sobre esta clase de modelan varias clases que serán los
+recursos de los que consta DARE. Cada uno de estos recursos tendrá
+métodos para mostrar y eliminar un recurso. Cuando se muestra un
+recurso a través del método \emph{show} se devuelve el objeto en
+formato JSON. Aparte contienen métodos para generar otros recursos a
+partir de ellos. Por ejemplo, a partir de un recurso \emph{Robot} se
+puede generar una \emph{Execution} o una \emph{Periodical}. La clase
+\emph{DARE} funciona a modo de punto de entrada del sistema. A partir
+de este recurso se pueden crear recursos \emph{Robot} o
+\emph{Execution}.
+
+La funcionalidad expuesta por esta jerarquía de clases se puede
+utilizar desde la línea de comandos. La línea de comandos utiliza un
+objeto \emph{Store} para almacenar las ejecuciones realizadas y los
+robots creados. En el diagrama hemos mostramos una clase \emph{Main}
+que se comunica con la jerarquía de recursos y la clase
+\emph{Store}. En realidad esta clase no existe en el código, son una
+serie de métodos definidos en \emph{DARE-python/rest.py} con las
+responsibilidades indicadas en el diagrama.
+
+\begin{landscape}
+\begin{figure}[hp]
+\includegraphics[width=1.4\textwidth]{chapters/technical-manual/diagrams/clases_dare_python.png}
+\caption{Diagrama clases DARE-python}\label{diagrama_clases_dare_python}
+\end{figure}
+\end{landscape}
 
 \subsubsection{Esquema datos Sistema Almacenamiento}
