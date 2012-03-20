@@ -890,6 +890,9 @@ de la nueva instancia de \emph{Language}.
 \emph{DocumentWrapper} y \emph{AttributesWrapper} se encargan de
 facilitar la generación del XML.
 
+Todas estas clases están definidas en el fichero
+\emph{minilanguage/src/main/resources/es/uvigo/ei/sing/stringeditor/transformer.rb}.
+
 \begin{landscape}
 \begin{figure}[hp]
 \includegraphics[width=1.4\textwidth]{chapters/technical-manual/diagrams/clases_minilenguaje.png}
@@ -897,8 +900,45 @@ facilitar la generación del XML.
 \end{figure}
 \end{landscape}
 
+\subsubsection{Descripción Implementación Minilenguaje}
+
+Después de la introducción a minilenguaje apoyada en el diagrama de
+clases hemos creido conveniente utilizar algunas técnicas adicionales
+para facilitar su comprensión. La implementación de una DSL interna es
+difícil de capturar con un diagrama de clases, por lo que hemos
+buscado otras formas de exponer su comportamiento.
+
+Más concretamente hemos optado por aplicar Docco\cite{DOCCO} a la
+implementación. Docco nos permite aplicar técnicas de programación
+literaria\cite{LITERATE_PROGRAMMING}.
+
+Al realizar programación literaria se escribe un ensayo en lenguaje
+natural con segmentos de código intercalados. La herramienta de
+programación literaria genera a partir de este documento código apto
+para ser ejecutado o compilado. El programador al no tener que
+producir directamente el producto final a ser compilado, puede exponer
+el razonamiento y las abstracciones detrás de un programa de la manera
+más adecuada para los posibles lectores. En vez de seguir una
+estructura impuesta por el compilador se persigue la estructura más
+adecuada para transmitir las ideas subyacentes.  De este modo se
+facilita la comprensión del programa.
+
+Docco persigue objetivos similares pero sin realizar un proceso de
+transformación del código fuente. Esto facilita la introducción de
+técnicas de programación literaria utilizando herramientas típicas. Si
+bien no es estrictamente programación literaria, se alcanzan muchos de
+sus objetivos. Por ejemplo, muchas veces para lograr una exposición
+adecuada del programa se requiere la modificación de su estructura
+para que sea acorde con el ensayo generado.
+
+Docco por defecto genera este ensayo en forma de HTML, para la
+inclusión del mismo en este proyecto hemos modificado Docco para
+producir \LaTeX{}\cite{DOCCOTEX}.
+
+Por último señalar que la documentación producida está en inglés ya
+que el código esta en este mismo idioma.
+
 \begin{landscape}
-\subsubsection{Descripción Implementación transformer.rb}
 \begingroup
     \fontsize{9pt}{11pt}\selectfont
     \input{doccotex/transformer.tex}
