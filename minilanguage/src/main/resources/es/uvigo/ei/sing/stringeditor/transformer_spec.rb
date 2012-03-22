@@ -3,12 +3,12 @@ require 'transformer'
 describe "Transformers" do
 
   it "description shouldn't be changed" do
-    t = SimpleTransformer.new :description =>  "blabla"
+    t = SimpleTransformer.new :description => "blabla"
     lambda{t.description = "blabla"}.should raise_error
   end
 
   it "should accept description" do
-    t = SimpleTransformer.new :description=>"blabla"
+    t = SimpleTransformer.new :description => "blabla"
     t.description.should == "blabla"
   end
 
@@ -43,7 +43,7 @@ describe "Transformers" do
   end
 
   it "should keep parameters" do
-    t = SimpleTransformer.new :other =>"bla"
+    t = SimpleTransformer.new :other => "bla"
     t.params[:other].should_not be_nil
   end
 
@@ -66,14 +66,15 @@ describe "Transformers" do
     t.children.length.should == 1
   end
 
-
   shared_examples_for "transformer invariants" do
     it "should have a not nil description" do
       @transformer.description.should_not be_nil
     end
+
     it "should have a not nil transformer_class" do
       @transformer.transformer_class.should_not be_nil
     end
+
     it "should have a not nil branchtype" do
       @transformer.branchtype.should_not be_nil
     end
@@ -128,7 +129,7 @@ describe "Transformers" do
     it_should_behave_like "transformer invariants"
 
     it "should have a fixed transformer class" do
-      p = PatternMatcher.new :pattern =>  'bla'
+      p = PatternMatcher.new :pattern => 'bla'
       p.transformer_class.should == :PatternMatcher
     end
 
@@ -149,7 +150,7 @@ describe "Transformers" do
     end
 
     it "should let specify additional params" do
-      p = PatternMatcher.new :pattern => 'bla', :bla =>"a"
+      p = PatternMatcher.new :pattern => 'bla', :bla => "a"
       p.params[:bla].should == "a"
     end
 
@@ -157,13 +158,13 @@ describe "Transformers" do
 
   describe Language do
     it "should let put transformers in cascade" do
-      result = Language.interpret { url > patternMatcher(:pattern =>"bla") >
-        replacer(:sourceRE =>"e", :dest => "a")}
+      result = Language.interpret { url > patternMatcher(:pattern => "bla") >
+        replacer(:sourceRE => "e", :dest => "a")}
     end
 
     it "should let the language be supplied as a string" do
-      result = Language.language_eval %q{url > patternMatcher(:pattern =>"bla") >
-        replacer(:sourceRE =>"e", :dest => "a")}
+      result = Language.language_eval %q{url > patternMatcher(:pattern => "bla") >
+        replacer(:sourceRE => "e", :dest => "a")}
       result.should_not be_nil
       result.transformer_class.should == :SimpleTransformer
       result.branchtype.should be_equal(:CASCADE)
@@ -178,8 +179,8 @@ describe "Transformers" do
     end
 
     it "should let put transformers as children of other transformer in cascade" do
-      result = Language.interpret { url {patternMatcher(:pattern =>"bla") >
-        replacer(:sourceRE =>"e", :dest => "a")}}
+      result = Language.interpret { url {patternMatcher(:pattern => "bla") >
+        replacer(:sourceRE => "e", :dest => "a")}}
       result.should_not be_nil
       result.transformer_class.should == :SimpleTransformer
       result.branchtype.should be_equal(:CASCADE)
@@ -192,8 +193,8 @@ describe "Transformers" do
     end
 
     it "should let put several consecutive pipes" do
-      result = Language.interpret{ pipe {url > patternMatcher(:pattern =>"bla")} |
-        pipe {url > patternMatcher(:pattern =>"bla")}}
+      result = Language.interpret{ pipe {url > patternMatcher(:pattern => "bla")} |
+        pipe {url > patternMatcher(:pattern => "bla")}}
       result.should_not be_nil
       result.children.size.should == 2
       first_pipe = result.children[0]
@@ -206,8 +207,8 @@ describe "Transformers" do
 
     it "should let put transformers in branch" do
       result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
-          patternMatcher(:pattern =>"bla")
-          patternMatcher(:pattern =>"eoo") } > appender(:append => "bla")}
+          patternMatcher(:pattern => "bla")
+          patternMatcher(:pattern => "eoo") } > appender(:append => "bla")}
       result.should_not be_nil
       result.children.size.should == 3
       branch = result.children[1]
@@ -223,8 +224,8 @@ describe "Transformers" do
 
     it "should let put transformers in branch as children of other transformer" do
       result = Language.interpret { url(:BRANCH_DUPLICATED,:SCATTERED) {
-          patternMatcher(:pattern =>"bla")
-          patternMatcher(:pattern =>"eoo") } > appender(:append => "bla")}
+          patternMatcher(:pattern => "bla")
+          patternMatcher(:pattern => "eoo") } > appender(:append => "bla")}
       result.should_not be_nil
       result.children.size.should == 2
       url = result.children[0]
@@ -242,16 +243,16 @@ describe "Transformers" do
 
     it "should not let use | inside a branch" do
       lambda do Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
-          patternMatcher(:pattern =>"bla") | patternMatcher(:pattern =>"eoo") }
+          patternMatcher(:pattern => "bla") | patternMatcher(:pattern => "eoo") }
       }
       end.should raise_error(RuntimeError, "| can't be used in a pipe branch")
     end
 
     it "should let put transformers in cascade inside branch" do
       result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
-          patternMatcher(:pattern =>"bla")
-          patternMatcher(:pattern =>"eoo")
-          pipe{url > patternMatcher(:pattern =>"bla")}
+          patternMatcher(:pattern => "bla")
+          patternMatcher(:pattern => "eoo")
+          pipe{url > patternMatcher(:pattern => "bla")}
         } > appender(:append => "bla")}
       result.should_not be_nil
       result.children.size.should == 3
@@ -262,7 +263,7 @@ describe "Transformers" do
 
     it "should let do a loop" do
       result = Language.interpret { url |
-        pipe{ patternMatcher(:pattern =>"bla") | url}.repeat?{
+        pipe{ patternMatcher(:pattern => "bla") | url}.repeat?{
           patternMatcher(:pattern => "prueba")
         } | appender(:append => "bla")
       }
