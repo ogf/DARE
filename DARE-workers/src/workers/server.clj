@@ -239,11 +239,14 @@
   (mongo/with-mongo (get-connection-info server)
     (mongo/destroy! :workers {:server-id server-id})))
 
+(def registered-workers-removed (atom false))
+
 (defn shutdown [server & {:keys [complete-exit] :or {complete-exit true}}]
   (continue-on-error
    (server))
   (continue-on-error
-   (remove-registered-workers server))
+   (remove-registered-workers server)
+   (swap! registered-workers-removed (constantly true)))
   (continue-on-error
    (mongo/close-connection (get-connection-info server)))
   (when complete-exit
@@ -265,7 +268,8 @@
                          {:host ip :port port}
                          {:$set {:server-id server-id}})))
       (.addShutdownHook (Runtime/getRuntime)
-                        (Thread. #(remove-registered-workers tcp-server)))
+                        (Thread. #(when-not @registered-workers-removed
+                                    (remove-registered-workers tcp-server))))
       tcp-server
       (catch Throwable e
         (log/warn "Error connecting to mongo" e)
