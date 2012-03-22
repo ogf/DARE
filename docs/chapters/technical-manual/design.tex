@@ -1094,3 +1094,96 @@ responsibilidades indicadas en el diagrama.
 \end{landscape}
 
 \subsubsection{Esquema datos Sistema Almacenamiento}
+
+Vamos a describir los datos almacenados en MongoDB. Aunque MongoDB no
+utilizaun esquema fijo de manera explícita si que se podría decir que
+existe un esquema implícito. Este esquema describe los atributos que
+la aplicación espera que estén presente en un documento del tipo
+indicado. Para cada colección\footnote{Equivalente a table en una base
+de datos relacional} describimos los campos que son requeridos por
+DARE, el tipo de datos esperado y su semántica.
+
+La clase de DARE-Domain \emph{Robot} es mapeada a la colección
+\emph{robots}~\ref{robot_collection},
+página~\pageref{robot_collection}.
+
+La clase de DARE-Domain \emph{ExecutionResult} es mapeada a la
+colección \emph{executions}~\ref{execution_collection},
+página~\pageref{execution_collection}.
+
+La clase de DARE-Domain \emph{PeriodicalExecution} es mapeada a la
+colección \emph{executions}~\ref{periodical_execution_collection},
+página~\pageref{periodical_execution_collection}.
+
+\begin{table}[hbp]
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+Atributo & Tipo & Requerido & Descripción \\ \hline
+\_id & string & Sí & La clave del documento. Se genera internamente en la
+aplicación. Tiene formato de UUID. \\ \hline
+creationTime & NumberLong & Sí. & Indica la fecha de creación a modo de
+número de milisegundos desde \emph{epoch}. \\ \hline
+description & string & No. & Texto acerca del cometido del
+robot. \\ \hline
+transformerInMinilanguage & string & Sí. & La versión en minilenguaje
+del transformador. \\ \hline
+transformerInXML & string & Sí. & La versión en XML del transformador. \\ \hline
+\end{tabularx}
+\caption{Colección Robot}
+\label{robot_collection}
+\end{table}
+
+\begin{table}[hbp]
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+Atributo & Tipo & Requerido & Descripción \\ \hline
+\_id & string & Sí & La clave del documento. Se genera internamente en la
+aplicación. Tiene formato de UUID. \\ \hline
+creationTime & NumberLong & Sí. & Indica la fecha de creación a modo de
+número de milisegundos desde \emph{epoch}. \\ \hline
+optionalRobotCode & string & Sí. & El código del robot al que
+pertenece. El nombre es desafortunado debido a que el atributo se
+llama igual que en la clase Java.\\ \hline
+inputs & Array de string & Sí. & El vector de entrada
+utilizado. \\ \hline
+\multicolumn{4}{c}{Presentes después ejecución} \\ \hline
+resultLines & Array de string & No. & El resultado
+producido. \\ \hline
+executionTimeMilliseconds & NumberLong & No. & El número de
+milisegundos que llevo realizar la ejecución incluído tiempo de espera
+en el \emph{worker}. \\ \hline
+realExecutionTime & NumberLong & No. & El número de
+milisegundos que llevo realizar la ejecución sin tiempo de espera
+en el \emph{worker}. \\ \hline
+\end{tabularx}
+\caption{Colección Ejecución}
+\label{execution_collection}
+\end{table}
+
+\begin{table}[hbp]
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+Atributo & Tipo & Requerido & Descripción \\ \hline
+\_id & string & Sí & La clave del documento. Se genera internamente en la
+aplicación. Tiene formato de UUID. \\ \hline
+robotCode & string & Sí. & El código del robot al que
+pertenece en formato UUID. \\ \hline
+creationTime & NumberLong & Sí. & Indica la fecha de creación a modo de
+número de milisegundos desde \emph{epoch}. \\ \hline
+inputs & Array de string & Sí. & El vector de entrada a
+utilizar. \\ \hline
+executionPeriod & Object & Sí. & Un objeto con los campos amount y
+unitType. Indica el periodo de ejecución.\\ \hline
+lastExecution & Object & No & Un objeto con los mismos campos que una
+\emph{Ejecución} menos optionalRobotCode. Ver
+\ref{execution_collection}. \\ \hline
+\multicolumn{4}{c}{Campos planificación} \\ \hline
+next-execution-ms & NumberLong & Sí & Indica la fecha en la que se
+debe de ejecutar esta ejecución periódica. Esta fecha se indica en
+forma de número de milisegundos desde \emph{epoch}\\ \hline
+scheduled & boolean & Sí & Si esta ejecución periódica ha sido marcada
+para ser planificada y está a la espera de ser lanzada.\\ \hline
+\end{tabularx}
+\caption{Colección Ejecución Periódica}
+\label{periodical_execution_collection}
+\end{table}
