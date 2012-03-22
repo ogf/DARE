@@ -43,7 +43,7 @@
 
     <property name="src.unit_tests" location="src/main/test" />
 
-    <property name="src.functional_tests" location="src/main/functional_test" />
+    <property name="src.integration_tests" location="src/main/integration_test" />
 
     <property name="dist" location="target" />
 
@@ -51,7 +51,7 @@
 
     <property name="unit_test_classes_dir" location="${dist}/unit-test-classes" />
 
-    <property name="functional_test_classes_dir" location="${dist}/functional-test-classes" />
+    <property name="integration_test_classes_dir" location="${dist}/integration-test-classes" />
 
     <property name="reports.tests" location="${dist}/reports" />
 
@@ -85,7 +85,7 @@
       <fileset refid="test-libs" />
       <pathelement location="${classes_dir}" />
       <pathelement location="${unit_test_classes_dir}" />
-      <pathelement location="${functional_test_classes_dir}" />
+      <pathelement location="${integration_test_classes_dir}" />
     </path>
 
     <target name="dependencies" depends="init-ivy">
@@ -143,17 +143,17 @@
         </junit>
     </target>
 
-    <target name="check.functional-tests-exist">
-        <condition property="functional-tests-exist">
-            <available file="${src.functional_tests}" />
+    <target name="check.integration-tests-exist">
+        <condition property="integration-tests-exist">
+            <available file="${src.integration_tests}" />
         </condition>
     </target>
 
-    <target name="compile-functional-test"
-            depends="compile, compile-unit-test, check.functional-tests-exist"
-            if="functional-tests-exist">
-        <mkdir dir="${functional_test_classes_dir}" />
-        <javac srcdir="${src.functional_tests}" destdir="${functional_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
+    <target name="compile-integration-test"
+            depends="compile, compile-unit-test, check.integration-tests-exist"
+            if="integration-tests-exist">
+        <mkdir dir="${integration_test_classes_dir}" />
+        <javac srcdir="${src.integration_tests}" destdir="${integration_test_classes_dir}" debug="true" source="1.6" target="1.6" includeantruntime="false">
             <classpath>
               <path refid="compile-classpath" />
               <fileset refid="test-libs" />
@@ -163,13 +163,13 @@
         </javac>
     </target>
 
-    <target name="functional-test" depends="compile-functional-test" if="functional-tests-exist">
+    <target name="integration-test" depends="compile-integration-test" if="integration-tests-exist">
         <mkdir dir="${reports.tests}" />
         <junit printsummary="yes" haltonfailure="yes">
             <classpath refid="test-classpath" />
             <formatter type="plain" />
             <batchtest todir="${reports.tests}">
-                <fileset dir="${src.functional_tests}">
+                <fileset dir="${src.integration_tests}">
                     <include name="**/*Test*.java" />
                     <exclude name="**/AllTests.java" />
                 </fileset>
@@ -177,7 +177,7 @@
         </junit>
     </target>
 
-    <target name="jar" depends="unit-test, functional-test">
+    <target name="jar" depends="unit-test, integration-test">
       <jar destfile="${dist}/jars/${ivy.module}.jar">
         <fileset dir="${classes_dir}" includes="**" />
       </jar>

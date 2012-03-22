@@ -37,7 +37,7 @@
 		</java>
     </target>
 
-	<target name="functional-test" depends="dependencies, start, common.functional-test">
+	<target name="integration-test" depends="dependencies, start, common.integration-test">
 	</target>
 
 </project>
