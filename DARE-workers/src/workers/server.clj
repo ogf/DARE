@@ -19,8 +19,7 @@
                                    (assoc fields :creationTime
                                           (System/currentTimeMillis))}
                              :next-execution-ms next-execution-ms
-                             :scheduled false
-                             :execution-sent-at nil)
+                             :scheduled false)
     fields))
 
 (defn db-update! [collection code mongo-updates]
