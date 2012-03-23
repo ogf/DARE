@@ -1,3 +1,267 @@
+A lo largo del desarrollo se han realizado diversos tipos de pruebas
+automatizadas. Valoramos capturar los casos de prueba como código
+ejecutable porque porque permiten detectar errores cuanto antes y no
+requiere intervención manual.
+
 \subsection{Pruebas unitarias}
+
+Las pruebas unitarias comprueban que unidades aisladas de la
+aplicación funcionan según lo especificado. Esta clase de tests son
+útiles para detectar inmediatamente desviaciones con respecto al
+comportamiento especificado. La mayoría de las pruebas de este tipo
+que se han realizado son de caja blanca ya que se han diseñado
+conociendo la estructura interna de la aplicación.
+
+\subsubsection{Pruebas Minilanguage}
+
+Se ha empleado RSpec\cite{RSPEC}. Es una herramienta para hacer tests
+siguiendo el estilo BDD\footnote{\emph{Behaviour-Driven
+    Development}}. Este estilo de TDD\footnote{\emph{Test-Driven
+    Development}} hace un especial énfasis en generar especificaciones
+legibles del software desarrollado. En el resultado de ejecutar
+minilanguage/src/main/resources/es/uvigo/ei/sing/stringeditor/transformer\_spec.rb
+se puede ver una lista de ejemplos que caracterizan el comportamiento
+de
+minilanguage/src/main/resources/es/uvigo/ei/sing/stringeditor/transformer.rb. Ver
+el cuadro~\ref{rspec_tests}, página~\pageref{rspec_tests}.
+
+\begin{table}[hbp]
+\begingroup
+    \fontsize{9pt}{11pt}\selectfont
+\begin{verbatim}
+aAUTOMATOR minilanguage
+  Transformer
+    should accept description
+    description shouldn't be allowed to be changed once set
+    should have transformer_class name as default value for description
+    should accept branchtype parameter
+    should have branchtype CASCADE as default
+    should accept parameter branchmergemode
+    should have branchmergemode SCATTERED as default
+    should accept parameter loop
+    should keep parameters
+    should let add children
+    must have an empty list as children initially
+    should not let modify original children collection
+    can have other transformers as children
+      should report the added children
+      it should behave like invariants for a Transformer
+        should have a not nil description
+        should have a not nil transformer_class
+        should have a not nil branchtype
+        should have a not nil branchmergemode
+        should traverse tranformer
+    PatternMatcher
+      should have a fixed transformer class
+      should require parameter pattern
+      should read parameter pattern
+      should let specify pattern as just one param
+      should let specify additional params
+      it should behave like invariants for a Transformer
+        should have a not nil description
+        should have a not nil transformer_class
+        should have a not nil branchtype
+        should have a not nil branchmergemode
+        should traverse tranformer
+  Language
+    should let put transformers in cascade
+    should let the language be supplied as a string
+    should let put transformers as children of other transformer in cascade
+    should let put several consecutive pipes
+    should let put transformers in branch
+    should let put transformers in branch as children of other transformer
+    should not let use | inside a branch
+    should let put transformers in cascade inside branch
+    should let do a loop
+    should let put several transformer serially connected in the repeat clause
+    should let put several transformers paralelly connected in the repeat clause
+
+Finished in 0.589 seconds
+39 examples, 0 failures
+\end{verbatim}
+\endgroup
+\caption{RSpec Tests para minilenguaje}
+\label{rspec_tests}
+\end{table}
+
+\subsubsection{Pruebas DARE-domain}
+Se ha empleado JUnit\cite{JUNIT} para realizar las pruebas de
+DARE-domain. JUnit es un framework para realizar pruebas unitarias
+para la plataforma Java. El resultado se puede ver en el
+cuadro~\ref{junit_dare-domain},pág.~\pageref{junit_dare-domain}.
+
+\begin{table}[hbp]
+\begingroup
+    \fontsize{9pt}{11pt}\selectfont
+\begin{verbatim}
+Testsuite: es.uvigo.ei.sing.dare.entities.ExecutionPeriodTest
+Tests run: 9, Failures: 0, Errors: 0, Time elapsed: 0.124 sec
+
+Testcase: anExecutionPeriodIsComposedOfAnAmountAndAnUnit took 0.012 sec
+Testcase: theAmountMustBeGreaterThanZero took 0.001 sec
+Testcase: theAmountMustBeNotNegative took 0 sec
+Testcase: theUnitIsRequired took 0 sec
+Testcase: anExecutionPeriodCanBeSpecifiedWithAString took 0.001 sec
+Testcase: notAllTheStringsCanBeParsed took 0 sec
+Testcase: throwExceptionIfTheUnitSpecificationIsInvalid took 0 sec
+Testcase: itCanTellWhenShouldBeExecutedNext took 0.098 sec
+Testcase: twoExecutionPeriodsAreEqualIfHaveTheSameUnitAndAmount took
+0.002 sec
+
+Testsuite: es.uvigo.ei.sing.dare.entities.PeriodicalExecutionTest
+Tests run: 13, Failures: 0, Errors: 0, Time elapsed: 5.292 sec
+
+Testcase: thePeriodMustBeNotNull took 3.292 sec
+Testcase: theInputsArrayMustBeNotNull took 0.027 sec
+Testcase: theInputsListMustBeNotNull took 0.038 sec
+Testcase: allTheInputsMustBeNotNull took 0.037 sec
+Testcase: thePeriodicalExecutionHasItsOwnCode took 0.04 sec
+Testcase: thePeriodicalExecutionHasACreationTime took 0.025 sec
+Testcase: aPeriodicalExecutionContainsTheRobotThatCreatedIt took 0.028 sec
+Testcase: thePeriodicalExecutionHasTheInputsWithWhichItWasCreated took 0.025 sec
+Testcase: theProvidedListOfInputsIsCopiedToAvoidUndesirableSideEffects took 0.027 sec
+Testcase: theInputsOfAPeriodicalExecutionCannotBeModified took 0.024 sec
+Testcase: thePeriodicalExecutionHasThePeriodWithWhichItWasCreated took 0.023 sec
+Testcase: initiallyTheLastExecutionResultIsNull took 0.031 sec
+Testcase: theLastExecutionCanBeUpdated took 1.668 sec
+
+Testsuite: es.uvigo.ei.sing.dare.entities.RobotTest
+Tests run: 10, Failures: 0, Errors: 0, Time elapsed: 0.533 sec
+
+Testcase: aRobotCanBeCreatedFromACodeAndAMinilanguageString took 0.031 sec
+Testcase: ifTheMinilanguageIsIncorretThrowIllegalArgumentException took 0.042 sec
+Testcase: aRobotCanBeCreatedFromAXmlStringWithARobot took 0.143 sec
+Testcase: aRobotCanBeCreatedFromAXmlDocumentWithARobot took 0.044 sec
+Testcase: ifTheXMLDocumentIsWrongAIllegalArgumentExceptionIsThrown took 0.006 sec
+Testcase: aRobotHasACreationTime took 0.032 sec
+Testcase: aRobotCreatedFromAMinilanguageHasTheTransformerInXMLToo took 0.026 sec
+Testcase: aRobotInitiallyHasNoDescription took 0.024 sec
+Testcase: changingTheDescriptionImpliesCreatingANewRobotInstanceSinceItsImmutable took 0.022 sec
+Testcase: aRobotCanBeCreatedWithATimeout took 0.158 sec
+
+\end{verbatim}
+\endgroup
+\caption{Junit Test DARE-domain}
+\label{junit_dare-domain}
+\end{table}
+
 \subsection{Pruebas integración}
+
+Las pruebas de integración se realizan contra un agrupamiento de
+varias unidades. Así se puede verificar que esas unidades funcionan
+correctamente juntas.
+
+\subsubsection{DARE-java con DARE-war}
+
+En DARE-java existen una serie de pruebas de integración que
+comprueban que la librería DARE-java funciona correctamente en
+conjunción con DARE-war. Además, a través de estas pruebas de
+integración se comprueba que el funcionamiento de DARE-war es
+correcto. Para realizar estas pruebas se ha empleado JUnit. El
+resultado se puede ver en el cuadro~\ref{junit_dare-java},
+pág.~\pageref{junit_dare-java}.
+
+\begin{table}[hbp]
+\begingroup
+  \fontsize{9pt}{11pt}\selectfont
+\begin{verbatim}
+Testsuite: es.uvigo.ei.sing.dare.resources.RobotResourceExecutionTest
+Tests run: 16, Failures: 0, Errors: 0, Time elapsed: 12.984 sec
+
+Testcase: existsPostMethod[0] took 1.196 sec
+Testcase: onWrongTransformerThrowsException[0] took 0.119 sec
+Testcase: testErrorExecuting[0] took 0.21 sec
+Testcase: testTimeoutExecuting[0] took 0.298 sec
+Testcase: testReturnResults[0] took 1.215 sec
+Testcase: itReturnsTheTimeElapsedAndTheDate[0] took 1.184 sec
+Testcase: theRobotAssociatedIsStoredAndAURLToItIsStored[0] took 1.25 sec
+Testcase: testStructureDocumentReturnedDirectly[0] took 1.129 sec
+Testcase: existsPostMethod[1] took 1.212 sec
+Testcase: onWrongTransformerThrowsException[1] took 0.101 sec
+Testcase: testErrorExecuting[1] took 0.127 sec
+Testcase: testTimeoutExecuting[1] took 0.185 sec
+Testcase: testReturnResults[1] took 1.299 sec
+Testcase: itReturnsTheTimeElapsedAndTheDate[1] took 1.135 sec
+Testcase: theRobotAssociatedIsStoredAndAURLToItIsStored[1] took 1.125 sec
+Testcase: testStructureDocumentReturnedDirectly[1] took 1.165 sec
+
+Testsuite: es.uvigo.ei.sing.dare.resources.RobotResourceTest
+Tests run: 12, Failures: 0, Errors: 0, Time elapsed: 4.896 sec
+
+Testcase: aRobotCanBeCreatedFromAMinilanguage took 0.146 sec
+Testcase: ifTheMinilanguageIsWrongABadRequestErrorStatusIsReturned took 0.128 sec
+Testcase: ifTheEvaluationOfMinilanguageTakesMoreThanOneSecondAnErrorIsReturned took 1.092 sec
+Testcase: aRobotCanBeCreatedFromAXML took 0.244 sec
+Testcase: ifTheRobotHasAnInvalidXMLAnErrorStatusIsReturned took 0.092 sec
+Testcase: afterCreatingARobotItCanBeViewedUsingTheReturnedURI took 0.254 sec
+Testcase: afterCreatingARobotItCanBeRetrievedASJSON took 0.209 sec
+Testcase: theCreationDateIsReturnedAsALong took 0.141 sec
+Testcase: aCreatedRobotCanBeExecuted took 2.211 sec
+Testcase: executingANotCreatedRobotReturnsNotFound took 0.066 sec
+Testcase: fromARobotAPeriodicalExecutionCanBeCreated took 0.154 sec
+Testcase: aWrongPeriodImpliesABadRequestResponse took 0.155 sec
+
+Testsuite: es.uvigo.ei.sing.dare.resources.PeriodicalExecutionResourceTest
+Tests run: 6, Failures: 0, Errors: 0, Time elapsed: 5.354 sec
+
+Testcase: ifNotAssociatedPeriodicalResultReturn404 took 0.619 sec
+Testcase: ifPeriodicalResultExistsMustReturn200Code took 3.88 sec
+Testcase: aPeriodicalExecutionIsMappedToAPeriodicalExecutionView took 0.12 sec
+Testcase: theRobotFromThePeriodicalExecutionCanBeRetrieved took 0.531 sec
+Testcase: theLastExecutionResultIsReturnedInTheResponse took 0.105 sec
+Testcase: theJSONMappingIsIdiomatic took 0.08 sec
+\end{verbatim}
+\endgroup
+\caption{Junit Test DARE-Java}
+\label{junit_dare-java}
+\end{table}
+
+\subsubsection{DARE-backend con DARE-workers}
+En DARE-backend existen una serie de pruebas de integración que
+comprueban que DARE-backend funciona correctamente en conjunción con
+DARE-workers. De paso también se comprueba que los servicios de
+persistencia ofrecidos por DARE-backend funcionan correctamente. Para
+realizar estas pruebas se ha empleado la librería Clojure.test. El El
+resultado se puede ver en el cuadro~\ref{test_dare-backend},
+pág.~\pageref{test_dare-backend}.
+
+\begin{table}[hbp]
+\begingroup
+  \fontsize{9pt}{11pt}\selectfont
+\begin{verbatim}
+(deftest can-create-entities)
+(deftest a-robot-can-be-saved-and-retrieved-later)
+(deftest finding-a-non-existent-robot-returns-nil)
+(deftest the-robot-of-a-periodical-execution-must-be-saved)
+(deftest submiting-robot-with-execution
+  (testing "saves the provided robot")
+  (testing "eventually creates a result")
+  (testing "if the execution timeouts, appropriate error is returned")
+  (testing "if the execution fails, appropiate error is returned")
+  (testing "If the execution timeouts in the server, appropiate error is returned"))
+(deftest retrieving-a-not-existent-execution-returns-nil)
+(deftest execution-result-at-initial-state-implies-none-is-returned)
+(deftest the-robot-must-exist-when-providing-the-code)
+(deftest execution-result-with-results-fullfiled-implies-result-returned)
+(deftest finding-a-non-existent-periodical-execution-returns-nil)
+(deftest a-periodical-execution-can-be-saved-and-retrieved
+  (testing "without last execution")
+  (testing "eventually the periodical execution is scheduled and executed after being created")
+  (testing "executions scheduled but not send are cleaned so they can be scheduled again"))
+(deftest robots-periodical-executions-and-result-executions-can-be-deleted
+  (testing "Deleting an execution removes it from storage")
+  (testing "Deleting a periodical execution removes it from storage")
+  (testing "Deleting the robot makes it unavailable along with the associated robots
+            and periodical executions"))
+(deftest can-find-new-workers)
+(deftest Backend-is-an-implementation-of-IBackend)
+
+Ran 14 tests containing 49 assertions.
+0 failures, 0 errors.
+\end{verbatim}
+\endgroup
+\caption{clojure.test DARE-backend}
+\label{test_dare-backend}
+\end{table}
+
 \subsection{Pruebas rendimiento}
