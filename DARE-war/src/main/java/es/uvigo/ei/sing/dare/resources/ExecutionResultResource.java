@@ -5,7 +5,6 @@ import static es.uvigo.ei.sing.dare.configuration.Configuration.EXECUTION_RESULT
 import java.net.URI;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -64,7 +63,6 @@ public class ExecutionResultResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @Path("{executionResultCode}")
     public Response retrieve(
@@ -110,7 +108,6 @@ public class ExecutionResultResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{executionResultCode}")
     public Response retrieveAsJSON(
