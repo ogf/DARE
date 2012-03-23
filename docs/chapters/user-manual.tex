@@ -4,9 +4,340 @@
 \subsection{Pallet}
 http://palletops.com/
 \subsection{Logs}
-\section{Pruebas Rendimiento}
-\subsection{Resultados con un nodo}
-\subsection{Resultados con n nodos}
+\section{Especificación API REST}
+
+A continuación describimos la API REST de manera detallada. Esta
+documentación debería permitir crear librerías para DARE en otras
+plataformas.
+
+\subsection{Puntos entrada}
+El primer dato que necesitamos es conocer los puntos de entrada a la
+aplicación. Para ello primero debemos conocer la URL en la que está
+instalada la aplicación, \verb+<base-url>+ a partir de ahora.
+
+A partir de este dato se puede acceder a varios puntos de entrada.
+
+\begin{table}[hp]
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & POST \verb+<base-url>/robot/execute+ \\
+ & Crea el robot proporcionado y lanza una solicitud de
+ejecución.\\ \hline
+\multirow{2}{*}{Petición}
+ & application/x-www-form-urlencoded \\
+ & Un campo \emph{robot} con una cadena de
+  minilenguaje válida. \newline
+  Cero, uno o varios campos \emph{input} que formarán el vector de
+  entrada.\\ \hline
+\multirow{2}{*}{Respuesta}
+& 201 Created \\
+& Tiene un campo location con la url en donde se pondrá la \emph{execution result}
+una vez finalizada.
+Esta \emph{execution result} no tiene porque existir todavía.\\
+\end{tabularx}
+\caption{Ejecutar nuevo Robot}
+\label{execute_new_robot}
+\end{table}
+
+\begin{table}[hp]
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & POST \verb+<base-url>/robot/create+ \\
+ & Crea el robot proporcionado.\\ \hline
+\multirow{4}{*}{Petición}
+ & application/x-www-form-urlencoded \\
+ & Un campo \emph{minilanguage} con una cadena de
+  minilenguaje válida.\\ \cline{2-2}
+ & application/xml \\
+ & Un robot en el formato XML de \emph{aAUTOMATOR}.\\ \hline
+\multirow{2}{*}{Respuesta}
+& 201 Created \\
+& Tiene un campo location con la url del robot creado.
+Esta \emph{execution result} no tiene porque existir todavía.\\
+\end{tabularx}
+\caption{Crear nuevo Robot}
+\label{create_new_robot}
+\end{table}
+\newpage
+
+\subsection{Recurso Robot}
+
+Por medio del recurso Crear nuevo Robot --- cuadro
+\ref{create_new_robot}, pág.~\pageref{create_new_robot}--- se obtiene
+la URL a un nuevo Robot. Esta URL actualmente es de la forma
+\verb+<base-url>/robot/{robot-code}+, pero esto está sujeto a
+cambio. La aplicación cliente debería trabajar con esta URL al crear
+un nuevo Robot. A esta URL la llamaremos \verb+<robot-url>+. A partir
+de esta URL se pueden realizar varias acciones.
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & GET \verb+<robot-url>+ \\
+ & Muestra la información del robot indicado en alguno de los formatos
+soportados. El formato deseado se indica mediante la cabecera Accept.\\ \hline
+\multirow{4}{*}{Respuesta}
+& application/json \\
+& Robot en formato JSON. Ver cuadro~\ref{robot_json_representation}, pág.~\pageref{robot_json_representation}. \\ \cline{2-2}
+& application/xml \\
+& Robot en formato XML. Ver cuadro~\ref{robot_xml_representation}, pág.~\pageref{robot_xml_representation}. \\
+\end{tabularx}
+\caption{GET robot}
+\label{get_robot}
+\end{table}
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & DELETE \verb+<robot-url>+ \\
+ & Elimina el Robot más las ejecuciones asociadas, tanto normales como
+periódicas.\\ \hline
+\multirow{1}{*}{Respuesta}
+& 200 OK \\
+\end{tabularx}
+\caption{DELETE robot}
+\label{delete_robot}
+\end{table}
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & POST \verb+<robot-url>/execute+ \\
+ & Lanza una solicitud de ejecución para el robot indicado.\\ \hline
+\multirow{2}{*}{Petición}
+ & application/x-www-form-urlencoded \\
+ & Cero, uno o varios campos \emph{input} que formarán el vector de entrada.\\ \hline
+\multirow{2}{*}{Respuesta}
+& 201 Created \\
+& Campo location con la url a la execution result creada.\\
+\end{tabularx}
+\caption{Execute robot}
+\label{execute_robot}
+\end{table}
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & POST \verb+<robot-url>/periodical+ \\
+ & Crea una ejecución periódica. Una ejecución periódica es como una
+ejecución normal pero que se ejecuta cada cierto periodo de tiempo.\\ \hline
+\multirow{2}{*}{Petición}
+ & application/x-www-form-urlencoded \\
+ & Campo \emph{period} con el formato <numero><tipo> donde tipo puede
+ser d, h o m para especificar días, horas o minutos respectivamente.\newline
+ Cero, uno o varios campos \emph{input} que formarán el vector de entrada.\\ \hline
+\multirow{2}{*}{Respuesta}
+& 201 Created \\
+& Campo location con la url a la execution result creada.\\ \hline
+\end{tabularx}
+\caption{Create periodical}
+\label{create_periodical}
+\end{table}
+\newpage
+
+\subsection{Recurso Resultado Ejecución}
+
+Utilizando los recursos para realizar ejecuciones
+---cuadro~\ref{execute_new_robot}, pág.~\pageref{execute_new_robot} y
+cuadro~\ref{execute_robot}, pág.~\pageref{execute_robot}--- se obtiene
+la URL a un nuevo Resultado de Ejecución. Esta URL es actualmente de
+la forma \verb+\<base-url>/result/{code}+, pero esto está sujeto a
+cambio. La apicaxción cliente debería trabajar con la URL obtenida al
+crearse una nueva ejecución. A esta URL la llamaremos
+\verb+<execution-url>+.
+
+Las ejecuciones de Robots llevan cierto tiempo realizarse. Por ello,
+mientras la ejecución todavía no se haya completado se devuelve un
+resultado \verb+204 NO CONTENT+. Es responsabilidad de la aplicación
+cliente seguir intentándolo hasta que el resultado de la ejecución
+esté disponible.
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & GET \verb+<execution-url>+ \\
+ & Muestra la información de la ejecución indicada en alguno de los
+formatos soportados. Indicar el formato deseado mediante la cabecera Accept.\\ \hline
+\multirow{6}{*}{Respuesta}
+& 204 No Content \\
+& Si la ejecución todavía no ha sido completada.\\ \cline{2-2}
+& application/json \\
+& Ejecución en formato JSON. Ver cuadro~\ref{execution_json_representation}, pág.~\pageref{execution_json_representation}.\\ \cline{2-2}
+& application/xml \\
+& Ejecución en formato XML. Ver cuadro~\ref{execution_xml_representation}, pág.~\pageref{execution_xml_representation}. \\
+\end{tabularx}
+\caption{GET Execution Result}
+\label{get_execution_result}
+\end{table}
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & DELETE \verb+<execution-url>+\\
+ & Elimina la Ejecución indicada.\\ \hline
+\multirow{1}{*}{Respuesta}
+ & 200 OK \\
+\end{tabularx}
+\caption{DELETE Execution Result}
+\label{delete_execution_result}
+\end{table}
+\newpage
+
+\subsection{Recurso Ejecución Periódica}
+
+Utilizando el recurso para crear una ejecución periódica
+---cuadro~\ref{create_periodical}, pág.~\pageref{create_periodical}---
+se obtiene la URL que identifica una Ejecución Periódica. Esta URL es
+actualmente de la forma
+\verb+\<base-url>/result/{periodical-execution-code}+, pero esto está
+sujeto a cambio. La apicación cliente debería trabajar con la URL
+obtenida al crearse una nueva ejecución periódica. A esta URL la
+llamaremos \verb+<periodical-url>+.
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & GET \verb+<periodical-url>+ \\
+ & Muestra la información de la ejecución periódica indicada en alguno de los
+formatos soportados. El formato deseado se indica mediante la cabecera Accept.\\ \hline
+\multirow{4}{*}{Respuesta}
+& application/json \\
+& Ejecución Periódica en formato JSON. Ver
+cuadro~\ref{periodical_execution_json_representation}, pág.~\pageref{periodical_execution_json_representation}.\\ \cline{2-2}
+& application/xml \\
+& Ejecución Periódica en formato XML. Ver
+cuadro~\ref{periodical_execution_xml_representation}, pág.~\pageref{periodical_execution_xml_representation}. \\
+\end{tabularx}
+\caption{GET Periodical Execution}
+\label{get_periodical_execution}
+\end{table}
+
+\begin{table}
+\begin{tabularx}{\textwidth}{l X}
+\multirow{2}{*}{Acción}
+ & DELETE \verb+<execution-url>+\\
+& Elimina la Ejecución Periódica indicada.\\ \hline
+\multirow{1}{*}{Respuesta}
+ & 200 OK \\
+\end{tabularx}
+\caption{DELETE Ejecución Periódica}
+\label{delete_periodical_execution}
+\end{table}
+
+\begin{table}
+\begin{minted}{javascript}
+{robotXML: '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+  <robot version="1.0"> .... ... </robot>',
+code: '283cceff-8e05-48ed-8aca-421facd81848',
+robotInMinilanguage': 'url',
+creationDateMillis: 1332352716333L}
+\end{minted}
+\caption{Representación JSON Robot}
+\label{robot_json_representation}
+\end{table}
+
+\begin{table}
+\begin{minted}{xml}
+<stored-robot>
+  <code>283cceff-8e05-48ed-8aca-421facd81848</code> <!--UUID code -->
+  <creationDateMillis>1332352716333</creationDateMillis>
+  <robot version="1.0">
+   <!--... Robot in aAUTOMATOR format -->
+  </robot>
+<robotInMinilanguage>url</robotInMinilanguage>
+</stored-robot>
+\end{minted}
+\caption{Representación XML Robot}
+\label{robot_xml_representation}
+\end{table}
+
+\begin{table}
+\begin{minted}{javascript}
+{executionTime: 110,
+inputs: ['http://www.google.es'],
+resultLines: ['first output line', 'second output line'],
+createdFrom: 'http://localhost:5000/robot/283cceff-8e05-48ed-8aca-421facd81848',
+creationDateMillis: 1332353014267L}
+\end{minted}
+\caption{Representación JSON Resultado Ejecución}
+\label{execution_json_representation}
+\end{table}
+
+\begin{table}
+\begin{minted}{xml}
+<result>
+  <resultLines>
+  <line>
+    first output line
+    </line>
+    <line>
+    second output line
+    </line>
+  </resultLines>
+  <executionTime>110</executionTime>
+  <creationDateMillis>1332353014267</creationDateMillis>
+  <createdFrom>
+  http://localhost:5000/robot/283cceff-8e05-48ed-8aca-421facd81848
+  </createdFrom>
+  <inputs>
+    <input>http://www.google.es</input>
+  </inputs>
+</result>
+\end{minted}
+\caption{Representación XML Resultado Ejecución}
+\label{execution_xml_representation}
+\end{table}
+
+\begin{table}
+\begin{minted}{javascript}
+{'code': '391ad217-63cb-4699-a571-602c431b4ffa',
+'periodAmount': 1,
+'periodUnit': 'days',
+'inputs': ['http://www.google.es'],
+'lastExecutionResult':
+     {'executionTime': 435,
+      'resultLines': ['first output line', 'second output line'],
+      'creationDateMillis': 1332712521399L},
+'robot': 'http://localhost:5000/robot/283cceff-8e05-48ed-8aca-421facd81848',
+'creationDateMillis': 1332352996708L}
+\end{minted}
+\caption{Representación JSON Ejecución Periódica}
+\label{periodical_execution_json_representation}
+\end{table}
+
+\begin{table}
+\begin{minted}{xml}
+<periodical-execution>
+  <code>391ad217-63cb-4699-a571-602c431b4ffa</code>
+  <creationDateMillis>1332352996708</creationDateMillis>
+  <robot>
+  http://localhost:5000/robot/283cceff-8e05-48ed-8aca-421facd81848
+  </robot>
+  <periodUnit>days</periodUnit>
+  <periodAmount>1</periodAmount>
+  <inputs>
+  <input>http://www.google.es</input>
+  </inputs>
+  <lastExecutionResult>
+    <resultLines>
+      <line>
+      first output line
+      </line>
+      <line>
+      second output line
+      </line>
+    </resultLines>
+    <executionTime>435</executionTime>
+    <creationDateMillis>1332712521399</creationDateMillis>
+  </lastExecutionResult>
+</periodical-execution>
+\end{minted}
+\caption{Representación XML Ejecución Periódica}
+\label{periodical_execution_xml_representation}
+\end{table}
+
+\newpage
+
 \section{Línea comandos}
 \subsection{Ejemplos}
 \section{Librerías}
