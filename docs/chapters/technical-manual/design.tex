@@ -359,7 +359,7 @@ documentos y bases de datos orientadas a grafos.
   directo. Permiten realizar de manera sencilla consultas basadas en
   grafos, como, por ejemplo, calcular la distancia mínima entre dos
   nodos. El acceso a los datos y nodos asociados a un nodo en concreto
-  es más rápidoe que en una RDBMS. Por contra, las bases de datos
+  es más rápido que en una RDBMS. Por contra, las bases de datos
   relacionales son más rápidas realizando la misma operación contra
   una gran cantidad de datos.
 
@@ -859,19 +859,19 @@ puede a su vez tener \emph{Transformers} hijos. Cada
 aAUTOMATOR. Cada subclase de \emph{Transformer} se corresponde a una
 clase \emph{Transformer} de aAUTOMATOR. Cada \emph{Transformer} va a
 necesitar una serie de parámetros requeridos y opcionales. Cada
-subclase de \emph{Transformer} define pues, los parametros que va a
+subclase de \emph{Transformer} define pues, los parámetros que va a
 necesitar de una manera declarativa. \emph{Transformer} mantiene una
 lista de los hijos que contiene y permite que se le añadan más. Además
 puede recibir un XML de aAUTOMATOR y convertirlo a una \emph{string}
 de minilenguaje que produciría ese XML.
 
 La clase \emph{Language} es la encargada de procesar el
-lenguaje. Basicamente el lenguaje se evalúa contra una instancia de
+lenguaje. Básicamente el lenguaje se evalúa contra una instancia de
 \emph{Language}. Por ejemplo, el minilenguaje definido por
 \emph{xpath('//a/@href')} implica que el método xpath de
-\emph{Language} es llamado. ¿Implica ésto que habría que definir
+\emph{Language} es llamado. ¿Implica esto que habría que definir
 métodos por cada \emph{Transformer} que se defina? No, empleando
-metaprogramación\cite{METAPROGRAMMING} cada vez que se define una
+meta-programación\cite{METAPROGRAMMING} cada vez que se define una
 subclase de \emph{Transformer} se crea dinámicamente un nuevo método
 en \emph{Language}. Llamar a este método implica crear el
 \emph{Transformer} de la subclase adecuada con los parámetros
@@ -883,7 +883,7 @@ transformer de primer nivel en el \emph{Language}. Por ejemplo,
 tres \emph{Transformers} al \emph{Transformer} padre, que por defecto
 está en modo cascade. Como se puede ver se emplea el operador \emph{|}
 para separar cada \emph{Transformer}. Esto no es más que azúcar
-sintático. El siguiente ejemplo sería equivalente: \emph{url;
+sintáctico. El siguiente ejemplo sería equivalente: \emph{url;
   xpath('//a/@href'); patternMatcher('(http://.*)')}, pero con el
 operador \emph{|} queda más clara la intención.
 
@@ -911,7 +911,7 @@ Todas estas clases están definidas en el fichero
 \subsubsection{Descripción Implementación Minilenguaje}
 
 Después de la introducción a minilenguaje apoyada en el diagrama de
-clases hemos creido conveniente utilizar algunas técnicas adicionales
+clases hemos creído conveniente utilizar algunas técnicas adicionales
 para facilitar su comprensión. La implementación de una DSL interna es
 difícil de capturar con un diagrama de clases, por lo que hemos
 buscado otras formas de exponer su comportamiento.
@@ -944,7 +944,7 @@ inclusión del mismo en este proyecto hemos modificado Docco para
 producir \LaTeX{}\cite{DOCCOTEX}.
 
 Por último señalar que la documentación producida está en inglés ya
-que el código esta en este mismo idioma.
+que el código esta en ese mismo idioma.
 
 \begin{landscape}
 \begingroup
@@ -965,7 +965,7 @@ entidades por las que está formada la aplicación. Por cada
 \emph{PeriodicalExecution}. Por cada \emph{PeriodicalExecution} hay un
 \emph{Robot}. Una \emph{PeriodicalExecution} no contiene un
 \emph{ExecutionResult} si todavía no se ha completado la
-ejecución. Una vez se ha completao el \emph{PeriodicalExecution}
+ejecución. Una vez se ha completado el \emph{PeriodicalExecution}
 contiene el \emph{ExecutionResult} de su última ejecución.
 
 \emph{Robot} llama a MiniLanguage para generar el XML de aAUTOMATOR a
@@ -987,7 +987,7 @@ que se pueden producir relacionadas con el manejo de
 ejecuciones. \emph{IBackendBuilder} define una interfaz para el objeto
 que debe de crear el \emph{IBackend} a ser usado. Define y acepta una
 serie de parámetros necesarios para la operativa concreta del backend
-selecionado.
+seleccionado.
 
 La clase \emph{Maybe} sirve para indicar que un resultado es
 opcional. Por otra parte \emph{MinilanguageProducer} sirve para mantener una
@@ -1049,7 +1049,7 @@ misma. Para hacer la traducción JAX-RS utiliza JAXB\cite{JAXB}.
 \subsubsection{Diagrama clases DARE-java}
 A continuación~\ref{diagrama_clases_dare_java} mostramos un diagrama
 de clases de la librería para acceder a DARE desde Java. La clase DARE
-contiene metodos para crear nuevas entidades y para acceder a las
+contiene métodos para crear nuevas entidades y para acceder a las
 mismas. Internamente se usa JAX-RS, más concretamente a través de una
 instancia de Client. Se reutiliza el paquete de vistas de DARE-war. La
 clase DARE puede devolver instancias de las mismas para ser consumidas
@@ -1065,7 +1065,7 @@ todavía en curso.
 
 \subsubsection{Diagrama clases DARE-python}
 
-La clase Server contiene varios metodos para realizar acciones en el
+La clase Server contiene varios métodos para realizar acciones en el
 servidor. Sobre esta clase de modelan varias clases que serán los
 recursos de los que consta DARE. Cada uno de estos recursos tendrá
 métodos para mostrar y eliminar un recurso. Cuando se muestra un
@@ -1084,7 +1084,7 @@ robots creados. En el diagrama hemos mostramos una clase \emph{Main}
 que se comunica con la jerarquía de recursos y la clase
 \emph{Store}. En realidad esta clase no existe en el código, son una
 serie de métodos definidos en \emph{DARE-python/rest.py} con las
-responsibilidades indicadas en el diagrama.
+responsabilidades indicadas en el diagrama.
 
 \begin{landscape}
 \begin{figure}[hp]
@@ -1096,10 +1096,10 @@ responsibilidades indicadas en el diagrama.
 \subsubsection{Esquema datos Sistema Almacenamiento}
 
 Vamos a describir los datos almacenados en MongoDB. Aunque MongoDB no
-utilizaun esquema fijo de manera explícita si que se podría decir que
+utiliza un esquema fijo de manera explícita si que se podría decir que
 existe un esquema implícito. Este esquema describe los atributos que
 la aplicación espera que estén presente en un documento del tipo
-indicado. Para cada colección\footnote{Equivalente a table en una base
+indicado. Para cada colección\footnote{Equivalente a tabla en una base
 de datos relacional} describimos los campos que son requeridos por
 DARE, el tipo de datos esperado y su semántica.
 
@@ -1150,7 +1150,7 @@ utilizado. \\ \hline
 resultLines & Array de string & No. & El resultado
 producido. \\ \hline
 executionTimeMilliseconds & NumberLong & No. & El número de
-milisegundos que llevo realizar la ejecución incluído tiempo de espera
+milisegundos que llevo realizar la ejecución incluido tiempo de espera
 en el \emph{worker}. \\ \hline
 realExecutionTime & NumberLong & No. & El número de
 milisegundos que llevo realizar la ejecución sin tiempo de espera

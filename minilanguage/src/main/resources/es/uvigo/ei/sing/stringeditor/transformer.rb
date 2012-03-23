@@ -107,7 +107,7 @@ class Language
 
 #  For example after defining the class `PatternMatcher` a new method
 # `patternMatcher` is defined on *Language* class. The methods
-# generate receive some arguments that will be passed directly to the
+# generated receive some arguments that will be passed directly to the
 # class constructor. If a block is provided it's evaluated in a new
 # *Language* instance.
   def self.new_type_of_transformer transformer_klass
@@ -125,8 +125,8 @@ end
 
 # Now let's define some *Transformer* subclasses that will cause
 # methods to be added to the minilanguage. Notice how we use
-# transformer_class and param methods defined before to simplify he
-# definition of *Transformer* classes.
+# `transformer_class` and `param` methods defined before to simplify
+# the definition of *Transformer* classes.
 
 # It defines the `patternMatcher` call on *Language*. It can be used as
 # `patternMatcher('regexHere')` or
@@ -185,7 +185,7 @@ end
 
 # We reopen the *Transformer* class to show how it's instantiated. The
 # initialize constructor is called when calling the method dinamically
-# generated on *Language* class with the provided values.
+# generated on *Language* class.
 
 class Transformer
 
@@ -264,14 +264,14 @@ class Transformer
     params_definitions.find{|p| p.name.to_sym == name.to_sym}
   end
 
-# Add to the params hash the branch params
+# Add to the params hash the branch params if they exist.
   def self.with_branch_params(hash, branch_params)
     hash[:branchtype] = branch_params[0] if branch_params[0]
     hash[:branchmergemode] = branch_params[1] if branch_params[1]
     hash
   end
 
-# If params is a Hash we return early
+# If params is a Hash we return early.
   def self.ensure_params_hash provided_params_values
     return provided_params_values if Hash === provided_params_values
 # Otherwise we create a new Hash and if there is only one required
@@ -340,7 +340,7 @@ end
 
 
 # We reopen *Transformer* to add the methods needed by *Language* to
-# manipulate each generate transformer.
+# manipulate each created transformer.
 class Transformer
 
 # *aAUTOMATOR* expects that the loop control is the first element.
@@ -398,9 +398,9 @@ class Language
   protected :transformer_added_action
 
 # This is syntactic sugar. Inside the top level scope or a pipe scope
-# the | separator can be used to separate several transformer
+# the `|` separator can be used to separate several transformer
 # instantiations. The Ruby statement separator `;` can be used too,
-# but this gives it a 'flowing' look.
+# but `|` gives it a 'flowing' look.
   def > other
     self | other
   end
@@ -498,7 +498,7 @@ class Language
   end
 end
 
-# It interprets the parts inside a *Language* class.
+# It interprets the parts inside of a `repeat?` block.
 class RepeatClause < Language
 
   alias_method :standard_added_action, :transformer_added_action
@@ -541,14 +541,14 @@ class XMLBuilder
     XMLBuilder.new(factory.newDocumentBuilder.newDocument)
   end
 
-# A *XMLExporter* must have a reference to the document and the node
+# A *XMLBuilder* must have a reference to the document and the node
 # it's acting on. At the start that's the root document.
   def initialize(doc, node=doc)
     @doc = doc
     @node = node
   end
 
-# When adding a new element a new *XMLExporter* is created so that
+# When adding a new element a new *XMLBuilder* is created so that
 # element can be subsequently modified.
   def add_element name
     element = @doc.createElement(name)
