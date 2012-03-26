@@ -110,9 +110,6 @@ class DARE(Resource):
         url = self.server.do_post_form__location(self.path('robot/execute'), params)
         return Execution(url, self.server)
 
-    def robot(self, url_robot):
-        return Robot(url_robot, self.server)
-
 class Robot(Resource):
 
     def show(self):
