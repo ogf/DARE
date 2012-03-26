@@ -8,12 +8,65 @@ Finalmente la DSL se ha implementado por medio de una DSL~interna en
 JRuby. Discutiremos las características de las DSL~internas y las
 DSL~externas, así como la razón para elegir JRuby.
 \subsubsection{DSL internas}
-Definición, ventajas, inconvenientes, \ldots{}
+
+Las DSL internas se desarrollan utiizando las facilidades ofrecidas
+por el lenguaje de programación en el que se realiza. Esto colleva que
+estés limitado por las las características de dicho lenguaje. A medio
+camino entre librería y DSL interna se encuentran las llamadas
+\emph{fluent interfaces}. Muchas veces es difícil distinguir una
+\emph{fluent interface} de una DSL interna; teniendo las DSL internas
+mayores características de un lenguaje.
+
 \subsubsection{DSL externas}
-Definición, ventajas, inconvenientes, \ldots{}
-% JavaCC, ANTLR
+
+Con las DSL internas siempre estás limitado en cierta medida por la
+sintaxis del lenguaje anfitrión. Las DSL externas proporcionan, sin
+embargo, libertad absoluta. La DSL externa opera en texto, aplicando
+un proceso de parseado. Las técnicas para parsear el texto de entrada
+son las mismas que las utilizadas para implementar un lenguaje de
+programación. Conviene recordar que lo que distingue a una DSL de un
+lenguaje de programación es que está orientada a un campo específico.
+
+En el caso de decidir realizar una DSL externa se podría elegir entre
+varias técnicas para realizar el parseado:
+\begin{description}
+\item[Recursive Descent Parser\footnote{Analizador sintáctico
+    descendente recursivo}]: Es una forma de traducir un
+  \emph{top-down} parser, traduciendo cada símbolo no terminal a una
+  función.
+\item[Parser Combinator]: Se trata de una variante de lo anterior en
+  el que se utilizan combinadores, funciones que aceptan otras
+  funciones que representan símbolos no terminales.
+\item[Generador Parsers]: Se trata de librerías que reciben una
+  gramática en BNF\footnote{Backus-Naus Form} y emiten código para
+  crear un parser de un tipo específico. Unas de las más comunes en
+  el mundo Java son ANTLR y JavaCC.
+\end{description}
+
 \subsubsection{¿Por qué DSL interna?}
+
+Una ventaja de una DSL interna frente a una DSL externa es que en
+teoría tienen un coste de desarrollo inferior ya que se utilizan
+herramientas con las que el programador ya esta familiarizado. Por
+otro lado muchas veces las DSL internas descansan en características
+pocos conocidas de los lenguajes anfitriones.
+
+Por otro lado la DSL interna estará limitada por la sintaxis del
+lenguaje anfitrión y esto puede limitar su expresividad. Una ventaja
+de las DSL internas, sin embargo, es que permiten el uso del lenguaje
+anfitrión para exponer estructuras de control, aritmética, etc.
+
+Finalmente hemos optado por desarrollar una DSL interna ya que creímos
+que la expresividad de Ruby era suficiente para nuestros
+propositos. Para confirmarlo creamos un prototipo de la DSL
+interna. Consideramos el resultado suficientemente expresivo por lo
+que desechamos la posibilidad de desarrollar una DSL externa. A partir
+de este prototipo se ha desarollado el resultado final.
+
 \subsubsection{Ruby y JRuby}
+Ruby es una buena opción para realizar DSL internas porque es un
+lenguaje que gracias a su sintaxis flexible y sus capacidades de
+metaprogramación.
 \subsubsection{Sintaxis}
 \subsubsection{Ejemplos}
 
