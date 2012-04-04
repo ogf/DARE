@@ -130,7 +130,7 @@
 
 (deftest execution-result-at-initial-state-implies-none-is-returned
   (let [robot (Robot/createFromMinilanguage "url")
-        code (insert-execution-at-initial-state robot [])
+        code (insert-execution-at-initial-state! robot [])
         ^Maybe maybe (.retrieveExecution *backend* code)]
     (is (.isNone maybe))))
 
@@ -140,7 +140,7 @@
 
 (deftest execution-result-with-results-fullfiled-implies-result-returned
   (let [robot (Robot/createFromMinilanguage "url")
-        code (insert-execution-at-initial-state robot [])
+        code (insert-execution-at-initial-state! robot [])
         result-lines ["one" "two"]
         _ (mongo/update! :executions {:_id code} {:$set {:resultLines result-lines
                                                          :executionTimeMilliseconds 1000}})
@@ -185,7 +185,7 @@
       (assert-an-execution-eventually-exists))
     (testing "executions scheduled but not send are cleaned so they can be scheduled again"
       (erase-previous-periodical-result)
-      (mark-as-scheduled code)
+      (mark-as-scheduled! code)
       (assert-an-execution-eventually-exists))))
 
 (deftest robots-periodical-executions-and-result-executions-can-be-deleted
