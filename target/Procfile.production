@@ -1,0 +1,2 @@
+web:    java -Djava.security.manager -Djava.security.policy=server.policy -jar DARE-web-1.0.0-SNAPSHOT-standalone.jar -w DARE.war -p $PORT --mongo-db local
+worker: java -jar DARE-workers-0.1-SNAPSHOT-standalone.jar -p $PORT --mongo-db local

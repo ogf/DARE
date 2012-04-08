@@ -1,9 +1,131 @@
-\section{Instalación local}
-\section{Instalación cluster}
-\subsection{AWS}
-\subsection{Pallet}
-http://palletops.com/
-\subsection{Logs}
+ \section{Instalación}
+Veamos primero como instalar DARE en un único nodo. Para ello
+utilizaremos la \emph{gema} foreman. Los siguientes pasos de han
+comprobado en un Ubuntu 11.10. Las instrucciones deberían ser
+similares para cualquier sistema Linux actual, aunque podrían diferir
+en detalles. Como resultado de seguir estos pasos se debería tener
+DARE ejecutándose en un único nodo con dos procesos \emph{web} y dos
+procesos \emph{worker}.
+
+\subsection{Dependencias}
+\begin{description}
+\item[MongoDB.] Para instalar MongoDB en Ubuntu recomendamos seguir
+  las instrucciones presentes en
+  \url{http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages}. Una
+  vez instalado \verb+mongo --version+ debería producir algo similar
+  a: \verb+MongoDB shell version: 2.0.3+.
+\item[NginX.] Vamos a utilizar el servidor web NginX para actuar como
+  un proxy inverso con balanceo de carga. Para instalar efectuar:
+  \verb+sudo apt-get install nginx+.
+\item[Ruby Gems.] Sirve para instalar
+  \emph{gems}\cite{RUBY_GEMS}\footnote{Formato de distribución de
+    librerías Ruby}. Se necesita para instalar Foreman.  Se pude
+  instalar utilizando el comando:
+  \verb+sudo apt-get install rubygems1.8+ Otra opcion es utilizar
+  \emph{rvm}, para ello seguir las instrucciones en
+  \url{http://beginrescueend.com/}.
+\item[Foreman.] Es una gem que instala en el sistema el comando
+  Ruby. Para instalar efectuar: \verb+gem install foreman+.
+\end{description}
+
+\subsection{Pasos}
+
+\subsubsection{Configurar DARE}
+\begin{enumerate}
+  \item Crear usuario dare con el que se ejecutará el servicio. 
+    \begin{verbatim}
+sudo addgroup --system dare
+sudo adduser --system --no-create-home --ingroup dare -shell '/bin/bash' dare
+    \end{verbatim}
+  \item Crear directorio donde se encontrarán los ejecutables.
+    \begin{verbatim}
+sudo mkdir /opt/dare
+    \end{verbatim}
+  \item Copiar ejecutables DARE. \verb+target-location+ es el
+    directorio target dentro de tu distribución DARE. Allí deberían
+    estar los jars y el war de la aplicación.
+    \begin{verbatim}
+sudo mkdir /opt/dare
+sudo cp <target-location>/* /opt/dare
+sudo cp <target-location>/.foreman /opt/dare
+sudo chown -R dare:dare /opt/dare
+    \end{verbatim}
+
+  \item Exportar la aplicación para poder ser ejecuta desde el sistema
+    de manejo de procesos del sistema. En el caso de Ubuntu se emplea
+    Upstart\bibitem{UPSTART}. Si se está utilizando rvm hay que hacer
+    rvmsudo en vez de sudo.
+
+    \verb+sudo foreman export upstart /etc/init -f Procfile.production -u dare+
+
+    En el fichero \verb+.foreman+ se encuentran algunos valores por
+    defecto. Como el nombre de la aplicación, el puerto y la
+    concurrencia. Si se desea cambiar algún parámetro se puede cambiar
+    en este fichero o pasarlo como parámetro a foreman. Por ejemplo
+    para exportar un script upstart que lance tres procesos worker y
+    uno process web habría que invocar foreman del siguiente modo:
+
+    \begin{verbatim}
+sudo foreman export upstart /etc/init -f Procfile.production -c 'web=1,worker=3'
+    \end{verbatim}
+    Ejecutar \verb+foreman help export+ para ver más opciones.
+\end{enumerate}
+
+Ahora podemos hacer: 
+\begin{verbatim}
+# para lanzar dare:
+sudo dare start
+# para parar dare
+sudo dare stop
+# para parar sólo el worker-2
+sudo dare stop worker-2
+# para lanzar el worker-2
+sudo dare start worker-2
+\end{verbatim}
+Una vez lanzado dare debería haber dos procesos web y dos procesos
+worker escuchando en los puertos correspondientes. Los procesos web
+escucharán en los puertos 5000 y 5001. Obviamente los usuarios de DARE
+esperan que la aplicación esté escuchando en un dominio con el puerto
+estándar. Para ello debemos de configurar un proxy inverso que balancee
+la carga entre los procesos web configurados. 
+
+Si deseamos instalar DARE en más nodos repetimos este proceso en cada
+nodo. Sólo habría que instalar Nginx en uno de los nodos y hay que
+acordarse de listar todos los procesos en web en \verb+upstream dare+.
+
+\subsubsection{Configurar Nginx}
+
+Vamos a utilizar Nginx como balanceador de carga. En el directorio
+\verb+/etc/nginx/+ se encuentra su configuración.
+
+Primero creamos una nueva configuración, por ejemplo creando un
+fichero dare en \verb+/etc/sites-available/default+ con este contenido:
+\begin{verbatim}
+upstream dare {
+# list of launched web processes
+   server 127.0.0.1:5000;
+   server 127.0.0.1:5001;
+}
+
+server {
+       listen 80 default_server;
+       server_name       "";
+
+       location / {
+                proxy_pass http://dare;
+                include proxy_params;
+       }
+}
+\end{verbatim}
+
+A continuación creamos un enlace a esta configuración:
+
+\verb+sudo ln -s /etc/nginx/sites-available/dare /etc/nginx/sites-enabled/dare+
+
+Por último hay que eliminar el enlace a la configuración por defecto:
+
+\verb+sudo rm /etc/nginx/sites-enabled/default+.
+
 \section{Especificación API REST}
 
 A continuación describimos la API REST de manera detallada. Esta
@@ -142,7 +264,7 @@ Utilizando los recursos para realizar ejecuciones
 cuadro~\ref{execute_robot}, pág.~\pageref{execute_robot}--- se obtiene
 la URL a un nuevo Resultado de Ejecución. Esta URL es actualmente de
 la forma \verb+\<base-url>/result/{code}+, pero esto está sujeto a
-cambio. La apicaxción cliente debería trabajar con la URL obtenida al
+cambio. La aplicación cliente debería trabajar con la URL obtenida al
 crearse una nueva ejecución. A esta URL la llamaremos
 \verb+<execution-url>+.
 
@@ -190,7 +312,7 @@ Utilizando el recurso para crear una ejecución periódica
 se obtiene la URL que identifica una Ejecución Periódica. Esta URL es
 actualmente de la forma
 \verb+\<base-url>/result/{periodical-execution-code}+, pero esto está
-sujeto a cambio. La apicación cliente debería trabajar con la URL
+sujeto a cambio. La aplicación cliente debería trabajar con la URL
 obtenida al crearse una nueva ejecución periódica. A esta URL la
 llamaremos \verb+<periodical-url>+.
 
@@ -339,6 +461,4 @@ creationDateMillis: 1332353014267L}
 \newpage
 
 \section{Línea comandos}
-\subsection{Ejemplos}
-\section{Librerías}
 \subsection{Ejemplos}

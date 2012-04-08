@@ -1,0 +1,3 @@
+concurrency: web=2,worker=2
+port: 5000
+app: dare
