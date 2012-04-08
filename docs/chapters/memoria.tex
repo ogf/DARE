@@ -294,13 +294,105 @@ presenta en único volumen que contiene tres capítulos:
 
 Junto a la documentación se incluirá un CD con el siguiente contenido:
 
-\ldots{}
-%TODO: completar llegado el momento
+\begin{verbatim}
+.
+├── all.policy
+├── build-common.xml
+├── build.xml
+├── DARE-backend
+├── DARE-domain
+├── DARE-java
+├── DARE-python
+├── DARE-util
+├── DARE-war
+├── DARE-web
+├── DARE-workers
+├── docs
+├── ivyconf-local.xml
+├── ivyconf-public.xml
+├── ivysettings-default-chain.xml
+├── ivysettings-m2-publication.xml
+├── ivysettings.xml
+├── lib
+├── minilanguage
+├── Procfile
+└── target
 
+12 directories, 9 files
+\end{verbatim}
+
+Aparte se puede obtener la última versión del proyecto mediante git:
+
+\verb+git clone https://github.com/ogf/DARE+.
+
+De este modo se puede acceder a las actualizaciones realizadas después
+de que se haya entregado el proyecto.
 
 \section{Planificación y presupuesto}
 \subsection{Planificación temporal}
+En su totalidad el proyecto se ha realizado en 640 horas, mientras que
+la previsión del proyecto fueron 440 horas. Este desvío se ha
+producido sobretodo a que se escogieron tecnologías todavía no
+conocidas y que hubo que aprender. Además se evaluaron más tecnologías
+de las previstas a la hora de realizar el proyecto.
+
+A continuación mostramos una tabla con el tiempo empleado en las
+tareas planificadas, seguida del diagrama de Gantt de las mismas.
+
+\begin{landscape}
+  \begin{figure}[hbp]
+    \begin{center}
+      \includegraphics[width=1.4\textwidth]{tasks-structure.png}
+    \end{center}
+  \caption{Desglose Tareas}\label{tasks_structure}
+  \end{figure}
+\end{landscape}
+\begin{landscape}
+  \begin{figure}[hbp]
+    \begin{center}
+      \includegraphics[width=1.4\textwidth]{gantt-diagram.png}
+    \end{center}
+  \caption{Diagrama Gantt}\label{gantt_diagram}
+  \end{figure}
+\end{landscape}
 \subsection{Presupuesto}
+
+A continuación mostramos los costes fijos ---tabla \ref{fixed_costs},
+pág.~\pageref{fixed_costs}--- y los costes humanos estimados ---tabla
+\ref{human_costs}, pág.~\pageref{human_costs}---. En cuanto a los
+costes humanos solo hemos indicado las horas empleadas. Hemos
+preferido no imputar un precio a cada hora porque es completamente
+circunstancial y en el caso de un proyecto fin de carrera irreal.
+\newpage
+\begin{table}[hbp]
+\begin{tabularx}{\textwidth}{X r}
+\textbf{Recurso} & \textbf{Precio} \\\hline
+Ubuntu 11.10 & 0€ \\
+OpenJDK Server VM 1.6\_023 & 0€ \\
+Eclipse Indigo & 0€ \\
+\XeLaTeX{}  & 0€ \\
+Emacs 23 & 0€ \\
+MongoDB 2.0.3 & 0€ \\
+Sony Vaio VPCZ11X9E (amortizado) & 450€ \\
+\textbf{Total} & 450€ \\
+\end{tabularx}
+\caption{Costes Fijos}
+\label{fixed_costs}
+\end{table}
+
+\begin{table}[hbp]
+\begin{tabularx}{\textwidth}{X r}
+
+\textbf{Recurso} & \textbf{Horas} \\ \hline
+Analista/Diseñador & 200 horas\\
+Programador & 220 horas \\
+Documentación & 160 horas \\
+Pruebas & 60 horas \\
+\textbf{Total} & 640 horas \\
+\end{tabularx}
+\caption{Costes Humanos}
+\label{human_costs}
+\end{table}
 
 \section{Conclusiones y posibles ampliaciones}
 
@@ -364,17 +456,17 @@ la sensación de que la programación funcional, con la reducción de
 efectos laterales que conlleva, es una de las mejores herramientas que
 disponemos en la batalla por limitar la complejidad a la hora de
 construir y comprender sistemas.
-
-Otro campo en el que el proyecto ha ayudado ha sido adentrarme en el
-mundo de la \emph{Cloud Computing}. Hemos comprobado que el uso de
-AWS\footnote{\emph{Amazon Web Services}}, nos ha ofrecido flexibilidad
-a la hora de escalar el servicio. Así podemos ofrecer el servicio,
-tanto a un público reducido, como a un público amplio, simplemente
-añadiendo nuevas instancias dinámicamente. Pallets, nos ha ofrecido
-una gran facilidad para automatizar el despliegue y el
-redimensionamiento del servicio. Mientras que jclouds nos ofrece
-flexibilidad futura, permitiéndonos portabilidad a otros proveedores
-en el futuro.
+%
+%Otro campo en el que el proyecto ha ayudado ha sido adentrarme en el
+%mundo de la \emph{Cloud Computing}. Hemos comprobado que el uso de
+%AWS\footnote{\emph{Amazon Web Services}}, nos ha ofrecido flexibilidad
+%a la hora de escalar el servicio. Así podemos ofrecer el servicio,
+%tanto a un público reducido, como a un público amplio, simplemente
+%añadiendo nuevas instancias dinámicamente. Pallets, nos ha ofrecido
+%una gran facilidad para automatizar el despliegue y el
+%redimensionamiento del servicio. Mientras que jclouds nos ofrece
+%flexibilidad futura, permitiéndonos portabilidad a otros proveedores
+%en el futuro.
 
 Como no todo puede ser positivo, cabe destacar que la integración de
 tantas tecnologías ha presentado sus retos y una mayor complejidad que
@@ -399,6 +491,8 @@ de utilidad en un futuro.
 Hay una serie de ampliaciones que se podrían llevar a cabo:
 
 \begin{itemize}
+  \item Herramienta para instalar automáticamente DARE en varios
+    nodos, preferiblemente en AWS\footnote{\emph{Amazon Web Services}}.
   \item Crear una herramienta que facilite la creación de robots
     basados en la DSL creada. Debería ofrecer auto-completado,
     coloreado de sintaxis, marcado de errores, etc.
