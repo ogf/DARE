@@ -1,0 +1,47 @@
+<robot version="1.0">
+	<transformer class="SimpleTransformer" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+		<description>SimpleTransformer</description>
+		<param key="description">SimpleTransformer</param>
+		<param key="inputFilter"></param>
+		<transformer class="URLRetriever" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+			<description>URLRetriever</description>
+			<param key="description">URLRetriever</param>
+			<param key="inputFilter"></param>
+		</transformer>
+		<transformer class="SimpleTransformer" branchtype="BRANCH_DUPLICATED" branchmergemode="SCATTERED" loop="false">
+			<description>SimpleTransformer</description>
+			<param key="description">SimpleTransformer</param>
+			<param key="inputFilter"></param>
+			<transformer class="SimpleTransformer" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+				<description>SimpleTransformer</description>
+				<param key="description">SimpleTransformer</param>
+				<param key="inputFilter"></param>
+				<transformer class="HTMLMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+					<description>HTMLMatcher</description>
+					<param key="XPath">//a[@href]</param>
+					<param key="description">HTMLMatcher</param>
+					<param key="inputFilter"></param>
+				</transformer>
+				<transformer class="Decorator" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+					<description>Decorator</description>
+					<param key="description">Decorator</param>
+					<param key="head">
+</param>
+					<param key="inputFilter"></param>
+					<param key="tail">: </param>
+				</transformer>
+			</transformer>
+			<transformer class="HTMLMatcher" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+				<description>HTMLMatcher</description>
+				<param key="XPath">//a/@href</param>
+				<param key="description">HTMLMatcher</param>
+				<param key="inputFilter"></param>
+			</transformer>
+		</transformer>
+		<transformer class="Merger" branchtype="CASCADE" branchmergemode="SCATTERED" loop="false">
+			<description>Merger</description>
+			<param key="description">Merger</param>
+			<param key="inputFilter"></param>
+		</transformer>
+	</transformer>
+</robot>

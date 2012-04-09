@@ -1,0 +1,4 @@
+url | branch(:BRANCH_DUPLICATED, :SCATTERED) {
+    pipe {xpath('//a[@href]') | decorator(:head => "\n", :tail => ": ")}
+    xpath('//a/@href')
+} | merger

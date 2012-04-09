@@ -1,5 +1,5 @@
- \section{Instalación}
-Veamos primero como instalar DARE en un único nodo. Para ello
+\section{Instalación}
+Veamos primero como instalar DARE en un nodo. Para ello
 utilizaremos la \emph{gema} foreman. Los siguientes pasos de han
 comprobado en un Ubuntu 11.10. Las instrucciones deberían ser
 similares para cualquier sistema Linux actual, aunque podrían diferir
@@ -9,6 +9,16 @@ procesos \emph{worker}.
 
 \subsection{Dependencias}
 \begin{description}
+\item[Java.] Para instalar Java en Ubuntu se puede hacer:
+  \verb+sudo apt-get install openjdk-7-jdk+
+\item[Lein.] Sólo es necesario si se va a editar el proyecto y
+  desarrollar. Seguir las instrucciones en
+  \url{https://github.com/technomancy/leiningen}.
+\item[Ant.] Sólo es necesario si se va a editar el proyecto y
+  desarrollar. Hay que efectuar el siguiente comando:
+
+  \verb+sudo apt-get install ant+
+
 \item[MongoDB.] Para instalar MongoDB en Ubuntu recomendamos seguir
   las instrucciones presentes en
   \url{http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages}. Una
@@ -32,7 +42,7 @@ procesos \emph{worker}.
 
 \subsubsection{Configurar DARE}
 \begin{enumerate}
-  \item Crear usuario dare con el que se ejecutará el servicio. 
+  \item Crear usuario dare con el que se ejecutará el servicio.
     \begin{verbatim}
 sudo addgroup --system dare
 sudo adduser --system --no-create-home --ingroup dare -shell '/bin/bash' dare
@@ -71,7 +81,7 @@ sudo foreman export upstart /etc/init -f Procfile.production -c 'web=1,worker=3'
     Ejecutar \verb+foreman help export+ para ver más opciones.
 \end{enumerate}
 
-Ahora podemos hacer: 
+Ahora podemos hacer:
 \begin{verbatim}
 # para lanzar dare:
 sudo dare start
@@ -87,7 +97,7 @@ worker escuchando en los puertos correspondientes. Los procesos web
 escucharán en los puertos 5000 y 5001. Obviamente los usuarios de DARE
 esperan que la aplicación esté escuchando en un dominio con el puerto
 estándar. Para ello debemos de configurar un proxy inverso que balancee
-la carga entre los procesos web configurados. 
+la carga entre los procesos web configurados.
 
 Si deseamos instalar DARE en más nodos repetimos este proceso en cada
 nodo. Sólo habría que instalar Nginx en uno de los nodos y hay que
@@ -125,6 +135,261 @@ A continuación creamos un enlace a esta configuración:
 Por último hay que eliminar el enlace a la configuración por defecto:
 
 \verb+sudo rm /etc/nginx/sites-enabled/default+.
+
+\section{Guía Usuario}
+
+Una vez instalado \emph{DARE} siguiendo los pasos anteriores podemos
+comprobar su funcionamiento. Para ello utilizaremos la aplicación de
+línea de comandos encontrada dentro de \emph{DARE-python}. Para
+empezar veamos que produce la ayuda de la aplicación:
+
+\begin{verbatim}
+$./dare.py -h
+usage: dare.py [-h] {robot,execution,periodical} ...
+
+Connect to DARE
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Entities:
+  Type of entity on which to operate on
+
+  {robot,execution,periodical}
+    robot               -h for more help
+    execution           -h for more help
+    periodical          -h for more help
+\end{verbatim}
+
+Básicamente indica que dare.py se puede utilizar con robot, execution
+y periodical. A su vez podemos bajar un nivel y ver la ayuda asociada
+con la opción robot.
+\begin{verbatim}
+$./dare.py robot -h
+usage: dare.py robot [-h]
+                     {list,create,show,delete,execute,create-periodical} ...
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Command:
+  the command to execute. command plus -h for more information
+
+  {list,create,show,delete,execute,create-periodical}
+    list                List robots created by the user
+    create              Create a new robot from file or standard input
+    show                Show information about robot
+    delete              Delete the robot
+    execute             Execute the robot
+    create-periodical   Execute a robot periodically
+
+\end{verbatim}
+
+A su vez podemos comprobar que para robot existen más opciones. Esto
+mismo se puede realizar en cada paso para ver las opciones que se
+pueden usar. Ahora veamos lo que nos devuelve el listado de robots.
+\begin{verbatim}
+$./dare.py robot list
+\end{verbatim}
+Como se puede ver no devuelve nada. Esto se debe a que todavía no
+se ha creado ningún robot. Sin más dilación creemos uno muy
+sencillo. Para ello veamos como se crea un robot:
+\begin{verbatim}
+$./dare.py robot create -h
+usage: dare.py robot create [-h] -s SERVER [-xml] [-f FILE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SERVER, --server SERVER
+                        The url of the server on which the robot will be
+                        created
+  -xml, --xml           If present interpret the input as a xml. Otherwise in
+                        minilanguage.
+  -f FILE, --file FILE  If not present use standard input.
+\end{verbatim}
+Pasemos a crear un robot que extraiga los enlaces presentes en la
+url indicada:
+
+\begin{verbatim}
+$echo 'url | xpath("//a")' | ./dare.py robot create -s "http://localhost/"
+Robot with code a06fb83d-17f9-4e63-946b-2481fa1bfc79 created
+\end{verbatim}
+El código creado será distinto en tu caso.
+Ahora \verb+./dare.py robot list+ debería de devolver como resultado
+el robot creado.
+Ahora veamos como se ejecuta:
+\begin{verbatim}
+$./dare.py robot execute -h
+usage: dare.py robot execute [-h] robot [input [input ...]]
+
+positional arguments:
+  robot       The id of the robot
+  input       The inputs the robot will be executed with
+
+optional arguments:
+  -h, --help  show this help message and exit
+\end{verbatim}
+Ahora ejecutémoslo:
+\begin{verbatim}
+$./dare.py robot execute a06fb83d-17f9-4e63-946b-2481fa1bfc79 \
+"http://www.google.es"
+Execution with code 64f95a6c-efe7-4f54-99bf-8d9cad71f791 created
+\end{verbatim}
+
+Ahora que ya hemos creado una ejecución, mostrémosla:
+
+\begin{verbatim}
+$./dare.py execution show \
+execution 64f95a6c-efe7-4f54-99bf-8d9cad71f791
+
+Date: Mon, 09 Apr 2012 02:44:57
+Inputs: [u'http://www.google.es']
+Execution time: 556 ms
+from robot a06fb83d-17f9-4e63-946b-2481fa1bfc79
+Búsqueda
+Imágenes
+Vídeos
+Maps
+Noticias
+Shopping
+Gmail
+... ...
+\end{verbatim}
+También podemos comprobar que el listado de robots lista la ejecución
+creada:
+
+\begin{verbatim}
+$./dare.py robot list \
+robot a06fb83d-17f9-4e63-946b-2481fa1bfc79
+Date:  Mon, 09 Apr 2012 02:40:30
+url | xpath("//a")
+Executions:
+     execution 64f95a6c-efe7-4f54-99bf-8d9cad71f791
+     Date: Mon, 09 Apr 2012 02:44:58
+     Inputs:  ['http://www.google.es']
+----------------------------------------------------------------------
+\end{verbatim}
+Ahora vamos a crear un robot un poco más complejo. De paso
+aprovecharemos para demostrar como se crea un robot a partir de un
+fichero.
+
+Vamos a crear un robot que además del nombre del enlace muestre el
+enlace al que apunta. Se encuentra en el fichero
+\verb+example.minilanguage+:
+\begin{verbatim}
+url | branch(:BRANCH_DUPLICATED, :SCATTERED) {
+    pipe {xpath('//a[@href]') | decorator(:head => "\n", :tail => " : ")}
+    xpath('//a/@href')
+} | merger
+\end{verbatim}
+
+Creemos un nuevo robot a partir del fichero:
+\begin{verbatim}
+$./dare.py robot create -f example.minilanguage -s "http://localhost/"
+Robot with code 352168fe-b361-49b9-9f30-c9ff5f4db736 created
+\end{verbatim}
+
+Y ahora ejecutémoslo con la página http://www.google.com como entrada:
+
+\begin{verbatim}
+$./dare.py robot execute 352168fe-b361-49b9-9f30-c9ff5f4db736 "http://www.google.com"
+Execution with code 7f1b4d98-09d4-4bfb-b4b1-261994c4b615 created
+$./dare.py execution show 7f1b4d98-09d4-4bfb-b4b1-261994c4b615
+execution 7f1b4d98-09d4-4bfb-b4b1-261994c4b615
+Date: Mon, 09 Apr 2012 02:55:54
+Inputs: [u'http://www.google.com']
+Execution time: 686 ms
+from robot 352168fe-b361-49b9-9f30-c9ff5f4db736
+
+Búsqueda : http://www.google.es/webhp?hl=es&tab=ww
+Imágenes : http://www.google.es/imghp?hl=es&tab=wi
+Vídeos : http://video.google.es/?hl=es&tab=wv
+Maps : http://maps.google.es/maps?hl=es&tab=wl
+Noticias : http://news.google.es/nwshp?hl=es&tab=wn
+.... ....
+\end{verbatim}
+
+El mismo robot también se puede crear en formato XML y el resultado de
+su ejecución es el mismo. El robot equivalente está en directorio
+DARE-python y se llama example.xml.
+
+\begin{verbatim}
+$./dare.py robot create --xml -f example.xml -s "http://localhost/"
+Robot with code eae9ddd7-29e5-4eba-8543-31c0528f52c7 created
+
+$./dare.py robot execute eae9ddd7-29e5-4eba-8543-31c0528f52c7 \
+"http://www.google.com"
+Execution with code 5c64068e-0d9b-4538-af52-206152943bde created
+
+$./dare.py robot execution show 5c64068e-0d9b-4538-af52-206152943bde
+execution 5c64068e-0d9b-4538-af52-206152943bde
+Date: Mon, 09 Apr 2012 03:15:59
+Inputs: [u'http://www.google.com']
+Execution time: 413 ms
+from robot eae9ddd7-29e5-4eba-8543-31c0528f52c7
+
+Búsqueda: http://www.google.es/webhp?hl=es&tab=ww
+Imágenes: http://www.google.es/imghp?hl=es&tab=wi
+Vídeos: http://video.google.es/?hl=es&tab=wv
+Maps: http://maps.google.es/maps?hl=es&tab=wl
+Noticias: http://news.google.es/nwshp?hl=es&tab=wn
+... ...
+\end{verbatim}
+
+Como podemos comprobar el resultado es el mismo, pero como podemos
+observar el XML es mucho más verboso y complejo para un humano.
+
+\subsection{Ejecuciones Periódicas}
+
+Veamos ahora como se puede realizar una ejecución periódica. Vamos a
+utilizar uno de los robots creados con anterioridad. Recuerde que
+puedes copiar el código del robot a partir del listado:
+
+\begin{verbatim}
+$./dare.py robot list+
+\end{verbatim}
+
+Creemos una ejecución periódica que cada cinco horas genera el listado
+de enlaces de la escuela de informática:
+
+\begin{verbatim}
+$./dare.py robot create-periodical
+352168fe-b361-49b9-9f30-c9ff5f4db736 \
+5h "http://www.esei.uvigo.es/"
+
+Periodical execution with code 6e32f3b5-d607-4763-8a0c-e081f17da459 created
+\end{verbatim}
+
+Mostremos la ejecución periódica creada:
+
+\begin{verbatim}
+$./dare.py periodical show 6e32f3b5-d607-4763-8a0c-e081f17da459
+
+periodical 6e32f3b5-d607-4763-8a0c-e081f17da459
+Date: Mon, 09 Apr 2012 03:24:38
+from robot 352168fe-b361-49b9-9f30-c9ff5f4db736
+period: 5hours
+inputs [u'http://www.esei.uvigo.es/']
+Last execution date: Mon, 09 Apr 2012 03:24:39
+Execution time 645 ms
+
+ES : index.php?id=1&amp;L=2
+EN : index.php?id=1&amp;L=1
+ : /index.php
+ : http://www.uvigo.es/
+A ESEI : index.php?id=22
+ESTUDOS : index.php?id=cetest_firstpage
+ESTUDANTES : index.php?id=7
+NORMATIVAS E FORMULARIOS : index.php?id=6
+I+D E EMPRESAS : index.php?id=3
+Primeiro cuatrimestre : index.php?id=21
+Segundo cuatrimestre : index.php?id=20
+... ...
+\end{verbatim}
+
+Le animo a seguir navegando por los diferentes comandos ofrecidos por
+la línea de comandos, para ello añada al final \verb+-h+ para obtener
+un mensaje de ayuda.
 
 \section{Especificación API REST}
 
@@ -457,8 +722,4 @@ creationDateMillis: 1332353014267L}
 \caption{Representación XML Ejecución Periódica}
 \label{periodical_execution_xml_representation}
 \end{table}
-
 \newpage
-
-\section{Línea comandos}
-\subsection{Ejemplos}
