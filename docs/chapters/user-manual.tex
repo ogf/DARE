@@ -1,4 +1,5 @@
 \section{Instalación}
+\label{local_installation}
 Veamos primero como instalar DARE en un nodo. Para ello
 utilizaremos la \emph{gema} foreman. Los siguientes pasos de han
 comprobado en un Ubuntu 11.10. Las instrucciones deberían ser
@@ -63,7 +64,7 @@ sudo chown -R dare:dare /opt/dare
 
   \item Exportar la aplicación para poder ser ejecuta desde el sistema
     de manejo de procesos del sistema. En el caso de Ubuntu se emplea
-    Upstart\bibitem{UPSTART}. Si se está utilizando rvm hay que hacer
+    Upstart\cite{UPSTART}. Si se está utilizando rvm hay que hacer
     rvmsudo en vez de sudo.
 
     \verb+sudo foreman export upstart /etc/init -f Procfile.production -u dare+

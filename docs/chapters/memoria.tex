@@ -170,7 +170,7 @@ tiempo de arranque de la JVM.
 
 \subsection{Descripción del sistema}
 
-DARE está compuesto de los siguientes módulos.
+DARE está compuesto de los siguientes módulos:
 
 \begin{itemize}
 
@@ -223,7 +223,6 @@ DARE está compuesto de los siguientes módulos.
     modelo es el responsable de la parte de vista y controlador. El
     modelo sería DARE-domain junto a DARE-backend ofreciendo servicios
     de persistencia y ejecución.
-    %TODO: separar la libreria cliente Java de aqui
 
     Está diseñado para poder ejecutar numerosas instancias
     simultáneamente, ya que se sigue una filosofía
@@ -244,9 +243,54 @@ DARE está compuesto de los siguientes módulos.
     funcionalidad. Como es lógico está implementado en Python.
 
 \end{itemize}
-%TODO hacer diagrama
 
-\subsection{Visión del sistema}
+\subsection{Visión arquitectónica}
+
+Veamos a continuación un diagrama que muestra un ejemplo de despliegue
+de DARE --- ver \ref{deployment_example}. Podemos apreciar equipos clientes que se comunican utilizando
+el protocolo HTTP con DARE. Estos equipos pueden utilizar alguna de
+las librerías clientes presentadas en este proyecto o haber creado su
+propia librería o aplicación.
+
+Dentro de lo que seria DARE hay tres tipos de nodos:
+
+\begin{itemize}
+  \item Un nodo con un balanceador de carga. Para DARE recomendamos
+    utilizar nginx\cite{NGINX} como proxy inverso. Este nodo repartirá
+    las peticiones entre todos los nodos que estén ejecutando
+    DARE-web.
+  \item Nodos con el componente DARE-web. Estos nodos atienden
+    peticiones HTTP. Si la petición implica una ejecución, se manda
+    una solicitud de ejecución a uno de los nodos que tenga
+    DARE-worker instalado. Preferiblemente se elegirá el que tenga
+    menor carga en ese momento.
+  \item Nodos con el componente DARE-worker. Estos nodos reciben las
+    peticiones de ejecución vía TCP.
+  \item Sistema de almacenamiento. En el caso que se nos ocupa hemos
+    empleado MongoDB\cite{Mongo}. Es el punto responsable de almacenar
+    el estado del sistema. Todos los procesos ejecutando DARE-web
+    carecen de estado: es decir, se puede dirigir cada petición a
+    cualquiera de los procesos DARE-web.
+\end{itemize}
+
+El ejemplo de despliegue presentado en el diagrama no deja de ser más
+que un ejemplo. Se podrían colocar, por ejemplo, los procesos
+DARE-worker en los mismos nodos que los procesos DARE-web. En la
+sección de instalación ---\ref{local_installation},
+pág.~\pageref{local_installation}--- se instalan todos estos elementos
+en el mismo nodo. Esa es una buena opción para comenzar, luego según
+las necesidades van aumentando se pueden ir añadiendo más nodos con
+los tipos de procesos que son más requeridos.
+
+\begin{landscape}
+  \begin{figure}[hbp]
+    \begin{center}
+      \includegraphics[width=1.4\textwidth]{example-deployment.png}
+    \end{center}
+  \caption{Ejemplo Despliegue}\label{deployment_example}
+  \end{figure}
+\end{landscape}
+
 \subsection{Organización de la documentación}
 
 A lo largo de la documentación se emplearán distintos diagramas
