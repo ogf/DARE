@@ -24,6 +24,8 @@
 \definecolor{darkblue}{rgb}{0.0,0.0,0.6}
 \definecolor{cyan}{rgb}{0.0,0.6,0.6}
 
+\usepackage{appendix}
+
 \lstset{
   basicstyle=\ttfamily,
   columns=fullflexible,
@@ -47,7 +49,6 @@
 \author{Óscar González Fernández}
 \title{DARE: Distributed aAutomator Runtime Environment}
 \begin{document}
-\maketitle
 \tableofcontents
 \chapter{Memoria}
 \input{chapters/memoria.tex}
@@ -226,4 +227,11 @@
   \newblock Upstart
   \newblock \url{http://upstart.ubuntu.com/}, 2012.
 \end{thebibliography}
+
+\appendix
+\addappheadtotoc
+\chapter{Anteproyecto}
+\label{ANTEPROYECTO}
+
+
 \end{document}
