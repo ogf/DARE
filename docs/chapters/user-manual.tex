@@ -46,7 +46,8 @@ procesos \emph{worker}.
   \item Crear usuario dare con el que se ejecutará el servicio.
     \begin{verbatim}
 sudo addgroup --system dare
-sudo adduser --system --no-create-home --ingroup dare -shell '/bin/bash' dare
+sudo adduser --system --no-create-home --ingroup dare \
+-shell '/bin/bash' dare
     \end{verbatim}
   \item Crear directorio donde se encontrarán los ejecutables.
     \begin{verbatim}
@@ -138,7 +139,7 @@ Por último hay que eliminar el enlace a la configuración por defecto:
 \verb+sudo rm /etc/nginx/sites-enabled/default+.
 
 \section{Guía Usuario}
-
+\label{user_guide}
 Una vez instalado \emph{DARE} siguiendo los pasos anteriores podemos
 comprobar su funcionamiento. Para ello utilizaremos la aplicación de
 línea de comandos encontrada dentro de \emph{DARE-python}. Para

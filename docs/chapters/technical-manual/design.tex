@@ -9,13 +9,13 @@ JRuby. Discutiremos las características de las DSL~internas y las
 DSL~externas, así como la razón para elegir JRuby.
 \subsubsection{DSL internas}
 
-Las DSL internas se desarrollan utiizando las facilidades ofrecidas
-por el lenguaje de programación en el que se realiza. Esto colleva que
+Las DSL internas se desarrollan utilizando las facilidades ofrecidas
+por el lenguaje de programación en el que se realiza. Esto conlleva que
 estés limitado por las las características de dicho lenguaje. A medio
 camino entre librería y DSL interna se encuentran las llamadas
 \emph{fluent interfaces}. Muchas veces es difícil distinguir una
 \emph{fluent interface} de una DSL interna; teniendo las DSL internas
-mayores características de un lenguaje.
+mayor entidad como lenguaje.
 
 \subsubsection{DSL externas}
 
@@ -47,8 +47,8 @@ varias técnicas para realizar el parseado:
 
 Una ventaja de una DSL interna frente a una DSL externa es que en
 teoría tienen un coste de desarrollo inferior ya que se utilizan
-herramientas con las que el programador ya esta familiarizado. Por
-otro lado muchas veces las DSL internas descansan en características
+herramientas con las que el programador ya esta familiarizado. Sin
+embargo, muchas veces las DSL internas descansan en características
 pocos conocidas de los lenguajes anfitriones.
 
 Por otro lado la DSL interna estará limitada por la sintaxis del
@@ -58,23 +58,19 @@ anfitrión para exponer estructuras de control, aritmética, etc.
 
 Finalmente hemos optado por desarrollar una DSL interna ya que creímos
 que la expresividad de Ruby era suficiente para nuestros
-propositos. Para confirmarlo creamos un prototipo de la DSL
+propósitos. Para confirmarlo creamos un prototipo de la DSL
 interna. Consideramos el resultado suficientemente expresivo por lo
 que desechamos la posibilidad de desarrollar una DSL externa. A partir
-de este prototipo se ha desarollado el resultado final.
+de este prototipo se ha desarrollado el resultado final.
 
 \subsubsection{Ruby y JRuby}
 Ruby es una buena opción para realizar DSL internas porque es un
 lenguaje que gracias a su sintaxis flexible y sus capacidades de
 metaprogramación.
 \subsubsection{Sintaxis}
-\subsubsection{Ejemplos}
 
-\subsubsection{Inyección código malicioso}
-Se ha empleado una sandbox, Java Security Architecture, \ldots{}
-\subsubsection{Timeouts}
-\subsubsection{Manipulación estado intérprete}
-\label{interpreter_state_manipulation}
+Para ver ejemplos de la sintaxis de la DSL interna generada, consultar
+la guía de usuario ---pág.~\pageref{user_guide} ---.
 
 \subsection{Servicio sigue estilo arquitectónico REST}
 REST\footnote{\emph{Representational state transfer}} es un estilo de
@@ -145,7 +141,7 @@ través de varias peticiones. Hypermedia no puede mantener una lista de
 páginas que apuntan a un elemento, ya que el número de enlaces puede
 ser muy elevado e impredecible.
 
-Dado que la WWW no va a ser controlado por una única organización,
+Dado que la WWW no va a ser controlada por una única organización,
 nuevas versiones no se desplegarán homogéneamente. Por tanto,
 diferentes versiones de los elementos deben de poder coexistir. Cada
 componente debe suponer que nuevas versiones se van a añadir.
@@ -178,12 +174,12 @@ híbrido derivado de varios estilos arquitectónicos existentes:
 \begin{description}
 
 \item[Cliente-Servidor.] La primera restricción es que el sistema debe
-  de ser cliente servidor. La separación de intereses es el principio
+  de ser cliente-servidor. La separación de intereses es el principio
   detrás de la separación cliente servidor. Separando los
   requerimientos de la interfaz de usuario de los de almacenamiento de
   datos se mejora la portabilidad de la interfaz de usuario y se
   mejora la escabilidad al simplificar los componentes de servidor. En
-  el caso de la WwW, esto permite a los diferentes componentes
+  el caso de la WWW, esto permite a los diferentes componentes
   evolucionar independientemente.
 
 \item[Sin Estado.] La comunicación entre un cliente y un servidor debe
@@ -307,13 +303,13 @@ Una vez hemos descrito REST veamos que nos aporta en relación a DARE y
 porque se ha decidido escogerlo.
 
 Consideramos que REST es más práctico. No conlleva la carga conceptual
-de, por ejemplo SOAP\cite{SOAP}. Como la WWW está basada en los
+de, por ejemplo, SOAP\cite{SOAP}. Como la WWW está basada en los
 conceptos de REST, todos los programadores están familiarizados con
 ellos. Mientras es cierto que el soporte de SOAP es extenso y suelen
 existir herramientas para facilitar su uso, en muchas plataformas no
 es una opción. Por ejemplo, si queremos crear una aplicación web que
 acceda al servicio, como es el caso de una de las posibles
-ampliaciones de este proyecto. Ver~\ref{MASHUP_REF} en
+ampliaciones de este proyecto. Ver sección~\ref{MASHUP_REF} en
 pág.~\pageref{MASHUP_REF}.
 
 Además REST nos facilita proporcionar diferentes representaciones de
@@ -475,7 +471,7 @@ facilidad de uso, asi que emplear un RDBMS sigue siendo una opción.
   subjetiva. En mi caso me decantaría por PostgreSQL por tener, a mi
   juicio, una mayor calidad interna y por su modelo de
   desarrollo. Ambos productos son Software Libre, pero MySQL está
-  esponsorizado por una única compañía (Oracle). Por contra,
+  esponsorizado por una única compañía ---Oracle---. Por contra,
   PostgreSQL no está controlado por una única compañía.
 \item[BerkeleyDB:] Se trata de una base de datos embebida
   clave-valor. Soporta bases de datos de gran tamaño y los valores
@@ -581,7 +577,7 @@ escalabilidad de DARE por tanto se basa en un modelo basado en
 procesos. Idealmente será responsabilidad del Sistema Operativo
 relanzar los procesos que hayan terminado inesperadamente su
 operación. La gran ventaja de este modelo es que para escalar
-simplemente hay que lanzar más procesos ya sea en el mismo u otros
+simplemente hay que lanzar más procesos, ya sea en el mismo u otros
 nodos.
 
 Para ofrecer una mayor facilidad de administración los procesos Web
@@ -609,7 +605,7 @@ sus actividades. Más concretamente habría dos tipos de procesos:
 En DARE llamamos \emph{Backend} a la parte responsable de almacenar
 los datos y mandar las ejecuciones a aAUTOMATOR. La implementación de
 esta parte se ha dividido en dos componentes: DARE-backend y
-DARE-workers. Ver \ref{COMPONENTES-DARE},
+DARE-workers. Ver sección~\ref{COMPONENTES-DARE},
 pág.~\pageref{COMPONENTES-DARE}. Pero antes veamos la problemática a
 afrontar y los principios por los que se guiará su implementación.
 
@@ -673,8 +669,8 @@ Clojure es un dialecto de Lisp\cite{LISP} y comparte con Lisp la
 filosofía de código como datos. Ofrece, pues, un poderoso sistema de
 macros. Su paradigma es eminentemente funcional ofreciendo unas
 estructuras de datos inmutables y
-persistentes\cite{PERSISTENT-DATA-STRUCTURES}. Cuando mutabilidad es
-necesaria, Clojure ofrece memoria transaccional y un sistema de
+persistentes\cite{PERSISTENT-DATA-STRUCTURES}. Cuando la mutabilidad
+es necesaria, Clojure ofrece memoria transaccional y un sistema de
 agentes reactivos\footnote{Es similar a un Actor en Erlang}.
 
 Clojure ofrece facilidad de acceso a librerías Java, permitiendo
@@ -709,9 +705,9 @@ primer momento.
   de tener que trabajar con el flujo de bytes proveniente de TCP. Por
   ejemplo, para dividir el flujo de bytes en peticiones de strings se
   puede hacer definiendo un \emph{codec} en Gloss. En la
-  figura~\ref{gloss-example}, pág.~\pageref{gloss-example}, se define
-  que cada petición sera una String codificada en UTF-8 con un entero
-  indicando el tamaño de la misma.
+  figura~\ref{gloss-example} ---pág.~\pageref{gloss-example}--- se
+  define que cada petición sera una String codificada en UTF-8 con un
+  entero indicando el tamaño de la misma.
   \begin{figure}[hb]
     \begin{center}
       \begin{minted}{clojure}
@@ -1045,8 +1041,7 @@ seleccionado.
 La clase \emph{Maybe} sirve para indicar que un resultado es
 opcional. Por otra parte \emph{MinilanguageProducer} sirve para mantener una
 lista de instancias de \emph{Minilanguage} preparadas para ser
-usadas. Ver~\ref{interpreter_state_manipulation},
-pág.~\pageref{interpreter_state_manipulation}.
+usadas.
 
 \begin{landscape}
 
@@ -1096,7 +1091,7 @@ misma. Para hacer la traducción JAX-RS utiliza JAXB\cite{JAXB}.
 
 \subsubsection{Descripción Implementación DARE-backend}
 
-Como mencionabamos antes, este componente está implementado en
+Como mencionábamos antes, este componente está implementado en
 Clojure. Clojure no es un lenguaje OO\footnote{Orientado Objetos}
 tradicional, por lo que un diagrama de clases sirve de poca ayuda.
 
@@ -1114,7 +1109,7 @@ literaria similares a las utilizadas con minilenguaje.
 \subsubsection{Descripción implementación DARE-backend}
 
 Al igual que DARE-backend, este componente está implementado en
-Clojure. Hemos decidido, también, que la mejor de describir la
+Clojure. Hemos decidido, también, que la mejor manera de describir la
 implementación de DARE-backend es utilizar técnicas de programación
 literaria.
 

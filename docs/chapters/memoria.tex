@@ -1,5 +1,5 @@
 \section{Introducción}
-En la actualidad la WWW presenta una cantidad ingente de
+En la actualidad, la WWW presenta una cantidad ingente de
 información. Un problema al que nos enfrentamos es que esta
 información es difícil de procesar y extraer automáticamente, ya que
 la inmensa mayoría de esta información está destinada a ser leída por
@@ -194,7 +194,7 @@ DARE está compuesto de los siguientes módulos:
     \emph{worker}, interpreta esas peticiones y hace el trabajo
     correspondiente. Uno o varios de estos workers pueden estar
     lanzados en función de las necesidades de escalabilidad y
-    fiabilidad necesarios.
+    fiabilidad necesarias.
 
     Los workers pueden estar en el nodo local o repartidos por todo el
     cluster. La parte cliente es capaz de descubrirlos y repartir la
@@ -203,7 +203,7 @@ DARE está compuesto de los siguientes módulos:
     servicio continúe funcionando aun en la presencia de errores en
     los workers.
 
-    Tanto la parte servidor como cliente están implementados en
+    Tanto la parte servidor como cliente están implementadas en
     Clojure.
 
   \item DARE-backend: Es el encargado de comunicarse con la base de
@@ -219,14 +219,14 @@ DARE está compuesto de los siguientes módulos:
     desplegarse en cualquier servidor de aplicaciones JEE y/o
     contenedor de servlets.
 
-    Siguiendo el patrón MVC\footnote{Modelo Vista Controlador} este
+    Siguiendo el patrón MVC\footnote{Modelo Vista Controlador}, este
     modelo es el responsable de la parte de vista y controlador. El
     modelo sería DARE-domain junto a DARE-backend ofreciendo servicios
     de persistencia y ejecución.
 
     Está diseñado para poder ejecutar numerosas instancias
     simultáneamente, ya que se sigue una filosofía
-    \emph{share-nothing}. Para ellos nos hacemos valer de las
+    \emph{share-nothing}. Para ello nos hacemos valer de las
     características sin estado de REST. Es decir, podemos tener varios
     servidores web ejecutándose en distintos nodos. Está implementado
     en Java.
@@ -237,22 +237,23 @@ DARE está compuesto de los siguientes módulos:
     ligero, por lo que es especialmente adecuado para lanzar numerosas
     instancias de la aplicación. Está implementado en Clojure.
 
-  \item DARE-python: Este módulo implemente la librería cliente para
+  \item DARE-python: Este módulo implementa la librería cliente para
     Python, así como la aplicación de línea de comandos. La aplicación
     de línea de comandos emplea la librería para llevar a cabo su
     funcionalidad. Como es lógico está implementado en Python.
 
 \end{itemize}
 
-\subsection{Visión arquitectónica}
+\subsection{Visión sistema}
 
 Veamos a continuación un diagrama que muestra un ejemplo de despliegue
-de DARE --- ver \ref{deployment_example}. Podemos apreciar equipos clientes que se comunican utilizando
-el protocolo HTTP con DARE. Estos equipos pueden utilizar alguna de
-las librerías clientes presentadas en este proyecto o haber creado su
-propia librería o aplicación.
+de DARE ---ver figura \ref{deployment_example},
+pág.~\pageref{deployment_example}---. Podemos apreciar equipos
+clientes que se comunican utilizando el protocolo HTTP con DARE. Estos
+equipos pueden utilizar alguna de las librerías clientes presentadas
+en este proyecto o haber creado su propia librería o aplicación.
 
-Dentro de lo que seria DARE hay tres tipos de nodos:
+Dentro de lo que sería DARE hay tres tipos de nodos:
 
 \begin{itemize}
   \item Un nodo con un balanceador de carga. Para DARE recomendamos
@@ -267,9 +268,9 @@ Dentro de lo que seria DARE hay tres tipos de nodos:
   \item Nodos con el componente DARE-worker. Estos nodos reciben las
     peticiones de ejecución vía TCP.
   \item Sistema de almacenamiento. En el caso que se nos ocupa hemos
-    empleado MongoDB\cite{Mongo}. Es el punto responsable de almacenar
+    empleado MongoDB\cite{MONGO}. Es el punto responsable de almacenar
     el estado del sistema. Todos los procesos ejecutando DARE-web
-    carecen de estado: es decir, se puede dirigir cada petición a
+    carecen de estado: es decir, cada petición se puede dirigir a
     cualquiera de los procesos DARE-web.
 \end{itemize}
 
@@ -326,14 +327,11 @@ presenta en único volumen que contiene tres capítulos:
       usuario del presente proyecto.
 
       El manual de administrador explica cómo desplegar el proyecto
-      tanto en un equipo local como en un cluster. También se
-      describen los logs ofrecidos, así como las labores de
-      mantenimiento necesarias.
+      tanto en un equipo local como en un cluster.
 
       El manual de usuario explica como utilizar el servicio ofrecido
-      orientado a una audiencia técnica. Se tratará cómo integrar las
-      librerías Java y Python en tus propias aplicaciones. También se
-      explicará como usar la aplicación de línea de comandos.
+      orientado a una audiencia técnica. Se explicará como usar la
+      aplicación de línea de comandos.
 \end{description}
 
 Junto a la documentación se incluirá un CD con el siguiente contenido:
@@ -377,8 +375,8 @@ de que se haya entregado el proyecto.
 En su totalidad el proyecto se ha realizado en 640 horas, mientras que
 la previsión del proyecto fueron 440 horas. La planificación temporal
 inicial se encuentra en el anteproyecto ---ver el anexo
-\ref{ANTEPROYECTO}, pág.~\pageref{ANTEPROYECTO}. El desvío se ha
-producido sobretodo a que se escogieron tecnologías todavía no
+\ref{ANTEPROYECTO}, pág.~\pageref{ANTEPROYECTO}---. El desvío se ha
+producido sobre todo a que se escogieron tecnologías todavía no
 conocidas y que hubo que aprender. Además se evaluaron más tecnologías
 de las previstas a la hora de realizar el proyecto.
 
@@ -473,10 +471,10 @@ dirigido el proyecto.
 
 A mayores, he podido familiarizarme con el funcionamiento de varias
 bases de datos de lo que se ha venido en llamar movimiento
-\emph{NoSQL}. He podido observar que bajo esta etiqueta se esconde
-una panoplia de base de datos con características radicalmente
+\emph{NoSQL}. He podido observar que bajo esta etiqueta se esconde una
+panoplia de base de datos con características radicalmente
 diferentes. Más que nada se podrían definir por lo que no son: la
-típica base de datos relacional: MySQL, PostgreSQL, Oracle etc.
+típica base de datos relacional --- MySQL, PostgreSQL, Oracle, etc---.
 Sin desdeñar la utilidad de las bases de datos relacionales y sus
 grandes aportaciones, a veces otro tipo de base de datos son más
 adecuadas para un problema. Creo que, en este sentido, la experiencia
