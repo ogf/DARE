@@ -7,7 +7,6 @@
   (:use gloss.core gloss.io lamina.core clojure.tools.cli)
   (:require [aleph.tcp :as tcp]
             [lamina.connections :as c]
-            [clojure.contrib.json :as json]
             [somnium.congomongo :as mongo]
             [clojure.contrib.logging :as log]
             [clj-stacktrace.repl :as stacktrace])
@@ -299,6 +298,13 @@ describing the problem."
 (def ^{:doc "The lightweight request done to check if the worker is up."}
   query-alive-str "ping")
 
+(defn read-request
+  "It reads a request that is printed Clojure data. It's read with
+`*read-eval*` to false to avoid malicious attacks."
+  [request-str]
+  (binding [*read-eval* false]
+    (read-string request-str)))
+
 (defn accept-request-and-respond
   "It registers an execution to be done for the given request, unless
 the request is a `query-alive-str`. If returns to the client a
@@ -308,7 +314,7 @@ the error is returned instead."
 
   [executor-receiver response raw-request]
   (try
-    (let [request (json/read-json (.toString raw-request))]
+    (let [request (read-request (.toString raw-request))]
       (when-not (= request query-alive-str)
         (executor-receiver request)
         (send current-petitions inc))

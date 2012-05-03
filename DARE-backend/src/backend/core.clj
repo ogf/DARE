@@ -15,7 +15,7 @@
             ExecutionTimeExceededException ExecutionFailedException]
            [es.uvigo.ei.sing.dare.entities
             Robot PeriodicalExecution ExecutionPeriod ExecutionPeriod$Unit ExecutionResult]
-           [java.util UUID List ArrayList Map Collection]
+           [java.util UUID List Map Collection]
            [org.joda.time DateTime]
            [com.mongodb DB]))
 
@@ -288,10 +288,10 @@ collection to the corresponding domain entity"
 (defn insert-execution-at-initial-state!
   "An execution is inserted at its initial state, i.e. it still
   doesn't have its results."
-  [^Robot robot ^List inputs]
+  [^Robot robot inputs]
   (let [code (new-unique-code)]
     (save! executions-coll {:_id code
-                            :inputs inputs
+                            :inputs (vec inputs)
                             :creationTime (now-ms)
                             :optionalRobotCode (.getCode robot)})
     code))
@@ -299,13 +299,13 @@ collection to the corresponding domain entity"
 (defn common-request-part
   "It defines the part that is common for requests to both periodical
   executions and standard ones"
-  [^Robot robot ^List inputs]
-  {:inputs inputs
+  [^Robot robot inputs]
+  {:inputs (vec inputs)
    :robotXML (.getTransformerInXML robot)})
 
 (defn submit-execution-for-robot!
   "It submits an execution for the given `robot`"
-  [workers-handler ^Robot robot ^List inputs]
+  [workers-handler ^Robot robot inputs]
   (let [code (insert-execution-at-initial-state! robot inputs)]
     (workers/send-request! workers-handler (assoc (common-request-part robot inputs)
                                              :result-code code))
@@ -349,7 +349,7 @@ collection to the corresponding domain entity"
         (log/info (str "sending execution for periodical with code: "
                        periodical-code))
         (workers/send-request! workers-handler
-                               (assoc (common-request-part robot (ArrayList. inputs))
+                               (assoc (common-request-part robot inputs)
                                  :periodical-code periodical-code
                                  :next-execution-ms (next-execution execution-period)))))))
 

@@ -5,7 +5,6 @@
   (:require [clojure.set :as set]
             [aleph.tcp :as tcp]
             [lamina.connections :as c]
-            [clojure.contrib.json :as json]
             [clojure.contrib.logging :as log]))
 
 
@@ -19,7 +18,7 @@
 The response is a Clojure data structure inside a lamina's
 `result-channel`."
   [request timeout client]
-  (run-pipeline (client (json/json-str request) timeout)
+  (run-pipeline (client (pr-str request) timeout)
     (fn [response] (read-string response))))
 
 (defn send-and-wait
