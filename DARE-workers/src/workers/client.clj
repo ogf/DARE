@@ -173,9 +173,11 @@ The returned value can be used with `add-new-workers!`,
                              *check-healthy-interval-ms*)
         check-alive-several #(doall (map check-alive %))
         high-load-if-unknown 30
-        get-healthy (fn [] (sort-by #(get load-by-worker (first %)
-                                         high-load-if-unknown)
-                                   @alive))
+        get-healthy (fn []
+                      (let [load-by-worker @load-by-worker]
+                        (sort-by #(get load-by-worker (first %)
+                                       high-load-if-unknown)
+                                 @alive)))
         _ (check-alive-several @specified-workers)]
     (log/info (str "created workers handler for: " workers-specs))
     {:specified-workers specified-workers
