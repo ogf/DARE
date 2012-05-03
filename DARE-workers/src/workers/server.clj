@@ -305,6 +305,15 @@ describing the problem."
   (binding [*read-eval* false]
     (read-string request-str)))
 
+(defmacro continue-on-error
+  "If an error happens inside `body`, the error is reported but the
+execution goes on."
+  [& body]
+  `(try
+     ~@body
+     (catch Throwable ~'e
+       (log/error "Execution continues in spite of:" ~'e))))
+
 (defn accept-request-and-respond
   "It registers an execution to be done for the given request, unless
 the request is a `query-alive-str`. If returns to the client a
@@ -323,7 +332,9 @@ the error is returned instead."
     (catch Throwable e
       (log/error (str "Error processing: " raw-request) e)
       (enqueue response (pr-str {:accepted false
-                                 :error (stacktrace/pst-str e)})))))
+                                 :error (or
+                                         (continue-on-error (stacktrace/pst-str e))
+                                         (.getMessage e))})))))
 
 ;; Any function that could access the database must be executed in an
 ;; environment with a mongo connection defined.
@@ -388,14 +399,6 @@ will work with the given `mongo-connection`."
 
 (defn- get-connection-info [server]
   (:conn (meta server)))
-
-(defmacro continue-on-error
-  "If an error happens inside `body` it continues being executed."
-  [& body]
-  `(try
-     ~@body
-     (catch Throwable ~'e
-       (log/error "Execution continues in spite of:" ~'e))))
 
 (defn other-not-daemon-threads
   "Get all threads that are not daemon and different to the current
