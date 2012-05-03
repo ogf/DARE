@@ -57,15 +57,6 @@ of the on-success function is used."
       (catch Throwable e
         (on-error e)))))
 
-(def ^{:doc "It sends a ping message to check if it can connect to the
-  provided worker."}
-  check-alive-fn (partial
-                  (wrap send-and-wait
-                        :on-success (constantly :successes)
-                        :on-error (constantly :errors))
-                  query-alive-str
-                  200))
-
 
 (defn- loop-while-healthy
   "It checks periodically that the given client can reach its
@@ -82,8 +73,8 @@ object.
 
 `udpate-current-petitions!` is called when receiving the ping response
 of a worker. The response contains the number of the petitions that is
-handling right now. This will be used to send the petitions to the
-least used worker."
+handling right now. This information can be used to send the petitions
+to the least used worker."
 
   [client alive-atom spec update-current-petitions! polling-interval]
 
@@ -130,8 +121,8 @@ continuously."
 (defn- as-set [workers-data]
   (apply hash-set workers-data))
 
-;; Internally some local variables that are not accessible from
-;;outside this namespace are used:
+;; Internally some local variables intended to not be accessible from
+;;outside this namespace are defined:
 ;;
 ;; 1. specified-workers: An atom that contains a set with the workers
 ;; specified.

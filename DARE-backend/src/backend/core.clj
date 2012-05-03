@@ -4,7 +4,7 @@
 ;; by `es.uvigo.ei.sing.dare.domain.IBackend`. It stores and retrieves
 ;; domain objects to and from a MongoDB database.
 ;;
-;; Besides it uses DARE-workers client part to send the executions.
+;; Besides, it uses DARE-workers client part to send the executions.
 (ns backend.core
   (:require [somnium.congomongo :as mongo]
             [somnium.congomongo.config :as mongo-config]
@@ -23,11 +23,11 @@
 ;; A `PeriodicalExecution` can only be executed each hour at most.
 (def ^{:dynamic true} *minimal-allowed-execution-period-ms* (* 60 60 1000))
 
-;; The time allowed for a `PeriodicalExecution` to elapse executing
-;; once it's been sent to the workers: 4 minutes.
+;; The elapsed time allowed for a `PeriodicalExecution` once it's been
+;; sent to the workers: 4 minutes.
 (def ^{:dynamic true} *time-allowed-for-periodical-execution-ms* (* 4 60 1000))
 
-;; The time allowed for a `Execution` to elapse executing: 2 minutes.
+;; Elapsed time allowed for an `Execution`: 2 minutes.
 (def ^{:dynamic true} *time-allowed-for-execution-ms* (* 2 60 1000))
 
 ;; ### MongoDB utilities
@@ -65,12 +65,12 @@
 
 ;; ### Domain objects => MongoDB
 
-;; We have to transform the domain objects into documents (associative
-;; maps). For that we transform the domain object into a map using the
-;; builtin function `bean`. This gives us a map with the properties of
-;; the domain object. To this map we have to apply some further
-;; transformations and we have a map that can be saved as a document
-;; for the proper collection.
+;; We have to transform the domain objects(Java classes instances)
+;; into documents (associative maps). For that we transform the domain
+;; object into a map using the builtin function `bean`. This gives us
+;; a map with the properties of the domain object. We apply some
+;; further transformations to this map, obtaining a map that can be
+;; saved as a document for the proper collection.
 
 (defn code-to-mongo-id
   "It converts the code property to the `_id` property. MongoDB uses
@@ -286,7 +286,7 @@ collection to the corresponding domain entity"
   (.toString (UUID/randomUUID)))
 
 (defn insert-execution-at-initial-state!
-  "An execution is inserted at its initial state, i.e. it still
+  "An execution is inserted at its initial state, i.e., it still
   doesn't have its results."
   [^Robot robot inputs]
   (let [code (new-unique-code)]
@@ -397,7 +397,7 @@ continues."
         (schedule-periodical! workers (to-submit-map each))))))
 
 (defn unscheduled-on-next
-  "where clause for `schedule-periodicals!` that retrieves not
+  "Where clause for `schedule-periodicals!` that retrieves not
 scheduled periodical executions which must be scheduled within the
 next `expiring-on-next-ms` milliseconds."
   [expiring-on-next-ms]
@@ -406,7 +406,7 @@ next `expiring-on-next-ms` milliseconds."
      :next-execution-ms {:$lte before-time}}))
 
 (defn with-id
-  "where clause for `schedule-periodicals!` that retrieves the
+  "Where clause for `schedule-periodicals!` that retrieves the
   execution such _id is equal to`code`."
   [code]
   {:_id code})

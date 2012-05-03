@@ -19,12 +19,12 @@
 
 ;; ### Storing result
 
-;; The result of the execution must be stored either on the
+;; The result of a execution must be stored either on the
 ;; periodical-executions or executions collection.
 
 (defn db-update!
   "It updates the document of _id `code` in `collection` with the
-provided mongo-updates`"
+provided `mongo-updates`"
   [collection code mongo-updates]
   (mongo/update! collection {:_id code} mongo-updates :upsert false))
 
@@ -224,18 +224,18 @@ provided `on-error`function is called with the produced exception."
 (def ^{:dynamic true} *time-allowed-for-execution-ms* (* 1 60 1000))
 ;; For implementing this we launch a pipeline. It does a poll
 ;; operation on a newly created constant channel, named success. This
-;; poll operation either returns the a tuple or a nil value if it has
-;; timed out. In the next stage of the pipeline we check for that and
+;; poll operation either returns a tuple or a nil value if it has
+;; timed out. In the next stage of the pipeline, we check for that and
 ;; if it has timed out we interrupt the thread on which the execution
 ;; is being done.
 ;;
 ;; As soon as we finish executing the provided function we enqueue in
-;; the success channel. This causes the pipeline to wake up and the
+;; the success channel. This causes the pipeline to wake up so the
 ;; thread is not interrupted. Once done that we can call the
 ;; `on-success` function.
 ;;
 ;; If the execution operation took too much time and the .interrupt
-;; call is reached an InterruptedException is thrown. In that case we
+;; call is reached, an InterruptedException is thrown. In that case we
 ;; call the provided `on-timeout` function.
 ;;
 ;; Last we have to clean up in the finally clause. We must avoid
