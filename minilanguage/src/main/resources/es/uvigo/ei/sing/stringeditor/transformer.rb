@@ -39,6 +39,14 @@ class Transformer
     @transformer_class
   end
 
+  def self.custom_name name
+    @custom_name = name
+  end
+
+  def self.get_custom_name
+    @custom_name
+  end
+
 # It stores a new param definition. This method is intended to be used
 # inside the body of subclasses from Transformer.
   def self.param(name, hash)
@@ -84,12 +92,10 @@ class Transformer
 
 # The name of the method to be added to *Language*. It's created from
 # the name of the class with the first letter in lowercase, unless
-# it's present in the custom names map.
+# it's has been customized.
   def self.language_method_name
-    @@custom_names[self.to_s] || self.lowercase_first(self.to_s)
+    self.get_custom_name || self.lowercase_first(self.to_s)
   end
-
-  @@custom_names = {"URLRetriever" => "url"}
 
   def self.lowercase_first word
     word[0, 1].downcase + word[1, word.length - 1]
@@ -101,16 +107,29 @@ end
 # definition. *Language* class will be reopened.
 class Language
 
-# One a trannsformer class is created it's added as a method to
-# Language. A new method is generated that will call
+  @@pending_method_definitions = []
+
+# One a trannsformer class is created it's eventually added as a
+# method to Language. A new method is generated that will call
 # `transformer_added_action` with the provided parameters.
 
+# We can't define the new method immediately because when the
+# `inherited` hook is called the body of the Transformer subclass has
+# not been executed yet. `language_method_name` wouldn't still be
+# defined.
+  def self.new_type_of_transformer transformer_klass
+    @@pending_method_definitions << lambda {
+      define_method_for transformer_klass
+    }
+  end
+
 #  For example after defining the class `PatternMatcher` a new method
-# `patternMatcher` is defined on *Language* class. The methods
+# `patternMatcher` is defined on *Language* class once the
+# `register_pending_method_definitions` is called. The methods
 # generated receive some arguments that will be passed directly to the
 # class constructor. If a block is provided it's evaluated in a new
 # *Language* instance.
-  def self.new_type_of_transformer transformer_klass
+  def self.define_method_for transformer_klass
     define_method(transformer_klass.language_method_name) do |*args, &block|
       transformer = transformer_klass.new(*args)
       transformer_added_action(transformer)
@@ -118,6 +137,18 @@ class Language
         Language.new transformer, &block
       end
       self
+    end
+  end
+
+# It invokes all the pending method defintions causing the methods for
+# each transformer to  be defined.
+  def self.register_pending_method_definitions
+# This race condition doesn't matter because all transformers are
+# defined before languages are started to be instantiated.
+    pending = Array.new @@pending_method_definitions
+    @@pending_method_definitions = []
+    pending.each do |l|
+      l.call()
     end
   end
 
@@ -159,6 +190,7 @@ end
 # transformer class is used to customize the name. It's used as `url`
 # or `url(:description=>'whatever')`
 class URLRetriever < Transformer
+  custom_name "url"
   transformer_class :URLRetriever
 end
 # It defines the `replacer` call on *Language*. It's used as
@@ -414,8 +446,11 @@ class Language
 
 # Constructor for a *Language*. Both params and block are optional. It
 # creates a `SimpleTransformer` as container. It interprets the
-# optionally provided block in the context of the *Language* being created.
+# optionally provided block in the context of the *Language* being
+# created. It also registers the pending method definitions to ensure
+# that they are available.
   def initialize transformer, &block
+    Language.register_pending_method_definitions
     @transformer = transformer
     instance_eval(&block) if block
   end
