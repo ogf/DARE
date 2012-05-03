@@ -1,13 +1,27 @@
 # ### Introduction
 
+# An *aAUTOMATOR* Robot specifies steps for doing web scraping of a
+# page or a set of pages. Each robot is built from several
+# transformers connected in the shape of a graph. Each transformer
+# type specifies some elemental operation to make. They are
+# parametrized and combined to create a whole robot. This robot is
+# specified in a XML format.
+#
+# Here we define a DSL that we call *minilanguage*. It eases the
+# creation of *aAUTOMATOR* robots, so no longer is needed to create
+# verbose XML files. Instead we can use a *minilanguage* string to
+# define it.
+#
 # We can create a new *aAUTOMATOR* robot by feeding a minilanguage
 # string to *Language*. *Language* class interprets it and creates a
 # tree of *Transformer* objects. This *Transformer*'s tree resembles
 # *aAUTOMATOR* XML format so the latter is easy to generate.
 #
-# *Language* interprets the language by using the `eval` capabilities
-# of Ruby. In order to not have to define manually a method for each
-# type of Transformer in *Language* we generate each one dinamically.
+# *Language* interprets the *minilanguage* string by using the `eval`
+# capabilities of Ruby. At *Language* class there are methods for
+# creating transformers of each indidividual type. In order to not
+# have to define manually a method for each type of Transformer, we
+# generate them dinamically.
 
 # We include java packages for generating the XML.
 require 'java'
@@ -19,10 +33,11 @@ end
 # ### *Transformer* as template for new sublcasses
 
 # We define methods to ease the definition of new *Transformer*
-# subclasses . These methods are called when the class is being
+# subclasses. These methods are called when the class is being
 # constructed and parametrize the behavior of the generated
 # subclass. Each generated *Transformer* subclass receives the values
-# for the parameters it requires when being instantiated.
+# for the parameters it requires when its constructor is
+# called. *Transformer* class will be reopened.
 class Transformer
 
 # The `@variables` used inside of class methods(`self.method_name`)
@@ -39,6 +54,9 @@ class Transformer
     @transformer_class
   end
 
+# Register a custom name for this Transformer subclass. By default,
+# the generated method name is built from the class name. But
+# sometimes that isn't suitable and a custom name must be provided.
   def self.custom_name name
     @custom_name = name
   end
@@ -87,7 +105,7 @@ class Transformer
 # Language. We also keep track of the subclasses added.
   def self.inherited subclass
     Language.new_type_of_transformer(subclass)
-    (@@subclasses||=[]) << subclass
+    (@@subclasses ||= []) << subclass
   end
 
 # The name of the method to be added to *Language*. It's created from
@@ -109,8 +127,9 @@ class Language
 
   @@pending_method_definitions = []
 
-# One a trannsformer class is created it's eventually added as a
-# method to Language. A new method is generated that will call
+# Once a transformer class is created, a method that creates a
+# transformer instance of that type is *eventually* added to
+# Language. The newly generated method will call
 # `transformer_added_action` with the provided parameters.
 
 # We can't define the new method immediately because when the
@@ -124,10 +143,10 @@ class Language
   end
 
 #  For example after defining the class `PatternMatcher` a new method
-# `patternMatcher` is defined on *Language* class once the
+# `patternMatcher` is defined on *Language* class, once the
 # `register_pending_method_definitions` is called. The methods
 # generated receive some arguments that will be passed directly to the
-# class constructor. If a block is provided it's evaluated in a new
+# class constructor. If a block is provided, it's evaluated in a new
 # *Language* instance.
   def self.define_method_for transformer_klass
     define_method(transformer_klass.language_method_name) do |*args, &block|
@@ -221,9 +240,9 @@ end
 
 class Transformer
 
-# As you can see `arguments` it's a variable list or arguments. It can
+# As you can see `arguments` is a variable list of arguments. It can
 # have zero, one, two or three arguments. If branch parameters are
-# provided they are the first two. The params is the last one, but
+# provided they are the first two. The params are the last one, but
 # it's optional.
   def self.split_parameters arguments
     params = (arguments.length == 1 || arguments.length == 3) && arguments.last
@@ -240,8 +259,9 @@ class Transformer
 # concrete method associated to this class is called. Examples of
 # calls on *Language* that can trigger this:
 #
-#    patternMatcher('(http://.*)')
-#    decorator(:head=>"<h1>", :tail=>"</h1>", :description=>"wrapping")
+#     patternMatcher('(http://.*)')
+#     decorator(:head=>"<h1>", :tail=>"</h1>", :description=>"wrapping")
+#
   def initialize *arguments
     klass = self.class
 # Check that `transformer_class` has been defined
@@ -253,7 +273,7 @@ class Transformer
 # We ensure the params is in a Hash form, that the branch parameters
 # are added, and that if a key is not found the value in
 # default_values is returned.
-    params = klass.ensure_params_hash(params)
+    params = klass.ensure_params_is_hash(params)
     params = klass.with_branch_params(params, branch_parameters)
     params = klass.with_defaults params
 # We set instance attributes from the params. Notice that if the value
@@ -263,7 +283,7 @@ class Transformer
     @branchmergemode = params[:branchmergemode].to_sym
     @loop = params[:loop]
 # We extract the values from the params for the param definitions and
-# we generate the accessors
+# we generate the accessors.
     @params = (klass.values_for_param_definitions params).freeze
     klass.generate_named_accessors_for_parameters("params")
   end
@@ -304,7 +324,7 @@ class Transformer
   end
 
 # If params is a Hash we return early.
-  def self.ensure_params_hash provided_params_values
+  def self.ensure_params_is_hash provided_params_values
     return provided_params_values if Hash === provided_params_values
 # Otherwise we create a new Hash and if there is only one required
 # param we set the value of that param for the single value provided.
@@ -388,12 +408,12 @@ class Transformer
 end
 
 # Besides the methods presented here this class contains all the
-# methods generated with the *Transformer* subclasses. The Language
-# uses Ruby blocks to create nested scopes.
+# methods generated by the *Transformer* subclasses definitions. The
+# Language uses Ruby blocks to create nested scopes.
 class Language
 
 # This is the entering point for *Language*. A new *Language* instance
-# is created against which the `language_str` is evaluated. For
+# is created, against which the `language_str` is evaluated. For
 # example if `language_str` is `url | xpath('//a/@href')` the methods
 # `url`, `|` and `xpath`, `|` are executed on the new *Language*
 # instance.
@@ -423,7 +443,7 @@ class Language
 # dinamically defined methods. It adds the created transformer
 # instance to the current transformer. For example, calling
 # `patternMatcher('regexHere')` on some *Language* scope adds it as a
-# child to `@transformer`.
+# child to this Language's instance `@transformer`.
   def transformer_added_action transformer
     @transformer.add_child transformer
   end
