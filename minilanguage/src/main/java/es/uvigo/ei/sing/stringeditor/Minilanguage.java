@@ -22,6 +22,7 @@ import java.security.cert.Certificate;
 import java.util.PropertyPermission;
 
 import org.jruby.CompatVersion;
+import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 import org.w3c.dom.Document;
 
@@ -57,7 +58,7 @@ public class Minilanguage {
     private final ScriptingContainer engine;
 
     public Minilanguage() {
-        engine = new ScriptingContainer();
+        engine = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
         engine.setCompatVersion(CompatVersion.RUBY1_9);
         engine.runScriptlet(TRANSFORMER_RB);
     }
