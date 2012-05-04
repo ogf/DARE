@@ -2,6 +2,8 @@
 
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="DARE" default="publish">
 
+    <property name="project-version" value="0.1"/>
+
     <property environment="env"/>
 
     <import file="../build-common.xml"/>
