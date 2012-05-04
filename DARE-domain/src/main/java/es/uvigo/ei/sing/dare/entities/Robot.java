@@ -52,9 +52,12 @@ public class Robot {
         } catch (TimeoutException e) {
             f.cancel(true);
             Thread thread = threadRef.get();
-            // interrupt is too weak. we must stop the execution no matter what
-            // in order to prevent DoS attack
-            thread.stop();
+            if (thread != null) {
+                // interrupt is too weak. we must stop the execution no matter
+                // what
+                // in order to prevent DoS attack
+                thread.stop();
+            }
             throw e;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
