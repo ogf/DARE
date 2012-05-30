@@ -505,7 +505,7 @@ class Language
   def pipe &block
     pipe = Language.new SimpleTransformer.new, &block
     @transformer.add_child pipe.transformer
-    pipe
+    self
   end
 
 # It creates a new minilanguage scope with branch semantics. A branch
@@ -531,10 +531,10 @@ class Language
     end
     branch = Language.new(SimpleTransformer.new(*params), &block)
     @transformer.add_child branch.transformer
-    branch
+    self
   end
 
-# It tells that the current transformer is executed in a loop. The
+# It tells that the last defined transformer is executed in a loop. The
 # provided block is used as the loop control. For example:
 #
 #     url { patternMatcher(:pattern=>"somePattern")}.repeat? {
@@ -545,9 +545,13 @@ class Language
 # they are in cascade mode (the same as `pipe`). This is specially
 # useful with `repeat?` blocks.
   def repeat? *params, &block
+    last_transformer = @transformer.children.last
+    unless last_transformer
+      raise "no transformer to which apply a repeat? clause"
+    end
     clause = RepeatClause.new(SimpleTransformer.new(*params), &block)
     if clause.transformer
-      @transformer.do_loop_with clause.transformer
+      last_transformer.do_loop_with clause.transformer
     end
     self
   end

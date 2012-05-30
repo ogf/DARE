@@ -257,6 +257,15 @@ describe "aAUTOMATOR minilanguage" do
       end.should raise_error(RuntimeError, "| can't be used in a pipe branch")
     end
 
+    it "should let use | after a branch" do
+      result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
+          patternMatcher(:pattern => "foo")
+          patternMatcher(:pattern => "bar")} | appender(:append => :bar)
+      }
+      result.children.size.should == 3
+      result.children[2].transformer_class.should == :Appender
+    end
+
     it "should let put transformers in cascade inside branch" do
       result = Language.interpret { url > branch(:BRANCH_DUPLICATED,:SCATTERED) {
           patternMatcher(:pattern => "bla")
@@ -272,17 +281,42 @@ describe "aAUTOMATOR minilanguage" do
 
     it "should let do a loop" do
       result = Language.interpret { url |
-        pipe{ patternMatcher(:pattern => "bla") | url}.repeat?{
-          patternMatcher(:pattern => "prueba")
-        } | appender(:append => "bla")
+        pipe{ patternMatcher(:pattern => "bar") | url}.repeat?{
+          patternMatcher(:pattern => "foo")
+        } | appender(:append => "bar")
       }
       result.should_not be_nil
       result.children.size.should == 3
-      result.children[1].children.size.should == 3
-      result.children[1].children[0].transformer_class.should == :PatternMatcher
-      result.children[1].children[0].pattern.should == "prueba"
+      pipe = result.children[1]
+      pipe.loop?.should be_true
+      pipe.children.size.should == 3
+      pipe.children[0].transformer_class.should == :PatternMatcher
+      pipe.children[0].pattern.should == "foo"
+
       result.children[2].children.size.should == 0
       result.children[2].transformer_class.should == :Appender
+    end
+
+    it "should let use repeat? with any kind, not only containers" do
+      result = Language.interpret { url(:BRANCH_DUPLICATED,:SCATTERED) {
+          appender(:append => "appender")
+        }.repeat? {
+          patternMatcher(:pattern => "inside-repeate")
+        }}
+      result.children.size.should == 1
+      url = result.children[0]
+      url.loop?.should be_true
+      url.children.size.should == 2
+      url.children[0].transformer_class.should == :PatternMatcher
+    end
+
+    it "shouldn't allow to use repeat if no transformer defined at that level" do
+      lambda {Language.interpret { url |
+          pipe{self.repeat? {
+              patternMatcher(:pattern => "foo")
+            }} | appender(:append => "bar")
+        }
+      }.should raise_error
     end
 
     it "should let put several transformer serially connected in the repeat clause" do
