@@ -13,3 +13,10 @@ The executions requested to the service can be distributed among
 several worker processes. For more information on this take a look at
 the [workers](http://ogf.github.com/DARE/workers/uberdoc.html) and
 [backend](http://ogf.github.com/DARE/backend/uberdoc.html) files.
+
+### License
+
+Distributed under
+[MIT](http://www.opensource.org/licenses/mit-license.php) license.
+
+Copyright 2012, Oscar Gonzalez.
