@@ -1,3 +1,10 @@
+## Important notice
+
+Automator has now been rebranded to jARVEST. The DSL part of this
+project is now integrated into
+[jARVEST](http://sing.ei.uvigo.es/jarvest/). Please refer there if you
+want to use the most up-to-date version.
+
 ## Distributed aAutomator Runtime Environment
 
 Final year project at [Vigo's University](www.esei.uvigo.es). It
