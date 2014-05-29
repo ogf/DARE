@@ -19,9 +19,9 @@
 #
 # *Language* interprets the *minilanguage* string by using the `eval`
 # capabilities of Ruby. At *Language* class there are methods for
-# creating transformers of each indidividual type. In order to not
-# have to define manually a method for each type of Transformer, we
-# generate them dinamically.
+# creating transformers of each individual type. In order not to have
+# to define manually a method for each type of Transformer, we
+# generate them dynamically.
 
 # We include java packages for generating the XML.
 require 'java'
@@ -30,7 +30,7 @@ module XML
   include_package 'org.w3c.dom'
 end
 
-# ### *Transformer* as template for new sublcasses
+# ### *Transformer* as template for new subclasses
 
 # We define methods to ease the definition of new *Transformer*
 # subclasses. These methods are called when the class is being
@@ -159,7 +159,7 @@ class Language
     end
   end
 
-# It invokes all the pending method defintions causing the methods for
+# It invokes all the pending method definitions causing the methods for
 # each transformer to  be defined.
   def self.register_pending_method_definitions
 # This race condition doesn't matter because all transformers are
@@ -235,7 +235,7 @@ end
 # ### *Transformer* instantiation.
 
 # We reopen the *Transformer* class to show how it's instantiated. The
-# initialize constructor is called when calling the method dinamically
+# initialize constructor is called when calling the method dynamically
 # generated on *Language* class.
 
 class Transformer
@@ -351,7 +351,7 @@ class Transformer
     result
   end
 
-# It generates dinamically accessors for the parameters definitions in
+# It generates dynamically accessors for the parameters definitions in
 # this instance, the values are the ones stored in
 # `instance_variable_name`. For example for `PatternMatcher` we
 # generate `pattern` and `dotAll` accessors.
@@ -440,7 +440,7 @@ class Language
   end
 
 # Method called when a new transformer is created using one of the
-# dinamically defined methods. It adds the created transformer
+# dynamically defined methods. It adds the created transformer
 # instance to the current transformer. For example, calling
 # `patternMatcher('regexHere')` on some *Language* scope adds it as a
 # child to this Language's instance `@transformer`.
@@ -511,7 +511,7 @@ class Language
 # It creates a new minilanguage scope with branch semantics. A branch
 # requires that its type and merge mode are specified as params. The
 # provided block is interpreted with the newly created instance. The
-# children of a branch must be separed by newlines, never by `|`. An
+# children of a branch must be separated by newlines, never by `|`. An
 # example of branch is:
 #
 #     branch(:BRANCH_DUPLICATED, :COLLAPSED) {
@@ -563,7 +563,7 @@ class RepeatClause < Language
   alias_method :standard_added_action, :transformer_added_action
 
 # Instead of adding the created transformer to the container the
-# children of the repeat clase are stored.
+# children of the repeat clause are stored.
   def transformer_added_action transformer
     (@transformers||=[]) << transformer
   end
@@ -702,7 +702,7 @@ end
 def children_to_minilanguage parent, separator
   result = ""
 
-# Lambda that converts an element to minilanguate taking into account
+# Lambda that converts an element to minilanguage taking into account
 # its position.
   generate_element = lambda do |element, index|
     # We retrieve the Transformer class associated to the element.

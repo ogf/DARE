@@ -3070,14 +3070,14 @@ sent to the workers: 4 minutes.</p>
      (mongo/with-mongo (:conn ~backend)
        (ensure-consistent-request (get-db ~backend) #(do ~@body)))
      (do ~@body)))</pre></td></tr><tr><td class="docs"><h3>Collections Names</h3>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>Defining the collections names as variables, we avoid typos.</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>Defining the collections names as variables, so we avoid typos.</p>
 </td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def robots-coll :robots)</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def executions-coll :executions)</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def periodicals-coll :periodical-executions)</pre></td></tr><tr><td class="docs"><h3>Domain objects => MongoDB</h3>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>We have to transform the domain objects(Java classes instances)
 into documents (associative maps). For that we transform the domain
-object into a map using the builtin function <code>bean</code>. This gives us
+object into a map using the built-in function <code>bean</code>. This gives us
 a map with the properties of the domain object. We apply some
 further transformations to this map, obtaining a map that can be
 saved as a document for the proper collection.</p>
@@ -3124,7 +3124,7 @@ the milliseconds number since epoch.</p>
   [map]
   (assoc map
     :next-execution-ms (now-ms)
-    :scheduled false))</pre></td></tr><tr><td class="docs"><p>We define a Mongoable protocol that will be implemeted for all
+    :scheduled false))</pre></td></tr><tr><td class="docs"><p>We define a Mongoable protocol that will be implemented for all
 DARE-domain entities that can be saved into the MongoDB database.</p>
 </td><td class="codes"><pre class="brush: clojure">(defprotocol Mongoable
   (to-mongo [this]))</pre></td></tr><tr><td class="docs">
@@ -3224,7 +3224,7 @@ document.</p>
                             #(when % (assoc %
                                        :_id (:_id map-from-mongo)
                                        :inputs (:inputs map-from-mongo)))))))
-       (apply create-periodical)))</pre></td></tr><tr><td class="docs"><p>Returns a fuction that would convert a document of the given
+       (apply create-periodical)))</pre></td></tr><tr><td class="docs"><p>Returns a function that would convert a document of the given
 collection to the corresponding domain entity</p>
 </td><td class="codes"><pre class="brush: clojure">(defn to-domain-fn
   [coll]
@@ -3282,7 +3282,7 @@ collection to the corresponding domain entity</p>
 <p>  Once the time has come the request is sent to the workers. A field
   <code>:next-execution-ms</code> is specified so the worker stores the next
   execution time, once the execution is finished. This avoids a
-  dependecy to DARE-domain in DARE-workers.</p>
+  dependency to DARE-domain in DARE-workers.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn schedule-periodical!
   [workers-handler {:keys [periodical-code robot-code inputs execution-period
                            next-execution-ms] :as request}]
@@ -3311,8 +3311,8 @@ collection to the corresponding domain entity</p>
   [periodical-code]
   (mongo/update! periodicals-coll
                  {:_id periodical-code}
-                 {:$set {:scheduled true}} :upsert false))</pre></td></tr><tr><td class="docs"><p>If the wrapped body fails, the exeption is logged but the execution
-continues.</p>
+                 {:$set {:scheduled true}} :upsert false))</pre></td></tr><tr><td class="docs"><p>If the wrapped body fails, the exception is logged but the
+execution continues.</p>
 </td><td class="codes"><pre class="brush: clojure">(defmacro continue-on-error
   [name &amp; body]
   `(try ~@body

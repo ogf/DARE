@@ -226,7 +226,7 @@ available an exception is thrown."
 
 (defn shutdown!
   "It frees resources associated to the provided `workers-handler`. It
-cannot be used any loger after this."
+cannot be used any longer after this."
   [workers-handler]
   (close-connections! (vals @(:alive workers-handler)))
   (log/info "workers handler has been shutdown"))

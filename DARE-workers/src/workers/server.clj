@@ -2,7 +2,7 @@
 ;; execution requests. Each time it receives a requests sends a
 ;; response acknowledging that has accepted it.
 ;; The accepted request is eventually executed and its response
-;; written to the appropiate MongoDB collection.
+;; written to the appropriate MongoDB collection.
 (ns workers.server
   (:use gloss.core gloss.io lamina.core clojure.tools.cli)
   (:require [aleph.tcp :as tcp]
@@ -62,7 +62,7 @@ directly to the topmost level of the document."
 ;; ### Execution
 
 (defn millis-elapsed-since
-  "Returns a seq with the time ellapsed from each of the provided
+  "Returns a seq with the time elapsed from each of the provided
 times in milliseconds to right now."
   [& times]
   (let [now (System/currentTimeMillis)]

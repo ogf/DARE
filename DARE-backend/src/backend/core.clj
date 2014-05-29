@@ -55,7 +55,7 @@
 
 ;; ### Collections Names
 
-;; Defining the collections names as variables, we avoid typos.
+;; Defining the collections names as variables, so we avoid typos.
 
 (def robots-coll :robots)
 
@@ -67,7 +67,7 @@
 
 ;; We have to transform the domain objects(Java classes instances)
 ;; into documents (associative maps). For that we transform the domain
-;; object into a map using the builtin function `bean`. This gives us
+;; object into a map using the built-in function `bean`. This gives us
 ;; a map with the properties of the domain object. We apply some
 ;; further transformations to this map, obtaining a map that can be
 ;; saved as a document for the proper collection.
@@ -129,7 +129,7 @@ the milliseconds number since epoch."
     :next-execution-ms (now-ms)
     :scheduled false))
 
-;; We define a Mongoable protocol that will be implemeted for all
+;; We define a Mongoable protocol that will be implemented for all
 ;; DARE-domain entities that can be saved into the MongoDB database.
 (defprotocol Mongoable
   (to-mongo [this]))
@@ -254,7 +254,7 @@ document."
        (apply create-periodical)))
 
 (defn to-domain-fn
-  "Returns a fuction that would convert a document of the given
+  "Returns a function that would convert a document of the given
 collection to the corresponding domain entity"
   [coll]
   (condp = coll
@@ -331,7 +331,7 @@ collection to the corresponding domain entity"
   Once the time has come the request is sent to the workers. A field
   `:next-execution-ms` is specified so the worker stores the next
   execution time, once the execution is finished. This avoids a
-  dependecy to DARE-domain in DARE-workers."
+  dependency to DARE-domain in DARE-workers."
 
   [workers-handler {:keys [periodical-code robot-code inputs execution-period
                            next-execution-ms] :as request}]
@@ -365,8 +365,8 @@ collection to the corresponding domain entity"
                  {:$set {:scheduled true}} :upsert false))
 
 (defmacro continue-on-error
-  "If the wrapped body fails, the exeption is logged but the execution
-continues."
+  "If the wrapped body fails, the exception is logged but the
+execution continues."
   [name & body]
   `(try ~@body
         (catch Throwable ~'e
