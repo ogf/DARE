@@ -3220,7 +3220,7 @@ available an exception is thrown.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn- close-connections!
   [connections]
   (doseq [conn connections] (c/close-connection conn)))</pre></td></tr><tr><td class="docs"><p>It frees resources associated to the provided <code>workers-handler</code>. It
-cannot be used any loger after this.</p>
+cannot be used any longer after this.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn shutdown!
   [workers-handler]
   (close-connections! (vals @(:alive workers-handler)))
@@ -3228,7 +3228,7 @@ cannot be used any loger after this.</p>
 execution requests. Each time it receives a requests sends a
 response acknowledging that has accepted it.
 The accepted request is eventually executed and its response
-written to the appropiate MongoDB collection.</p>
+written to the appropriate MongoDB collection.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns workers.server
   (:use gloss.core gloss.io lamina.core clojure.tools.cli)
   (:require [aleph.tcp :as tcp]
@@ -3273,7 +3273,7 @@ directly to the topmost level of the document.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn db-execution-error!
   [collection code fields-to-update]
   (db-update! collection code {:$set fields-to-update}))</pre></td></tr><tr><td class="docs"><h3>Execution</h3>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>Returns a seq with the time ellapsed from each of the provided
+</td><td class="codes"></td></tr><tr><td class="docs"><p>Returns a seq with the time elapsed from each of the provided
 times in milliseconds to right now.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn millis-elapsed-since
   [&amp; times]
